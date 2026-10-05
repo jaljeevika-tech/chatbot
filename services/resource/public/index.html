@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Resource Registration — FieldFlow</title>
+<style>
+  :root {
+    --teal-dark: #0f4c4c;
+    --teal: #0d7d7d;
+    --purple: #6d5bd0;
+    --green: #1a8a5f;
+    --green-bg: #e7f6ef;
+    --red: #c0392b;
+    --red-bg: #fdecea;
+    --border: #dbe4e4;
+    --border-soft: #e9eeee;
+    --text-muted: #4b5f5f;
+    --text-faint: #7d9191;
+    --bg: #f4f7f7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--teal-dark);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 60px;
+  }
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 14px rgba(15,76,76,0.08);
+    padding: 28px 24px 32px;
+  }
+  h1 { font-size: 19px; margin: 0 0 4px; }
+  .sub { font-size: 13px; color: var(--text-faint); margin: 0 0 22px; }
+  label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-muted); margin: 16px 0 6px; }
+  label .req { color: var(--red); }
+  input, select {
+    width: 100%;
+    padding: 11px 12px;
+    font-size: 15px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    outline: none;
+    color: var(--teal-dark);
+    background: #fff;
+    font-family: inherit;
+  }
+  input:focus, select:focus { border-color: var(--purple); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row-uid { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+  button.submit {
+    width: 100%; margin-top: 24px; padding: 13px; border-radius: 12px; border: none;
+    background: var(--purple); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  button.submit:disabled { opacity: 0.55; cursor: default; }
+  button.secondary {
+    width: 100%; margin-top: 12px; padding: 12px; border-radius: 12px;
+    border: 1.5px solid var(--border); background: #fff; color: var(--teal-dark);
+    font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  button.fetch {
+    padding: 11px 16px; border-radius: 10px; border: none; background: var(--teal-dark);
+    color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  button.fetch:disabled { opacity: 0.55; cursor: default; }
+  button.geo {
+    margin-top: 8px; padding: 9px 14px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: #fff; color: var(--teal-dark); font-size: 12.5px; font-weight: 600; cursor: pointer;
+    width: 100%;
+  }
+  button.geo:disabled { opacity: 0.55; cursor: default; }
+  .banner { font-size: 13px; padding: 10px 12px; border-radius: 10px; margin-bottom: 16px; }
+  .banner.error { background: var(--red-bg); color: var(--red); }
+  .banner.ok    { background: var(--green-bg); color: var(--green); }
+  select:disabled, input:disabled { background: #f4f7f7; color: var(--text-faint); cursor: not-allowed; }
+  .center { text-align: center; padding: 40px 8px; }
+  .spinner {
+    width: 26px; height: 26px; margin: 0 auto 14px; border: 3px solid var(--border);
+    border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .uid-box { text-align: center; padding: 26px 10px; border-radius: 14px; background: var(--green-bg); margin-bottom: 6px; }
+  .uid-box .label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .uid-box .uid { font-size: 30px; font-weight: 700; color: var(--green); letter-spacing: 1px; margin-top: 6px; font-family: 'Courier New', monospace; }
+  .summary { font-size: 13px; color: var(--text-muted); margin-top: 16px; line-height: 1.7; }
+  .summary b { color: var(--teal-dark); }
+  .hidden { display: none; }
+  .beneficiary-card { margin-top: 10px; padding: 14px; border-radius: 12px; background: var(--green-bg); }
+  .beneficiary-card .type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--green); }
+  .beneficiary-card .name { font-size: 15px; font-weight: 600; color: var(--teal-dark); margin-top: 4px; }
+  .beneficiary-card .meta { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+  fieldset { border: none; padding: 0; margin: 0; }
+  fieldset[disabled] { opacity: 0.5; }
+  .branch-note { font-size: 12.5px; color: var(--text-faint); margin-top: 10px; }
+  .util-item { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .util-check {
+    display: flex; align-items: center; gap: 7px; flex: 1; margin: 0;
+    font-size: 13.5px; font-weight: 500; color: var(--teal-dark); cursor: pointer;
+  }
+  .util-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--purple); flex-shrink: 0; }
+  .util-item input[type="number"] { flex: 1; max-width: 150px; padding: 8px 10px; font-size: 13.5px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div id="loadingView" class="center">
+      <div class="spinner"></div>
+      <div style="font-size:13px;color:var(--text-faint);">Checking registration link…</div>
+    </div>
+
+    <div id="invalidView" class="hidden center">
+      <h1>Link not valid</h1>
+      <p class="sub" style="margin-top:8px;">
+        This registration link is invalid, incomplete, or has expired.
+        Please contact your program admin for a fresh link.
+      </p>
+    </div>
+
+    <form id="formView" class="hidden" autocomplete="off">
+      <h1>Resource Registration</h1>
+      <p class="sub">Fields marked <span style="color:var(--red);">*</span> are required. A unique Resource ID is generated on submit.</p>
+      <div id="formBanner"></div>
+
+      <label>Beneficiary UID <span class="req">*</span></label>
+      <div class="row-uid">
+        <input type="text" id="f_buid" placeholder="e.g. IB-0001, EB-0001, CB-0001" />
+        <button type="button" class="fetch" id="fetchBtn">Fetch Details</button>
+      </div>
+      <div id="beneficiaryCard"></div>
+
+      <fieldset id="restOfForm" disabled>
+        <label>Type of Production System <span class="req">*</span></label>
+        <select id="f_type" required>
+          <option value="">— Select —</option>
+          <option value="Freshwater Wetland">Freshwater Wetland</option>
+          <option value="Coastal Wetland">Coastal Wetland</option>
+          <option value="Agricultural Land">Agricultural Land</option>
+          <option value="Brackish Water">Brackish Water</option>
+        </select>
+
+        <!-- Freshwater Wetland branch -->
+        <div id="fwSection" class="hidden">
+          <label>Type of Resource <span class="req">*</span></label>
+          <select id="f_fw_waterbody">
+            <option value="">— Select —</option>
+            <option value="Chour">Chour</option>
+            <option value="Moen">Moen</option>
+            <option value="Dhar">Dhar</option>
+            <option value="Pond">Pond</option>
+          </select>
+
+          <label>Area (Acre)</label>
+          <input type="number" id="f_fw_area" min="0" step="0.01" placeholder="e.g. 1.5" />
+
+          <label>Resource Access</label>
+          <select id="f_fw_access">
+            <option value="">— Select —</option>
+            <option value="Owned">Owned</option>
+            <option value="Leased">Leased</option>
+            <option value="Common">Common</option>
+          </select>
+
+          <label>Resource Utility</label>
+          <div id="fwUtility"></div>
+        </div>
+
+        <!-- Coastal Wetland branch -->
+        <div id="cwSection" class="hidden">
+          <label>Type of Resource <span class="req">*</span></label>
+          <select id="f_cw_structure">
+            <option value="">— Select —</option>
+            <option value="Raft">Raft</option>
+            <option value="Mangroves">Mangroves</option>
+          </select>
+
+          <div id="cwRaftSection" class="hidden">
+            <label>No. of Raft</label>
+            <input type="number" id="f_cw_raft_count" min="0" step="1" placeholder="e.g. 4" />
+
+            <label>Resource Utility</label>
+            <div id="cwUtility"></div>
+          </div>
+
+          <div id="cwMangroveSection" class="hidden">
+            <label>Area (Acre)</label>
+            <input type="number" id="f_cw_mangrove_area" min="0" step="0.01" placeholder="e.g. 1.5" />
+          </div>
+        </div>
+
+        <!-- Agricultural Land branch -->
+        <div id="agriSection" class="hidden">
+          <label>Area (Acre)</label>
+          <input type="number" id="f_agri_area" min="0" step="0.01" placeholder="e.g. 1.5" />
+
+          <label>Resource Utility</label>
+          <div id="agriUtility"></div>
+        </div>
+
+        <!-- Brackish Water branch: no follow-up questions yet -->
+        <div id="bwSection" class="hidden">
+          <p class="branch-note">No additional questions for Brackish Water yet.</p>
+        </div>
+
+        <label>Location (GPS Coordinates)</label>
+        <div class="row2">
+          <div>
+            <input type="number" id="f_lat" step="any" min="-90" max="90" placeholder="Latitude" />
+          </div>
+          <div>
+            <input type="number" id="f_lng" step="any" min="-180" max="180" placeholder="Longitude" />
+          </div>
+        </div>
+        <button type="button" class="geo" id="geoBtn">📍 Use My Current Location</button>
+
+        <button type="submit" class="submit" id="submitBtn">Register Resource</button>
+      </fieldset>
+    </form>
+
+    <div id="successView" class="hidden">
+      <div class="uid-box">
+        <div class="label">Resource UID</div>
+        <div class="uid" id="successUid">WB-0000</div>
+      </div>
+      <div class="summary" id="successSummary"></div>
+      <button class="secondary" id="registerAnotherBtn">Register Another Resource</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const qs   = new URLSearchParams(window.location.search)
+  const org  = qs.get('org')  || ''
+  const key  = qs.get('key')  || ''
+
+  const $ = (id) => document.getElementById(id)
+  const loadingView  = $('loadingView')
+  const invalidView  = $('invalidView')
+  const formView     = $('formView')
+  const successView  = $('successView')
+  const restOfForm   = $('restOfForm')
+  const submitBtn    = $('submitBtn')
+
+  let fetchedBeneficiary = null
+
+  function show(view) {
+    [loadingView, invalidView, formView, successView].forEach(v => v.classList.add('hidden'))
+    view.classList.remove('hidden')
+  }
+
+  function setBanner(msg, kind) {
+    const el = $('formBanner')
+    if (!msg) { el.innerHTML = ''; return }
+    el.innerHTML = '<div class="banner ' + kind + '">' + msg + '</div>'
+  }
+
+  async function validateLink() {
+    if (!org || !key) { show(invalidView); return }
+    try {
+      const r = await fetch('/api/validate?org=' + encodeURIComponent(org) + '&key=' + encodeURIComponent(key))
+      const d = await r.json()
+      if (d.ok) show(formView)
+      else show(invalidView)
+    } catch (e) {
+      show(invalidView)
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]))
+  }
+
+  function renderBeneficiaryCard(b) {
+    if (!b) { $('beneficiaryCard').innerHTML = ''; return }
+    $('beneficiaryCard').innerHTML =
+      '<div class="beneficiary-card">' +
+        '<div class="type">' + escapeHtml(b.type) + ' · ' + escapeHtml(b.uid) + '</div>' +
+        '<div class="name">' + escapeHtml(b.name) + '</div>' +
+        (b.subLabel ? '<div class="meta">' + escapeHtml(b.subLabel) + '</div>' : '') +
+        (b.location ? '<div class="meta">' + escapeHtml(b.location) + '</div>' : '') +
+      '</div>'
+  }
+
+  $('fetchBtn').addEventListener('click', async () => {
+    setBanner('', '')
+    const uid = $('f_buid').value.trim()
+    if (!uid) { setBanner('Enter a Beneficiary UID first.', 'error'); return }
+    const btn = $('fetchBtn')
+    btn.disabled = true
+    btn.textContent = 'Fetching…'
+    fetchedBeneficiary = null
+    restOfForm.disabled = true
+    renderBeneficiaryCard(null)
+    try {
+      const r = await fetch('/api/lookup?org=' + encodeURIComponent(org) + '&key=' + encodeURIComponent(key) + '&uid=' + encodeURIComponent(uid))
+      const d = await r.json()
+      if (!r.ok) {
+        setBanner(d.error || 'Beneficiary not found.', 'error')
+      } else {
+        fetchedBeneficiary = d
+        renderBeneficiaryCard(d)
+        restOfForm.disabled = false
+        setBanner('Beneficiary found — continue below.', 'ok')
+      }
+    } catch (e) {
+      setBanner('Network error — please check your connection and try again.', 'error')
+    } finally {
+      btn.disabled = false
+      btn.textContent = 'Fetch Details'
+    }
+  })
+
+  // ── Resource Utility multiselect — reusable across all three branches
+  // that ask one (Freshwater Wetland / Coastal Wetland > Raft / Agricultural
+  // Land), each with a different option list. Built once from a plain
+  // options array rather than hand-written per branch, so adding/renaming an
+  // option later is a one-line change. "None of the above" (where present)
+  // unchecks and disables every other option in its own question — it is
+  // never itself sent as a utility entry (see readUtilityQuestion).
+  function buildUtilityQuestion(container, options) {
+    container.innerHTML = options.map(opt => {
+      const isNone = opt === 'None of the above'
+      return (
+        '<div class="util-item" data-util="' + escapeHtml(opt) + '">' +
+          '<label class="util-check"><input type="checkbox" class="util-checkbox"' + (isNone ? ' data-none="1"' : '') + ' /> ' + escapeHtml(opt) + '</label>' +
+          (isNone ? '' : '<input type="number" class="util-kg" min="0" step="0.01" placeholder="Production (KG)" disabled />') +
+        '</div>'
+      )
+    }).join('')
+    container.querySelectorAll('.util-item').forEach(item => {
+      const checkbox = item.querySelector('.util-checkbox')
+      const kgInput  = item.querySelector('.util-kg')
+      const isNone   = checkbox.dataset.none === '1'
+      checkbox.addEventListener('change', () => {
+        if (isNone) {
+          container.querySelectorAll('.util-checkbox').forEach(cb => {
+            if (cb === checkbox) return
+            cb.disabled = checkbox.checked
+            if (checkbox.checked) {
+              cb.checked = false
+              const sib = cb.closest('.util-item').querySelector('.util-kg')
+              if (sib) { sib.value = ''; sib.disabled = true }
+            }
+          })
+        }
+        if (kgInput) {
+          kgInput.disabled = !checkbox.checked
+          if (!checkbox.checked) kgInput.value = ''
+        }
+      })
+    })
+  }
+
+  function readUtilityQuestion(container) {
+    const out = []
+    container.querySelectorAll('.util-item').forEach(item => {
+      const checkbox = item.querySelector('.util-checkbox')
+      if (checkbox.dataset.none === '1' || !checkbox.checked) return
+      const kgInput = item.querySelector('.util-kg')
+      out.push({ utility: item.dataset.util, production_kg: kgInput ? kgInput.value : '' })
+    })
+    return out
+  }
+
+  function resetUtilityQuestion(container) {
+    container.querySelectorAll('.util-checkbox').forEach(cb => { cb.checked = false; cb.disabled = false })
+    container.querySelectorAll('.util-kg').forEach(kg => { kg.value = ''; kg.disabled = true })
+  }
+
+  buildUtilityQuestion($('fwUtility'),   ['Fishery', 'Makhana', 'Singhara', 'None of the above'])
+  buildUtilityQuestion($('cwUtility'),   ['Seaweed', 'Oyster', 'Mussel', 'Fish', 'Crab'])
+  buildUtilityQuestion($('agriUtility'), ['Bio Fortified Crop', 'Millet Crop', 'Pulse Crop', 'Grain Crop', 'Oil Seed Crop', 'None of the above'])
+
+  // ── Type of Production System branching ──────────────────────────────────
+  const fwSection = $('fwSection'), cwSection = $('cwSection'), agriSection = $('agriSection'), bwSection = $('bwSection')
+  const cwRaftSection = $('cwRaftSection'), cwMangroveSection = $('cwMangroveSection')
+
+  function resetBranchFields() {
+    $('f_fw_waterbody').value = ''
+    $('f_fw_area').value = ''
+    $('f_fw_access').value = ''
+    resetUtilityQuestion($('fwUtility'))
+    $('f_cw_structure').value = ''
+    $('f_cw_raft_count').value = ''
+    resetUtilityQuestion($('cwUtility'))
+    $('f_cw_mangrove_area').value = ''
+    $('f_agri_area').value = ''
+    resetUtilityQuestion($('agriUtility'))
+    cwRaftSection.classList.add('hidden')
+    cwMangroveSection.classList.add('hidden')
+  }
+
+  $('f_type').addEventListener('change', () => {
+    ;[fwSection, cwSection, agriSection, bwSection].forEach(s => s.classList.add('hidden'))
+    resetBranchFields()
+    const v = $('f_type').value
+    if (v === 'Freshwater Wetland') fwSection.classList.remove('hidden')
+    else if (v === 'Coastal Wetland') cwSection.classList.remove('hidden')
+    else if (v === 'Agricultural Land') agriSection.classList.remove('hidden')
+    else if (v === 'Brackish Water') bwSection.classList.remove('hidden')
+  })
+
+  $('f_cw_structure').addEventListener('change', () => {
+    cwRaftSection.classList.add('hidden')
+    cwMangroveSection.classList.add('hidden')
+    $('f_cw_raft_count').value = ''
+    resetUtilityQuestion($('cwUtility'))
+    $('f_cw_mangrove_area').value = ''
+    const v = $('f_cw_structure').value
+    if (v === 'Raft') cwRaftSection.classList.remove('hidden')
+    else if (v === 'Mangroves') cwMangroveSection.classList.remove('hidden')
+  })
+
+  $('geoBtn').addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      setBanner('Your browser does not support GPS location — enter coordinates manually.', 'error')
+      return
+    }
+    const btn = $('geoBtn')
+    btn.disabled = true
+    btn.textContent = 'Getting location…'
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        $('f_lat').value = pos.coords.latitude.toFixed(6)
+        $('f_lng').value = pos.coords.longitude.toFixed(6)
+        btn.disabled = false
+        btn.textContent = '📍 Use My Current Location'
+      },
+      () => {
+        setBanner('Could not get your location — please allow location access, or enter coordinates manually.', 'error')
+        btn.disabled = false
+        btn.textContent = '📍 Use My Current Location'
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  })
+
+  function resetForm() {
+    formView.reset()
+    fetchedBeneficiary = null
+    restOfForm.disabled = true
+    renderBeneficiaryCard(null)
+    ;[fwSection, cwSection, agriSection, bwSection].forEach(s => s.classList.add('hidden'))
+    resetBranchFields()
+    setBanner('', '')
+  }
+
+  $('registerAnotherBtn').addEventListener('click', () => {
+    resetForm()
+    show(formView)
+  })
+
+  formView.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    setBanner('', '')
+
+    if (!fetchedBeneficiary) {
+      setBanner('Fetch the beneficiary’s details first.', 'error')
+      return
+    }
+    const productionSystem = $('f_type').value
+    if (!productionSystem) {
+      setBanner('Please select a Type of Production System.', 'error')
+      return
+    }
+
+    const payload = {
+      org, key,
+      beneficiary_uid: fetchedBeneficiary.uid,
+      resource_type:   productionSystem,
+      latitude:        $('f_lat').value,
+      longitude:       $('f_lng').value,
+    }
+
+    if (productionSystem === 'Freshwater Wetland') {
+      if (!$('f_fw_waterbody').value) { setBanner('Please select a Type of Resource.', 'error'); return }
+      payload.water_body_type  = $('f_fw_waterbody').value
+      payload.area_acre        = $('f_fw_area').value
+      payload.resource_access  = $('f_fw_access').value
+      payload.resource_utility = readUtilityQuestion($('fwUtility'))
+    } else if (productionSystem === 'Coastal Wetland') {
+      const structure = $('f_cw_structure').value
+      if (!structure) { setBanner('Please select a Type of Resource.', 'error'); return }
+      payload.wetland_structure = structure
+      if (structure === 'Raft') {
+        payload.raft_count       = $('f_cw_raft_count').value
+        payload.resource_utility = readUtilityQuestion($('cwUtility'))
+      } else {
+        payload.area_acre = $('f_cw_mangrove_area').value
+      }
+    } else if (productionSystem === 'Agricultural Land') {
+      payload.area_acre        = $('f_agri_area').value
+      payload.resource_utility = readUtilityQuestion($('agriUtility'))
+    }
+    // Brackish Water: no extra fields.
+
+    submitBtn.disabled = true
+    submitBtn.textContent = 'Registering…'
+    try {
+      const r = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const d = await r.json()
+      if (!r.ok) {
+        setBanner(d.error || 'Registration failed — please try again.', 'error')
+        submitBtn.disabled = false
+        submitBtn.textContent = 'Register Resource'
+        return
+      }
+
+      const lines = []
+      lines.push('<b>' + escapeHtml(d.resource_type) + '</b>')
+      if (d.water_body_type) lines.push(escapeHtml(d.water_body_type))
+      if (d.wetland_structure) lines.push(escapeHtml(d.wetland_structure))
+      lines.push('Mapped to: <b>' + escapeHtml(d.beneficiary_name) + '</b> (' + escapeHtml(d.beneficiary_type) + ' · ' + escapeHtml(d.beneficiary_uid) + ')')
+      if (d.latitude != null && d.longitude != null) lines.push(d.latitude + ', ' + d.longitude)
+      if (d.area_acre != null) lines.push(d.area_acre + ' acre')
+      if (d.raft_count != null) lines.push(d.raft_count + ' raft' + (d.raft_count === 1 ? '' : 's'))
+      if (d.resource_access) lines.push('Access: ' + escapeHtml(d.resource_access))
+      if (Array.isArray(d.resource_utility) && d.resource_utility.length) {
+        lines.push(d.resource_utility.map(u => escapeHtml(u.utility) + (u.production_kg != null ? ': ' + u.production_kg + ' kg' : '')).join(' · '))
+      }
+
+      $('successUid').textContent = d.uid
+      $('successSummary').innerHTML = lines.join('<br/>')
+      show(successView)
+      submitBtn.disabled = false
+      submitBtn.textContent = 'Register Resource'
+    } catch (err) {
+      setBanner('Network error — please check your connection and try again.', 'error')
+      submitBtn.disabled = false
+      submitBtn.textContent = 'Register Resource'
+    }
+  })
+
+  validateLink()
+})()
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# .gcloudignore — files excluded from App Engine deployment
+# Keep dist/ (built frontend) and db/pool.js (DB connection module)
+
+node_modules/
+.env
+.env.local
+.env.*.local
+*.env
+.DS_Store
+*.tsbuildinfo
+.vite/
+.git/
+# Leading slash = repo root only. A bare `src/` also matched services/finance/src/
+# (gitignore semantics: a pattern without a slash matches at any depth), so that
+# folder was never uploaded and the 2026-10-03 12:12 deploy crashed at boot.
+/src/
+/public/
+# services/* (not services/) so subfolders can be re-included: the monolith
+# runs services/hr's and services/finance's routers in-process when their
+# *_SERVICE_URL is unset or Cloud Run is down (routes/hr.routes.js,
+# routes/finance-mgmt.routes.js).
+services/*
+!services/hr/
+!services/finance/
+db/migrations/
+*.md
+tsconfig*.json
+vite.config.*
+tailwind.config.*
+postcss.config.*

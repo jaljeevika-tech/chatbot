@@ -1,0 +1,18 @@
+{
+  "name": "fieldflow-report-writer-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "FieldFlow Report Writer microservice — AI-assisted NGO field report drafting",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "express": "^4.22.1",
+    "pg": "^8.13.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

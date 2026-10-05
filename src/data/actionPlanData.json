@@ -1,0 +1,6635 @@
+[
+  {
+    "sn": 1,
+    "activity": "Survey software/Tools subscription",
+    "unit": "Online subscription",
+    "times": "1",
+    "description": "* Jotform and zoho service procurement | * Regular data capturing from program area",
+    "responsibility": "BM",
+    "process": "* Hire local youth to list down all type of ponds/ chaur/ maun etc in potential villages  | * Give target to Mobilisers for 100-125 new waterbodies listing in cluster of villages",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": "KH:\nAL:\nBH\nPIP:\nKIS:\nKS:",
+            "achieved": null
+          },
+          "May": {
+            "target": 50,
+            "achieved": 26
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 50,
+            "achieved": 9
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 100,
+            "achieved": 50
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 100,
+            "achieved": 47
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 100,
+            "achieved": 50
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 100,
+            "achieved": 29
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "capacity"
+  },
+  {
+    "sn": 2,
+    "activity": "Quarterly Training for Program team",
+    "unit": "20",
+    "times": "4",
+    "description": "* Quarterly program review and plan exercise with project team (20 person)",
+    "responsibility": "Subodh",
+    "process": "* Q1 > mapping, process of activities to be completed, Convergence intervention, financial and digital literacy plan, budgted intervention in each villages | * Q2 > PG, institutions and PG level plans generation  | * Q3 > Block level entreprenuership plan, data capture and support to potential entreprenuers | * Q4 > Documentation",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": "1st week",
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": "Before 10th",
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": 1
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "capacity"
+  },
+  {
+    "sn": 3,
+    "activity": "2 days, six monthly training for farmers",
+    "unit": "300",
+    "times": "4",
+    "description": "* Technology transfer training for 250 fish farmers and 50 makhna-singhara farmers  | * Over year atleast 25 hrs program will be deleivered.",
+    "responsibility": "Niraj",
+    "process": "* Training curriculam- syllabus, PPT, hand note development | * Farmers card to right beneficiary | * 50 wetland productivity, Biz ideation playbook with case story | * Monthly training calender / activity in potential villages  | * Link trainees to online courses and generate certificates | * Link with KVK, ATMA, university for courses | * Register beneficiary numbers with hours (training, refresher trg) |  | June Topic: General & composite fishery training to pen and pond farmer | July Topic: feeding training to pen and pond farmer | Aug Topic:  Disease mgmt  training to pen and pond farmer",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 30,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 30,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 30,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": "Topic:  Harvesting and post mgmt, marketing training to pen and pond farmer\nKH+AL: 60\nBH: 60\nPIP: 60\nKIS:60\nKS: 60",
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 30,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 30,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 30,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 60,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 60,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 60,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 60,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 60,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 60,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 60,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 60,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 60,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 60,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 60,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 60,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "capacity"
+  },
+  {
+    "sn": 4,
+    "activity": "Exposure visit to farmers",
+    "unit": "40",
+    "times": "1",
+    "description": "* 40 progressive farmers will be taken for exposure trip to learn new technology/innovation",
+    "responsibility": "Niraj",
+    "process": "* To team members in local hatchery, Bankura (use travel fund) | * To community members in local hatchery, Darbhanga, Purnea,  | * Interaction with PMMSY beneficiaries (Supaul), PUSA, fisheries college",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 4,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 4,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 8,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 8,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 8,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 8,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "capacity"
+  },
+  {
+    "sn": 5,
+    "activity": "Content creation, video, manuals, case study for learning and technology dissemination",
+    "unit": "12",
+    "times": "1",
+    "description": "* 12 video based training content and farmers adoption case study related video content will be produced. Per video making cost -like shooting, editing, voice over is provided as lumpsum.",
+    "responsibility": "Ankita, Brijesh",
+    "process": "* Course video is almost ready | * Farmers who adopted new technique needs to be documented. (Purnea- Mahaldar, Bhuri- pen- cage- jhang- dry fish- nursery- integrated farm- desi fish/ mangur, waterhycinth, goat vaccination etc)",
+    "locations": [],
+    "category": "enterprise"
+  },
+  {
+    "sn": 6,
+    "activity": "Aquatalk online trg session & website",
+    "unit": "26",
+    "times": "1",
+    "description": "* Online thematic sessions to farmers, producer organisation by experts, scientist and entreprenuers on weekly basis.  | * These video based content will be converted as technical hand out for farmers training and scaling up of Koshi sahjeevan program among all community collective",
+    "responsibility": "Vertika, Deepak, Niraj, Ravish, Avinash, Anjana, Brijesh, other team members",
+    "process": "* List expert, professor, Govt officers, practitioners, entreprenuers, name | * Make their schedule, Google meet link and social media promotion  | * Summerise/transcription of session, and key video footage (2-5 minute launch)",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": 3,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": "KH+AL: 1\n\nBH: 1\nPIP: 1\nKIS: 1\nKS: 1",
+            "achieved": null
+          },
+          "Oct": {
+            "target": "KH+AL: 1\n\nBH: 1\nPIP: 1\nKIS: 1\nKS: 1",
+            "achieved": null
+          },
+          "Nov": {
+            "target": "KH+AL: 1\n\nBH: 1\nPIP: 1\nKIS: 1\nKS: 1",
+            "achieved": null
+          },
+          "Dec": {
+            "target": "KH+AL: 1\n\nBH: 1\nPIP: 1\nKIS: 1\nKS: 1",
+            "achieved": null
+          },
+          "Jan": {
+            "target": "KH+AL: 1\n\nBH: 1\nPIP: 1\nKIS: 1\nKS: 1",
+            "achieved": null
+          },
+          "Feb": {
+            "target": "KH+AL: 1\n\nBH: 1\nPIP: 1\nKIS: 1\nKS: 1",
+            "achieved": null
+          },
+          "Mar": {
+            "target": "KH+AL: 1\n\nBH: 1\nPIP: 1\nKIS: 1\nKS: 1",
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "capacity"
+  },
+  {
+    "sn": 7,
+    "activity": "Convergence camp- Monthly",
+    "unit": "4",
+    "times": "12",
+    "description": "* Monthly convergence camp in all blocks | * Stationary, campaign booth, vehicle hiring",
+    "responsibility": "All BMs, Community Mobiliser",
+    "process": "* Make convergence camp plan in key villages atleast 2/3 camps per village per month | * Wall stickers in all common places of villages/ camp location. | * Inaugrate it by one of the villagers. By day end provide printed copy to villagers. | * Post registration, take a brief sesion on benefit of this registration and what he can take life long benefits. | * Show video of those scheme and benefits | * EKCC",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": "3 day per month in all project villages. Target 50 beneficary per camp",
+            "achieved": null
+          },
+          "May": {
+            "target": 3,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 3,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 3,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 3,
+            "achieved": null
+          },
+          "Sep": {
+            "target": "KH+AL: 3\nBH: 2\nPIP: 2\nKIS: 2\nKS: 2",
+            "achieved": null
+          },
+          "Oct": {
+            "target": "KH+AL: 3\nBH: 2\nPIP: 2\nKIS: 2\nKS: 2",
+            "achieved": null
+          },
+          "Nov": {
+            "target": "KH+AL: 3\nBH: 2\nPIP: 2\nKIS: 2\nKS: 2",
+            "achieved": null
+          },
+          "Dec": {
+            "target": "KH+AL: 3\nBH: 2\nPIP: 2\nKIS: 2\nKS: 2",
+            "achieved": null
+          },
+          "Jan": {
+            "target": "KH+AL: 3\nBH: 2\nPIP: 2\nKIS: 2\nKS: 2",
+            "achieved": null
+          },
+          "Feb": {
+            "target": "KH+AL: 3\nBH: 2\nPIP: 2\nKIS: 2\nKS: 2",
+            "achieved": null
+          },
+          "Mar": {
+            "target": "KH+AL: 3\nBH: 2\nPIP: 2\nKIS: 2\nKS: 2",
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 2,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 2,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 2,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 2,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 2,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 2,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 2,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 2,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 2,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 2,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 2,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 2,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 2,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 2,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 2,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 2,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "community"
+  },
+  {
+    "sn": 8,
+    "activity": "Producers Group's six monthly meeting",
+    "unit": "4",
+    "times": "2",
+    "description": "* To discuss best practices and scaling up strategy, with leaders of producer group in all blocks.  | * Every six month meeting will be organsied in all blocks, cost mentioned related to food and meeting expences.",
+    "responsibility": "BM, Community Mobiliser",
+    "process": "* PG planning, PG register, PG meeting notes, PG meeting monthly schedule.  | * Biz plan, production plan for this PG, based on google earth map system. | * Issue / challenges of PG members and list potential solution that can be done individually- collectively- govt convergence, panchayat convergenec- skill builidng-credit mobilisation | * financial literacy and digital literacy with PG meeting | *EKCC",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": "KH+AL: 1\nBH: 1\nPIP: 1\nKIS: 1\nKS:1",
+            "achieved": null
+          },
+          "Oct": {
+            "target": "KH+AL: 1\nBH: 1\nPIP: 1\nKIS: 1\nKS:1",
+            "achieved": null
+          },
+          "Nov": {
+            "target": "KH+AL: 1\nBH: 1\nPIP: 1\nKIS: 1\nKS:1",
+            "achieved": null
+          },
+          "Dec": {
+            "target": "KH+AL: 1\nBH: 1\nPIP: 1\nKIS: 1\nKS:1",
+            "achieved": null
+          },
+          "Jan": {
+            "target": "KH+AL: 1\nBH: 1\nPIP: 1\nKIS: 1\nKS:1",
+            "achieved": null
+          },
+          "Feb": {
+            "target": "KH+AL: 1\nBH: 1\nPIP: 1\nKIS: 1\nKS:1",
+            "achieved": null
+          },
+          "Mar": {
+            "target": "KH+AL: 1\nBH: 1\nPIP: 1\nKIS: 1\nKS:1",
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "community"
+  },
+  {
+    "sn": 9,
+    "activity": "Pen culture in wetland area",
+    "unit": "4",
+    "times": "1",
+    "description": "* Installation of 4 pen culture for enhanced fish production in open water bodies & Chour area. Each pen will provide support to average 40 farmers",
+    "responsibility": "BM, Niraj",
+    "process": "* Awareness session to the communities   | Procurement of all materials- net, bamboo etc | * Increase more numbers of pen in high potential areas- Khagaria and Bhaptiyahi | * Complete this part before monsoon. | * Seed stocking, Mgmt action and documentation, Signboards, posters | * Develop as an exposure site for other farmers",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 2,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "livelihood"
+  },
+  {
+    "sn": 10,
+    "activity": "Input to pond fish farmers in wetland area",
+    "unit": "100",
+    "times": "1",
+    "description": "* INR 25000 is budgeted to provide input support to identified 50+50 best practicing farmers.",
+    "responsibility": "BM, Niraj",
+    "process": "* Procurement of budgted item | * Make farmer selection criteria, list farmers | * Training, Consent letter, Fish farmers card-regular entry | * Distribution of meterial | * digitalise mapping/ excel sheet of beneficiary",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 10,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 20,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 20,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 20,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 20,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "livelihood"
+  },
+  {
+    "sn": 11,
+    "activity": "Makhana seed and input support to wetland area",
+    "unit": "160",
+    "times": "1",
+    "description": "* Makhana seed will be provided to 80 +80 makhana wetland farmers",
+    "responsibility": "BM",
+    "process": "*  List makahna farmers | *Training curriculam, trg by experts, practitioners, entreprenuers | * Input distribution, buy quality plant form nursery | * farmers card, beneficiary MIS | * Develop 5 makhana plant nursery per block",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": 80,
+            "achieved": null
+          },
+          "Jan": {
+            "target": 80,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": "find 25 seller of seed- Swarn Vaidehi and Sabaur Makhana",
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "livelihood"
+  },
+  {
+    "sn": 12,
+    "activity": "Singhara farming input support to wetland area",
+    "unit": "200",
+    "times": "1",
+    "description": "* 10 kg of singhara cripper will be provided to 100 +100 wetland farmers plant cripper and fertiliser distribution",
+    "responsibility": "BM",
+    "process": "* Singhara seed/ and plant procurement | * list Singhara farmers, Training curriculam, singhara trg by experts, practitioners, entreprenuers | * Input distribution, buy quality plant form nursery | * Farmers card, beneficiary MIS",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 90,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 100,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 20,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 20,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 20,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "livelihood"
+  },
+  {
+    "sn": 13,
+    "activity": "Fish seed nursery enterprise and network",
+    "unit": "30",
+    "times": "1",
+    "description": "* 30 Fish seed nursery will be set by local entreprenuer.  | * Support for maintaining water quality management, input, fish spawn, plankton growth promoter, and bird net for fish seed nersary promotion. Budget 61000/-",
+    "responsibility": "BM, Niraj",
+    "process": "* Fish seed nursery entrepreur selection | * Training curriculam, trg by experts, practitioners, entreprenuers | * SoP for nursery, Consent by farmer | * Input procurement as per budgted, input distribution | * Growth record, farmers card, beneficiary MIS",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": "Target for the year completed",
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "enterprise"
+  },
+  {
+    "sn": 14,
+    "activity": "Pond bund based integrated model to primary livelihood farmers",
+    "unit": "150",
+    "times": "1",
+    "description": "* 150 numbers of farmers will be supported for bund based integrated farming, Cripper net, vegetable seeds, horticulture plants . Budget 8800/-",
+    "responsibility": "BM, CM",
+    "process": "* Input procurement as per budgted | * List primary livelihood farmers from cluster of vill. | * Training/exposure | * Input distribution,  | * Growth record, farmers card, beneficiary MIS",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 25,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 150,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 155,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "livelihood"
+  },
+  {
+    "sn": 15,
+    "activity": "Pond bund based integrated model to Secondary livelihood farmers",
+    "unit": "50",
+    "times": "1",
+    "description": "* focus in capture fisheries area, small ponds.  | * 50 numbers of farmers will be supported for bund based integrated farming, Cripper net, vegetable seeds, horticulture plants . Budget 7000/-",
+    "responsibility": "BM, CM",
+    "process": "* Input procurement as per budgted | * List primary livelihood farmers from cluster of vill. | * Training/exposure | * Input distribution,  | * Growth record, farmers card, beneficiary MIS",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "livelihood"
+  },
+  {
+    "sn": 16,
+    "activity": "Livestock support activities",
+    "unit": "100",
+    "times": "2",
+    "description": "* PPR vaccine 2 times in a year | * 3 time deworming of goats for 100 HH, on an avg 5 goat /hh.",
+    "responsibility": "Kanhaiya, CM",
+    "process": "* Complete both doses of previous farmers | * Maintain quality and numbers, no missing goat | * Main beneficiaries should not be left | * Non beneficiaries should be included",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": "Revaccination/booster dose preperation in all locations",
+            "achieved": null
+          },
+          "Jun": {
+            "target": "Revaccination/booster dose preperation in all locations",
+            "achieved": null
+          },
+          "Jul": {
+            "target": "Revaccination/booster dose preperation in all locations",
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "livelihood"
+  },
+  {
+    "sn": 17,
+    "activity": "Cold storage as CFC installation and operation support",
+    "unit": "1",
+    "times": "1",
+    "description": "* Affordable solar linked cold storage upto 6 Ton capacity for fish vendors and farmers market linkage | * Service provider : frozen hive, Pune",
+    "responsibility": "BM",
+    "process": "* Location identification, farmer mobilisation, | * Procuremnet order | * Room size building | * Vendors forum dev | * Rule regulation to form joint mgmt with CAL | * Make a monitoring committee  | * Maintain register",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": 1
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": "to be cont.",
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "enterprise"
+  },
+  {
+    "sn": 18,
+    "activity": "PCM gel based ice box for women fish vendors",
+    "unit": "200",
+    "times": "1",
+    "description": "* 200 women vendors will be provided with PCM gel based advance ice box to preserve unsold fishes",
+    "responsibility": "BM, CM",
+    "process": "* Vendor identification | * Procurement order | * Make vendors collective PG | * Monthly 1 scheduled meeting with them- issue, problem-possiblityes- new biz ideation, Consumer awareness, branding, hugenic presenttaion,  | * Demo sale of new products | * WA group, some collective-better way of biz marketing, value added products during village haat",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 10,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 30,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 30,
+            "achieved": null
+          },
+          "Sep": {
+            "target": 30,
+            "achieved": null
+          },
+          "Oct": {
+            "target": 30,
+            "achieved": null
+          },
+          "Nov": {
+            "target": 30,
+            "achieved": null
+          },
+          "Dec": {
+            "target": 20,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 30,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 10,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "enterprise"
+  },
+  {
+    "sn": 19,
+    "activity": "Chatbot",
+    "unit": "1",
+    "times": "1",
+    "description": "* WhatsApp chatbot based training delivery, advisory services, call to expert support service for a uniform knowledge deleivery system.  | * Other wetland program partners can also accesss this support service.",
+    "responsibility": "Ayush, IT team",
+    "process": "* Restructure, Redesign flow | * Simplify the content | * Micro content rewrite | * Generate Pdf, video, jpg files | * Bulk push message",
+    "locations": [],
+    "category": "technology"
+  },
+  {
+    "sn": 20,
+    "activity": "Affordable hatchery",
+    "unit": "1",
+    "times": "1",
+    "description": "* Affordable hatchery for quality fish seed production and distribution. This technology is devised by Jaljeevika to promote combo model of Hatchery cum biofloc system",
+    "responsibility": "",
+    "process": "* Target Nonpar (Bhaptiyahi) | * Collect chour vikash application related documents | * Self declaration, consent letter | * PG for demo purpose.",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": "to be cont.",
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": null,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": "to be cont.",
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "enterprise"
+  },
+  {
+    "sn": 21,
+    "activity": "Local vendors and enterprenuers collective",
+    "unit": "4",
+    "times": "6",
+    "description": "* Local fish vendors collective formation for market and convergence-credit linkages.",
+    "responsibility": "",
+    "process": "* Make a list of intervention with vendor PG | * Financial literacy trg to vendor PG | * Vendor registration, link with SBI swablamban scheme | * Consumer awareness posters at vendoing place | * Hygenic retailing+waste disposal | * link with govt vendoing kit scheme | * Tan90 box to selected members of vendor PG | * Market study",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 1,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 1,
+            "achieved": null
+          },
+          "Sep": {
+            "target": 1,
+            "achieved": null
+          },
+          "Oct": {
+            "target": 1,
+            "achieved": null
+          },
+          "Nov": {
+            "target": 1,
+            "achieved": null
+          },
+          "Dec": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jan": {
+            "target": 1,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 1,
+            "achieved": null
+          },
+          "Jun": {
+            "target": null,
+            "achieved": null
+          },
+          "Jul": {
+            "target": null,
+            "achieved": null
+          },
+          "Aug": {
+            "target": null,
+            "achieved": null
+          },
+          "Sep": {
+            "target": null,
+            "achieved": null
+          },
+          "Oct": {
+            "target": null,
+            "achieved": null
+          },
+          "Nov": {
+            "target": null,
+            "achieved": null
+          },
+          "Dec": {
+            "target": null,
+            "achieved": null
+          },
+          "Jan": {
+            "target": null,
+            "achieved": null
+          },
+          "Feb": {
+            "target": null,
+            "achieved": null
+          },
+          "Mar": {
+            "target": null,
+            "achieved": null
+          }
+        }
+      }
+    ],
+    "category": "enterprise"
+  },
+  {
+    "sn": 22,
+    "activity": "Development and testing of IT / data based advisory, cluster planning and traceblty market linkages",
+    "unit": "1",
+    "times": "1",
+    "description": "",
+    "responsibility": "Ayush and team",
+    "process": "* Calculator sync | * DPR sync | * PDF , PoP sync | * District map, GIS map sync | * Gov.in sync for census data and other socio eco data linkage",
+    "locations": [],
+    "category": "technology"
+  },
+  {
+    "sn": 23,
+    "activity": "Financial literacy prog",
+    "unit": "2000",
+    "times": "",
+    "description": "",
+    "responsibility": "",
+    "process": "",
+    "locations": [
+      {
+        "location": "Khagaria",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 25,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 25,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 25,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Sep": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Oct": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Nov": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Dec": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Jan": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Feb": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Mar": {
+            "target": 25,
+            "achieved": 25
+          }
+        }
+      },
+      {
+        "location": "Alauli",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 25,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 25,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 25,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Sep": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Oct": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Nov": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Dec": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Jan": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Feb": {
+            "target": 25,
+            "achieved": 25
+          },
+          "Mar": {
+            "target": 25,
+            "achieved": 25
+          }
+        }
+      },
+      {
+        "location": "Bhaptiyahi",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 50,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Sep": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Oct": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Nov": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Dec": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Jan": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Feb": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Mar": {
+            "target": 50,
+            "achieved": 50
+          }
+        }
+      },
+      {
+        "location": "Pipra",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 50,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Sep": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Oct": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Nov": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Dec": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Jan": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Feb": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Mar": {
+            "target": 50,
+            "achieved": 50
+          }
+        }
+      },
+      {
+        "location": "Kishanpur",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 50,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Sep": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Oct": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Nov": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Dec": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Jan": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Feb": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Mar": {
+            "target": 50,
+            "achieved": 50
+          }
+        }
+      },
+      {
+        "location": "Kusheshwar Sthan",
+        "monthly": {
+          "Apr": {
+            "target": null,
+            "achieved": null
+          },
+          "May": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jun": {
+            "target": 50,
+            "achieved": null
+          },
+          "Jul": {
+            "target": 50,
+            "achieved": null
+          },
+          "Aug": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Sep": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Oct": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Nov": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Dec": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Jan": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Feb": {
+            "target": 50,
+            "achieved": 50
+          },
+          "Mar": {
+            "target": 50,
+            "achieved": 50
+          }
+        }
+      }
+    ],
+    "category": "community"
+  }
+]

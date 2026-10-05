@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="theme-color" content="#341272" />
+    <title>FieldFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Loaded without blocking first paint (fonts already use display=swap). -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
+    <!-- Static boot splash: painted as soon as this HTML arrives, while the JS
+         bundle downloads. React replaces #root's contents on first render.
+         Must match src/components/ui/BootSplash.tsx (FF.bg / FF.border /
+         FF.tealDark, 28px ring, Tailwind animate-spin timing). -->
+    <style>
+      body { margin: 0; }
+      .ff-boot { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #F2F7F8; margin: 0; }
+      .ff-boot-ring { width: 28px; height: 28px; box-sizing: border-box; border-radius: 9999px; border: 3px solid #D9E6E8; border-top-color: #0E3A46; animation: ff-boot-spin 1s linear infinite; }
+      @keyframes ff-boot-spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div id="root"><div class="ff-boot" role="status" aria-label="Loading"><div class="ff-boot-ring"></div></div></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

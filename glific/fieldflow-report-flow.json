@@ -1,0 +1,281 @@
+{
+  "_comment": "FieldFlow Daily Report Collection Flow for Glific",
+  "_version": "1.0",
+  "_import_instructions": "Import this in Glific → Flows → Import Flow",
+
+  "name": "FieldFlow Daily Report",
+  "uuid": "fieldflow-daily-report-v1",
+  "spec_version": "13.1.0",
+  "language": "hin",
+  "type": "messaging",
+  "expire_after_minutes": 10080,
+  "metadata": { "revision": 1 },
+
+  "nodes": [
+
+    {
+      "uuid": "node-welcome",
+      "_label": "Welcome & Language Check",
+      "actions": [
+        {
+          "uuid": "action-welcome-msg",
+          "type": "send_msg",
+          "text": "🌾 FieldFlow में आपका स्वागत है!\nHello @contact.name 👋\n\nआज की फील्ड रिपोर्ट जमा करने के लिए नीचे का फॉर्म भरें।\nPlease fill today's field report.\n\n_Type *cancel* anytime to exit._"
+        }
+      ],
+      "exits": [{ "uuid": "exit-welcome", "destination_uuid": "node-project" }]
+    },
+
+    {
+      "uuid": "node-project",
+      "_label": "Select Project (List Message)",
+      "actions": [
+        {
+          "uuid": "action-project-list",
+          "type": "send_interactive_msg",
+          "name": "project",
+          "interactive_type": "list",
+          "text": "📋 *Step 1/6 — Project*\nकौन सा प्रोजेक्ट? / Which project?",
+          "list_items": [
+            { "title": "Dasara" },
+            { "title": "Kosi Sahajivan" },
+            { "title": "UNDP ECRIC Project" },
+            { "title": "TATWA" },
+            { "title": "Internal Program" },
+            { "title": "Jal Nidhi – Herbalife" },
+            { "title": "Other / अन्य" }
+          ],
+          "result_name": "project"
+        }
+      ],
+      "exits": [{ "uuid": "exit-project", "destination_uuid": "node-state" }]
+    },
+
+    {
+      "uuid": "node-state",
+      "_label": "Select State (List Message)",
+      "actions": [
+        {
+          "uuid": "action-state-list",
+          "type": "send_interactive_msg",
+          "name": "state",
+          "interactive_type": "list",
+          "text": "📍 *Step 2/6 — State*\nराज्य चुनें / Select your state:",
+          "list_items": [
+            { "title": "Bihar" },
+            { "title": "Jharkhand" },
+            { "title": "Uttar Pradesh" },
+            { "title": "Madhya Pradesh" },
+            { "title": "Maharashtra" },
+            { "title": "Odisha" },
+            { "title": "West Bengal" },
+            { "title": "Rajasthan" },
+            { "title": "Other / अन्य" }
+          ],
+          "result_name": "state"
+        }
+      ],
+      "exits": [{ "uuid": "exit-state", "destination_uuid": "node-location" }]
+    },
+
+    {
+      "uuid": "node-location",
+      "_label": "Type Location (Village/Block/District)",
+      "actions": [
+        {
+          "uuid": "action-location-prompt",
+          "type": "send_msg",
+          "text": "🏘️ *Step 3/6 — Location*\nगाँव/ब्लॉक/जिला का नाम लिखें:\nType village / block / district name:"
+        },
+        {
+          "uuid": "action-location-wait",
+          "type": "wait_for_response",
+          "result_name": "location",
+          "timeout_seconds": 120
+        }
+      ],
+      "exits": [{ "uuid": "exit-location", "destination_uuid": "node-area" }]
+    },
+
+    {
+      "uuid": "node-area",
+      "_label": "Select Area of Intervention (List Message)",
+      "actions": [
+        {
+          "uuid": "action-area-list",
+          "type": "send_interactive_msg",
+          "name": "area",
+          "interactive_type": "list",
+          "text": "🎯 *Step 4/6 — Activity Type*\nकाम का प्रकार / Type of activity:",
+          "list_items": [
+            { "title": "Community Mobilization" },
+            { "title": "Beneficiary Training" },
+            { "title": "Beneficiary Exposure Visit" },
+            { "title": "Beneficiary Input Distribution" },
+            { "title": "Camp & Convergence" },
+            { "title": "Collective Development" },
+            { "title": "Enterprise Development Support" },
+            { "title": "Input & Financial Linkage" },
+            { "title": "Documentation & Report" },
+            { "title": "Any Other" }
+          ],
+          "result_name": "area"
+        }
+      ],
+      "exits": [{ "uuid": "exit-area", "destination_uuid": "node-beneficiaries" }]
+    },
+
+    {
+      "uuid": "node-beneficiaries",
+      "_label": "Enter Beneficiary Count",
+      "actions": [
+        {
+          "uuid": "action-benef-prompt",
+          "type": "send_msg",
+          "text": "👥 *Step 5/6 — Beneficiaries*\nकितने लाभार्थी थे?\nHow many beneficiaries were reached?\n\n_(Type a number, e.g. 35)_"
+        },
+        {
+          "uuid": "action-benef-wait",
+          "type": "wait_for_response",
+          "result_name": "beneficiaries",
+          "timeout_seconds": 120
+        }
+      ],
+      "exits": [{ "uuid": "exit-benef", "destination_uuid": "node-description" }]
+    },
+
+    {
+      "uuid": "node-description",
+      "_label": "Describe the Activity",
+      "actions": [
+        {
+          "uuid": "action-desc-prompt",
+          "type": "send_msg",
+          "text": "📝 *Step 6/6 — Activity Description*\nआज की गतिविधि का विवरण लिखें:\nDescribe today's activity in 1-2 sentences:"
+        },
+        {
+          "uuid": "action-desc-wait",
+          "type": "wait_for_response",
+          "result_name": "description",
+          "timeout_seconds": 180
+        }
+      ],
+      "exits": [{ "uuid": "exit-desc", "destination_uuid": "node-photo" }]
+    },
+
+    {
+      "uuid": "node-photo",
+      "_label": "Upload Photo (Optional)",
+      "actions": [
+        {
+          "uuid": "action-photo-prompt",
+          "type": "send_interactive_msg",
+          "interactive_type": "button",
+          "text": "📸 *Photo (Optional)*\nक्या आप कोई फोटो भेजना चाहते हैं?\nWould you like to attach a photo?",
+          "buttons": [
+            { "title": "📷 Send Photo" },
+            { "title": "⏭ Skip" }
+          ]
+        }
+      ],
+      "exits": [
+        { "uuid": "exit-photo-send", "destination_uuid": "node-photo-wait", "condition": "has_phrase", "operand": "Send Photo" },
+        { "uuid": "exit-photo-skip", "destination_uuid": "node-submit",    "condition": "has_phrase", "operand": "Skip" }
+      ]
+    },
+
+    {
+      "uuid": "node-photo-wait",
+      "_label": "Wait for Photo Upload",
+      "actions": [
+        {
+          "uuid": "action-photo-wait",
+          "type": "send_msg",
+          "text": "📤 Please send the photo now. / अभी फोटो भेजें।"
+        },
+        {
+          "uuid": "action-photo-capture",
+          "type": "wait_for_response",
+          "result_name": "photo_url",
+          "timeout_seconds": 300
+        }
+      ],
+      "exits": [{ "uuid": "exit-photo-wait", "destination_uuid": "node-submit" }]
+    },
+
+    {
+      "uuid": "node-submit",
+      "_label": "Confirm & Call Webhook",
+      "actions": [
+        {
+          "uuid": "action-confirm-msg",
+          "type": "send_msg",
+          "text": "✅ *Confirm your report:*\n\n📋 Project: @results.project.input\n📍 State: @results.state.input\n🏘️ Location: @results.location.input\n🎯 Activity: @results.area.input\n👥 Beneficiaries: @results.beneficiaries.input\n\nSubmitting... / जमा हो रहा है..."
+        },
+        {
+          "uuid": "action-webhook",
+          "type": "call_webhook",
+          "url": "https://chatbot-492915.el.r.appspot.com/api/whatsapp/webhook",
+          "method": "POST",
+          "result_name": "webhook",
+          "body": {
+            "contact": "@contact",
+            "results": "@results",
+            "org_code": "@contact.fields.org_code"
+          },
+          "headers": {
+            "Content-Type": "application/json"
+          }
+        }
+      ],
+      "exits": [
+        { "uuid": "exit-submit-ok",   "destination_uuid": "node-success", "condition": "has_phrase", "operand": "true", "field": "@results.webhook.success" },
+        { "uuid": "exit-submit-fail", "destination_uuid": "node-error" }
+      ]
+    },
+
+    {
+      "uuid": "node-success",
+      "_label": "Success Message",
+      "actions": [
+        {
+          "uuid": "action-success-msg",
+          "type": "send_msg",
+          "text": "🎉 *Report Saved!*\n\nआपकी रिपोर्ट सफलतापूर्वक जमा हो गई।\nYour report has been saved successfully.\n\n📋 Project: @results.webhook.project\n📅 Date: @results.webhook.date\n\nशुक्रिया! Keep up the great work! 🌾\n\n_Send *REPORT* to submit another report._"
+        }
+      ],
+      "exits": []
+    },
+
+    {
+      "uuid": "node-error",
+      "_label": "Error / Retry Message",
+      "actions": [
+        {
+          "uuid": "action-error-msg",
+          "type": "send_msg",
+          "text": "❌ *Something went wrong.*\n\nकुछ गलत हो गया। कृपया दोबारा कोशिश करें।\nPlease try again or contact your supervisor.\n\nError: @results.webhook.error\n\n_Send *REPORT* to try again._"
+        }
+      ],
+      "exits": []
+    }
+  ],
+
+  "triggers": [
+    {
+      "keyword": "REPORT",
+      "keyword_type": "first_word",
+      "description": "Start daily field report collection"
+    },
+    {
+      "keyword": "REPT",
+      "keyword_type": "first_word",
+      "description": "Short alias"
+    },
+    {
+      "keyword": "रिपोर्ट",
+      "keyword_type": "first_word",
+      "description": "Hindi trigger"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+name: Deploy to Google Cloud App Engine
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fails the deploy only on critical-severity advisories, so a routine
+      # moderate/high finding in a transitive dep doesn't block shipping
+      # unreviewed — but a critical one (RCE-class, auth bypass, etc.) does.
+      # Run `npm audit` locally for the full report; this is a floor, not a
+      # substitute for reviewing it periodically.
+      - name: Audit dependencies for critical vulnerabilities
+        run: npm audit --audit-level=critical
+
+      - name: Build frontend
+        run: npm run build
+
+      # Generate app.yaml at deploy time — it's gitignored (see .gitignore),
+      # so CI must write it fresh on every run. Keep this in sync with the
+      # local app.yaml a developer uses for manual `gcloud app deploy`.
+      #
+      # Real secrets (GEMINI_API_KEY, DATABASE_URL, FIREBASE_ADMIN_SDK_JSON,
+      # ENCRYPTION_KEY, etc.) were migrated to GCP Secret Manager on
+      # 2026-08-20 — lib/secretManager.js pulls them into process.env at boot,
+      # so they must NOT be written here. The values below are all
+      # intentionally non-secret: VITE_FIREBASE_* is Firebase's client-side
+      # config (meant to be public — protected by Firebase security rules,
+      # not secrecy) and the rest are internal Cloud Run service URLs.
+      - name: Create app.yaml
+        run: |
+          cat > app.yaml << EOF
+          runtime: nodejs22
+          entrypoint: node server.js
+          inbound_services:
+            - warmup
+          env_variables:
+            NODE_ENV: production
+            FIREBASE_PROJECT_ID: chatbot-5304f
+            VITE_FIREBASE_API_KEY: AIzaSyAQYIjw4mv0tvx1nBDKyFEPEAmyvS6B1ko
+            VITE_FIREBASE_AUTH_DOMAIN: chatbot-5304f.firebaseapp.com
+            VITE_FIREBASE_PROJECT_ID: chatbot-5304f
+            VITE_FIREBASE_STORAGE_BUCKET: chatbot-5304f.firebasestorage.app
+            VITE_FIREBASE_MESSAGING_SENDER_ID: "470170238773"
+            VITE_FIREBASE_APP_ID: "1:470170238773:web:be08641a854afb9494567c"
+            NOTEBOOK_SERVICE_URL: "https://fieldflow-notebook-725980175357.asia-south1.run.app"
+            RW_SERVICE_URL: "https://fieldflow-report-writer-725980175357.asia-south1.run.app"
+            IB_FORM_BASE_URL: "https://fieldflow-individual-beneficiary-725980175357.asia-south1.run.app"
+            EB_FORM_BASE_URL: "https://fieldflow-micro-entrepreneur-725980175357.asia-south1.run.app"
+            CB_FORM_BASE_URL: "https://fieldflow-collective-725980175357.asia-south1.run.app"
+            RS_FORM_BASE_URL: "https://fieldflow-resource-725980175357.asia-south1.run.app"
+            APP_BASE_URL: "https://chatbot-492915.el.r.appspot.com"
+          automatic_scaling:
+            min_instances: 1
+            max_instances: 3
+            target_cpu_utilization: 0.65
+          EOF
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Deploy to App Engine
+        run: gcloud app deploy app.yaml --quiet --version=main

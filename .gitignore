@@ -1,0 +1,24 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.env
+.DS_Store
+*.tsbuildinfo
+.vite/
+
+# app.yaml contains API keys — never commit it
+# Use app.yaml.example as the git-safe template
+app.yaml
+
+# Service-account credentials — never commit these, ever. The app loads this
+# credential from FIREBASE_ADMIN_SDK_JSON (env/Secret Manager) instead; a
+# local copy of the file is a stale liability, not something the code needs.
+firebase-adminsdk.json
+*serviceaccount*.json
+*service-account*.json
+
+# Local Claude settings (contain API keys in allowed commands)
+.claude/settings.local.json
+backup_ponytail_*/

@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Micro-Entrepreneur Registration — FieldFlow</title>
+<style>
+  :root {
+    --teal-dark: #0f4c4c;
+    --teal: #0d7d7d;
+    --purple: #6d5bd0;
+    --green: #1a8a5f;
+    --green-bg: #e7f6ef;
+    --red: #c0392b;
+    --red-bg: #fdecea;
+    --border: #dbe4e4;
+    --border-soft: #e9eeee;
+    --text-muted: #4b5f5f;
+    --text-faint: #7d9191;
+    --bg: #f4f7f7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--teal-dark);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 60px;
+  }
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 14px rgba(15,76,76,0.08);
+    padding: 28px 24px 32px;
+  }
+  h1 {
+    font-size: 19px;
+    margin: 0 0 4px;
+  }
+  .sub {
+    font-size: 13px;
+    color: var(--text-faint);
+    margin: 0 0 22px;
+  }
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 16px 0 6px;
+  }
+  label .req { color: var(--red); }
+  input, select {
+    width: 100%;
+    padding: 11px 12px;
+    font-size: 15px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    outline: none;
+    color: var(--teal-dark);
+    background: #fff;
+    font-family: inherit;
+  }
+  input:focus, select:focus { border-color: var(--purple); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row2 > div { min-width: 0; }
+  button.submit {
+    width: 100%;
+    margin-top: 24px;
+    padding: 13px;
+    border-radius: 12px;
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.submit:disabled { opacity: 0.55; cursor: default; }
+  button.secondary {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    color: var(--teal-dark);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .banner {
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+  .banner.error { background: var(--red-bg); color: var(--red); }
+  .banner.ok    { background: var(--green-bg); color: var(--green); }
+  select:disabled, input:disabled { background: #f4f7f7; color: var(--text-faint); cursor: not-allowed; }
+  .loc-note { font-size: 11.5px; color: var(--text-faint); margin: 6px 0 0; }
+  .center { text-align: center; padding: 40px 8px; }
+  .spinner {
+    width: 26px; height: 26px; margin: 0 auto 14px;
+    border: 3px solid var(--border);
+    border-top-color: var(--purple);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .uid-box {
+    text-align: center;
+    padding: 26px 10px;
+    border-radius: 14px;
+    background: var(--green-bg);
+    margin-bottom: 6px;
+  }
+  .uid-box .label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .uid-box .uid { font-size: 30px; font-weight: 700; color: var(--green); letter-spacing: 1px; margin-top: 6px; font-family: 'Courier New', monospace; }
+  .summary { font-size: 13px; color: var(--text-muted); margin-top: 16px; line-height: 1.7; }
+  .summary b { color: var(--teal-dark); }
+  .hidden { display: none; }
+  .field-error { font-size: 12px; color: var(--red); margin-top: 4px; }
+  .util-item { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .util-check {
+    display: flex; align-items: center; gap: 7px; flex: 1; margin: 0;
+    font-size: 13.5px; font-weight: 500; color: var(--teal-dark); cursor: pointer;
+  }
+  .util-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--purple); flex-shrink: 0; }
+  .util-item input[type="number"] { flex: 1; max-width: 160px; padding: 8px 10px; font-size: 13.5px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div id="loadingView" class="center">
+      <div class="spinner"></div>
+      <div style="font-size:13px;color:var(--text-faint);">Checking registration link…</div>
+    </div>
+
+    <div id="invalidView" class="hidden center">
+      <h1>Link not valid</h1>
+      <p class="sub" style="margin-top:8px;">
+        This registration link is invalid, incomplete, or has expired.
+        Please contact your program admin for a fresh link.
+      </p>
+    </div>
+
+    <form id="formView" class="hidden" autocomplete="off">
+      <h1>Micro-Entrepreneur Registration</h1>
+      <p class="sub">Fields marked <span style="color:var(--red);">*</span> are required. A unique Entrepreneur ID is generated on submit.</p>
+      <div id="formBanner"></div>
+
+      <label>Name <span class="req">*</span></label>
+      <input type="text" id="f_name" required maxlength="120" />
+
+      <label>Contact No. <span class="req">*</span></label>
+      <input type="tel" id="f_contact" required pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number" />
+
+      <div class="row2">
+        <div>
+          <label>State</label>
+          <select id="f_state">
+            <option value="">Select state…</option>
+          </select>
+        </div>
+        <div>
+          <label>District</label>
+          <select id="f_district" disabled>
+            <option value="">Select state first</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Block</label>
+          <input type="text" id="f_block" maxlength="80" list="f_block_options" disabled placeholder="Select district first" />
+          <datalist id="f_block_options"></datalist>
+        </div>
+        <div>
+          <label>Panchayat</label>
+          <input type="text" id="f_panchayat" maxlength="80" list="f_panchayat_options" disabled placeholder="Select block first" />
+          <datalist id="f_panchayat_options"></datalist>
+        </div>
+      </div>
+
+      <label>Village</label>
+      <input type="text" id="f_village" maxlength="80" list="f_village_options" disabled placeholder="Select block or panchayat first" />
+      <datalist id="f_village_options"></datalist>
+      <p class="loc-note">Block, Panchayat and Village use official LGD location records — start typing to search; free text is also accepted.</p>
+
+      <label>Gender</label>
+      <select id="f_gender">
+        <option value="">— Select —</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label>Category</label>
+      <select id="f_category">
+        <option value="">— Select —</option>
+        <option value="General">General</option>
+        <option value="OBC">OBC</option>
+        <option value="EBC">EBC</option>
+        <option value="SC">SC</option>
+        <option value="ST">ST</option>
+        <option value="EWS">EWS</option>
+        <option value="Minority">Minority</option>
+      </select>
+
+      <label>Name of Enterprise</label>
+      <input type="text" id="f_enterprise" maxlength="120" placeholder="e.g. Sunita Fisheries" />
+
+      <label>Business Activity</label>
+      <input type="text" id="f_activity" maxlength="120" placeholder="e.g. Fish farming, Tailoring, Grocery" />
+
+      <label>Type of Production System</label>
+      <div id="prodSystem"></div>
+
+      <label>Current Revenue (₹ / year)</label>
+      <input type="number" id="f_revenue" min="0" step="1" placeholder="e.g. 120000" />
+
+      <label>Current No. of Employee</label>
+      <input type="number" id="f_employees" min="0" step="1" placeholder="e.g. 2" />
+
+      <button type="submit" class="submit" id="submitBtn">Register Entrepreneur</button>
+    </form>
+
+    <div id="successView" class="hidden">
+      <div class="uid-box">
+        <div class="label">Entrepreneur UID</div>
+        <div class="uid" id="successUid">EB-0000</div>
+      </div>
+      <div class="summary" id="successSummary"></div>
+      <button class="secondary" id="registerAnotherBtn">Register Another Entrepreneur</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const qs   = new URLSearchParams(window.location.search)
+  const org  = qs.get('org')  || ''
+  const key  = qs.get('key')  || ''
+
+  const $ = (id) => document.getElementById(id)
+  const loadingView  = $('loadingView')
+  const invalidView  = $('invalidView')
+  const formView     = $('formView')
+  const successView  = $('successView')
+
+  function show(view) {
+    [loadingView, invalidView, formView, successView].forEach(v => v.classList.add('hidden'))
+    view.classList.remove('hidden')
+  }
+
+  function setBanner(msg, kind) {
+    const el = $('formBanner')
+    if (!msg) { el.innerHTML = ''; return }
+    el.innerHTML = '<div class="banner ' + kind + '">' + msg + '</div>'
+  }
+
+  async function validateLink() {
+    if (!org || !key) { show(invalidView); return }
+    try {
+      const r = await fetch('/api/validate?org=' + encodeURIComponent(org) + '&key=' + encodeURIComponent(key))
+      const d = await r.json()
+      if (d.ok) { show(formView); loadStates() }
+      else show(invalidView)
+    } catch (e) {
+      show(invalidView)
+    }
+  }
+
+  // ── LGD location cascade — identical behaviour to
+  // services/individual-beneficiary/public/index.html; kept as a literal
+  // copy rather than a shared import because each registration form is
+  // meant to be a fully standalone static page with no build step.
+  const stateSelect      = $('f_state')
+  const districtSelect   = $('f_district')
+  const blockInput       = $('f_block')
+  const panchayatInput   = $('f_panchayat')
+  const villageInput     = $('f_village')
+  const blockDatalist    = $('f_block_options')
+  const panchayatDatalist = $('f_panchayat_options')
+  const villageDatalist  = $('f_village_options')
+
+  let blockOptions = [], panchayatOptions = [], villageOptions = []
+  let selectedCode = { district: null, block: null, panchayat: null, village: null }
+
+  function fillDatalist(el, options) {
+    el.innerHTML = options.map(o => '<option value="' + escapeHtml(o.name) + '"></option>').join('')
+  }
+
+  async function loadStates() {
+    try {
+      const list = await (await fetch('/api/lgd/states')).json()
+      stateSelect.innerHTML = '<option value="">Select state…</option>' +
+        list.map(s => '<option value="' + s.code + '">' + escapeHtml(s.name) + '</option>').join('')
+    } catch (e) { /* select stays on its placeholder option; form still submits fine without a state */ }
+  }
+
+  function resetVillage() {
+    selectedCode.village = null
+    villageOptions = []
+    villageInput.value = ''
+    villageInput.disabled = true
+    villageInput.placeholder = 'Select block or panchayat first'
+    fillDatalist(villageDatalist, [])
+  }
+  function resetPanchayat() {
+    selectedCode.panchayat = null
+    panchayatOptions = []
+    panchayatInput.value = ''
+    panchayatInput.disabled = true
+    panchayatInput.placeholder = 'Select block first'
+    fillDatalist(panchayatDatalist, [])
+    resetVillage()
+  }
+  function resetBlock() {
+    selectedCode.block = null
+    blockOptions = []
+    blockInput.value = ''
+    blockInput.disabled = true
+    blockInput.placeholder = 'Select district first'
+    fillDatalist(blockDatalist, [])
+    resetPanchayat()
+  }
+  function resetDistrict() {
+    selectedCode.district = null
+    districtSelect.innerHTML = '<option value="">Select state first</option>'
+    districtSelect.disabled = true
+    resetBlock()
+  }
+
+  function fetchBlocks(q) {
+    if (selectedCode.district == null) return
+    fetch('/api/lgd/blocks?district=' + selectedCode.district + (q ? '&q=' + encodeURIComponent(q) : ''))
+      .then(r => r.json()).then(list => { blockOptions = list; fillDatalist(blockDatalist, list) }).catch(() => {})
+  }
+  function fetchPanchayats(q) {
+    if (selectedCode.block == null) return
+    fetch('/api/lgd/panchayats?block=' + selectedCode.block + (q ? '&q=' + encodeURIComponent(q) : ''))
+      .then(r => r.json()).then(list => { panchayatOptions = list; fillDatalist(panchayatDatalist, list) }).catch(() => {})
+  }
+  function fetchVillages(q) {
+    const param = selectedCode.panchayat != null ? 'panchayat=' + selectedCode.panchayat
+      : selectedCode.block != null ? 'block=' + selectedCode.block : null
+    if (!param) return
+    fetch('/api/lgd/villages?' + param + (q ? '&q=' + encodeURIComponent(q) : ''))
+      .then(r => r.json()).then(list => { villageOptions = list; fillDatalist(villageDatalist, list) }).catch(() => {})
+  }
+
+  stateSelect.addEventListener('change', () => {
+    resetDistrict()
+    const code = stateSelect.value ? Number(stateSelect.value) : null
+    if (code == null) return
+    fetch('/api/lgd/districts?state=' + code).then(r => r.json()).then(list => {
+      districtSelect.disabled = false
+      districtSelect.innerHTML = '<option value="">Select district…</option>' +
+        list.map(d => '<option value="' + d.code + '">' + escapeHtml(d.name) + '</option>').join('')
+    }).catch(() => {})
+  })
+
+  districtSelect.addEventListener('change', () => {
+    resetBlock()
+    selectedCode.district = districtSelect.value ? Number(districtSelect.value) : null
+    if (selectedCode.district == null) return
+    blockInput.disabled = false
+    blockInput.placeholder = 'e.g. Kanti'
+    fetchBlocks('')
+  })
+
+  let blockDebounce
+  blockInput.addEventListener('input', () => {
+    const typed = blockInput.value.trim()
+    const match = blockOptions.find(o => o.name.toLowerCase() === typed.toLowerCase())
+    selectedCode.block = match ? match.code : null
+    if (selectedCode.block != null) {
+      panchayatInput.disabled = false
+      panchayatInput.placeholder = 'e.g. Rampur'
+      villageInput.disabled = false
+      villageInput.placeholder = 'e.g. Bakultala'
+      fetchPanchayats('')
+      fetchVillages('')
+    } else {
+      resetPanchayat()
+    }
+    clearTimeout(blockDebounce)
+    blockDebounce = setTimeout(() => fetchBlocks(typed), 300)
+  })
+
+  let panchayatDebounce
+  panchayatInput.addEventListener('input', () => {
+    const typed = panchayatInput.value.trim()
+    const match = panchayatOptions.find(o => o.name.toLowerCase() === typed.toLowerCase())
+    selectedCode.panchayat = match ? match.code : null
+    if (selectedCode.panchayat != null) fetchVillages('')
+    clearTimeout(panchayatDebounce)
+    panchayatDebounce = setTimeout(() => fetchPanchayats(typed), 300)
+  })
+
+  let villageDebounce
+  villageInput.addEventListener('input', () => {
+    const typed = villageInput.value.trim()
+    clearTimeout(villageDebounce)
+    villageDebounce = setTimeout(() => fetchVillages(typed), 300)
+  })
+
+  // ── Type of Production System multiselect — optional (not every
+  // micro-enterprise is farming/aquaculture-based). Same build/read/reset
+  // pattern as services/individual-beneficiary/public/index.html's version:
+  // one checkbox per system, each with its own quantity input —
+  // "Production (Quintal)" for Aquaculture/Agriculture/Horticulture,
+  // "Number of Livestock" (a headcount) for Livestock.
+  const PRODUCTION_SYSTEMS = ['Aquaculture', 'Agriculture', 'Livestock', 'Horticulture']
+  const prodSystemContainer = $('prodSystem')
+
+  function buildProductionSystemQuestion(container, options) {
+    container.innerHTML = options.map(opt => {
+      const isLivestock = opt === 'Livestock'
+      return (
+        '<div class="util-item" data-type="' + escapeHtml(opt) + '">' +
+          '<label class="util-check"><input type="checkbox" class="ps-checkbox" /> ' + escapeHtml(opt) + '</label>' +
+          '<input type="number" class="ps-qty" min="0" step="' + (isLivestock ? '1' : '0.01') + '" ' +
+            'placeholder="' + (isLivestock ? 'Number of Livestock' : 'Production (Quintal)') + '" disabled />' +
+        '</div>'
+      )
+    }).join('')
+    container.querySelectorAll('.util-item').forEach(item => {
+      const checkbox = item.querySelector('.ps-checkbox')
+      const qtyInput = item.querySelector('.ps-qty')
+      checkbox.addEventListener('change', () => {
+        qtyInput.disabled = !checkbox.checked
+        if (!checkbox.checked) qtyInput.value = ''
+      })
+    })
+  }
+
+  function readProductionSystemQuestion(container) {
+    const out = []
+    container.querySelectorAll('.util-item').forEach(item => {
+      const checkbox = item.querySelector('.ps-checkbox')
+      if (!checkbox.checked) return
+      const type = item.dataset.type
+      const qty = item.querySelector('.ps-qty').value
+      out.push(type === 'Livestock' ? { type, livestock_count: qty } : { type, production_quintal: qty })
+    })
+    return out
+  }
+
+  function resetProductionSystemQuestion(container) {
+    container.querySelectorAll('.ps-checkbox').forEach(cb => { cb.checked = false })
+    container.querySelectorAll('.ps-qty').forEach(q => { q.value = ''; q.disabled = true })
+  }
+
+  buildProductionSystemQuestion(prodSystemContainer, PRODUCTION_SYSTEMS)
+
+  function resetForm() {
+    formView.reset()
+    resetDistrict()
+    resetProductionSystemQuestion(prodSystemContainer)
+    setBanner('', '')
+  }
+
+  $('registerAnotherBtn').addEventListener('click', () => {
+    resetForm()
+    show(formView)
+  })
+
+  formView.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    setBanner('', '')
+
+    const contact = $('f_contact').value.trim()
+    if (!/^\d{10}$/.test(contact)) {
+      setBanner('Please enter a valid 10-digit contact number.', 'error')
+      $('f_contact').focus()
+      return
+    }
+
+    const payload = {
+      org, key,
+      name:                    $('f_name').value.trim(),
+      contact_no:              contact,
+      state:                   stateSelect.value ? stateSelect.options[stateSelect.selectedIndex].text : '',
+      district:                districtSelect.value ? districtSelect.options[districtSelect.selectedIndex].text : '',
+      block:                   $('f_block').value.trim(),
+      panchayat:               $('f_panchayat').value.trim(),
+      village:                 $('f_village').value.trim(),
+      gender:                  $('f_gender').value,
+      category:                $('f_category').value,
+      enterprise_name:         $('f_enterprise').value.trim(),
+      business_activity:       $('f_activity').value.trim(),
+      production_systems:      readProductionSystemQuestion(prodSystemContainer),
+      current_revenue_inr:     $('f_revenue').value,
+      current_employee_count:  $('f_employees').value,
+    }
+
+    const btn = $('submitBtn')
+    btn.disabled = true
+    btn.textContent = 'Registering…'
+    try {
+      const r = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const d = await r.json()
+      if (!r.ok) {
+        setBanner(d.error || 'Registration failed — please try again.', 'error')
+        btn.disabled = false
+        btn.textContent = 'Register Entrepreneur'
+        return
+      }
+      $('successUid').textContent = d.uid
+      $('successSummary').innerHTML =
+        '<b>' + escapeHtml(d.name) + '</b> · ' + escapeHtml(d.contact_no) + '<br/>' +
+        [d.village, d.panchayat, d.block, d.district, d.state].filter(Boolean).map(escapeHtml).join(', ') + '<br/>' +
+        (d.category ? escapeHtml(d.category) + '<br/>' : '') +
+        (d.enterprise_name ? '<b>' + escapeHtml(d.enterprise_name) + '</b>' + (d.business_activity ? ' · ' + escapeHtml(d.business_activity) : '') + '<br/>' : (d.business_activity ? escapeHtml(d.business_activity) + '<br/>' : '')) +
+        (Array.isArray(d.production_systems) && d.production_systems.length
+          ? d.production_systems.map(p => escapeHtml(p.type) + ': ' + (p.type === 'Livestock'
+              ? (p.livestock_count != null ? p.livestock_count : '—')
+              : (p.production_quintal != null ? p.production_quintal + ' quintal' : '—'))
+            ).join(' · ') + '<br/>'
+          : '') +
+        (d.current_revenue_inr != null ? '₹' + Number(d.current_revenue_inr).toLocaleString('en-IN') + ' / year' : '') +
+        (d.current_employee_count != null ? ' · ' + d.current_employee_count + ' employee' + (d.current_employee_count === 1 ? '' : 's') : '')
+      show(successView)
+      btn.disabled = false
+      btn.textContent = 'Register Entrepreneur'
+    } catch (err) {
+      setBanner('Network error — please check your connection and try again.', 'error')
+      btn.disabled = false
+      btn.textContent = 'Register Entrepreneur'
+    }
+  })
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]))
+  }
+
+  validateLink()
+})()
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "fieldflow-hr-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "FieldFlow HR microservice — employee attendance (GPS check-in, team register) and leave management, with offline-sync support",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.22.1",
+    "nodemailer": "^10.0.13",
+    "pg": "^8.13.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "fieldflow-finance-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "FieldFlow Finance microservice — advances, settlements, ledger requests",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "express": "^4.22.1",
+    "nodemailer": "^10.0.13",
+    "pg": "^8.13.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
