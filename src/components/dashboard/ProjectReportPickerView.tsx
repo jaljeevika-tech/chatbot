@@ -2,7 +2,7 @@
 // on the right.
 
 import { useEffect, useMemo, useState } from 'react'
-import { TrendingUp, X, MapPin, Calendar, Hash, RotateCcw, CalendarDays, CalendarRange, CalendarClock, History, Layers, Check, FileSpreadsheet, Infinity as InfinityIcon } from 'lucide-react'
+import { TrendingUp, X, MapPin, Calendar, Hash, RotateCcw, Check, FileSpreadsheet, Infinity as InfinityIcon } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useProjectContext } from '../../context/ProjectContext'
 import { apiFetch } from '../../utils/apiFetch'
@@ -12,6 +12,7 @@ import { FF } from '../../theme/colors'
 import { formatDate } from '../../utils/format'
 import { MultiSelect } from './MultiSelect'
 import { REPORT_LANGUAGES } from '../../constants/reportLanguages'
+import { PERIODS as DATED_PERIODS, periodRange, type Period as DatedPeriod } from './reportPickerPeriods'
 import type { DailyReport, ActiveFilters } from '../../types/report'
 
 interface Props {
@@ -27,58 +28,13 @@ interface Props {
   onClose: () => void
 }
 
-type Period = 'all' | 'monthly' | 'previousMonth' | 'quarterly' | 'halfYearly' | 'annual'
+// Adds an "All" preset (no date bounds) ahead of the shared presets.
+type Period = 'all' | DatedPeriod
 
-const PERIODS: { key: Period; icon: typeof CalendarDays }[] = [
-  { key: 'all',          icon: InfinityIcon  },
-  { key: 'monthly',      icon: CalendarDays  },
-  { key: 'previousMonth', icon: History       },
-  { key: 'quarterly',    icon: CalendarRange },
-  { key: 'halfYearly',   icon: Layers        },
-  { key: 'annual',       icon: CalendarClock },
+const PERIODS: { key: Period; icon: typeof InfinityIcon }[] = [
+  { key: 'all', icon: InfinityIcon },
+  ...DATED_PERIODS,
 ]
-
-// Formats from LOCAL calendar fields. Never use .toISOString() on a local Date: it
-// converts to UTC and shifts the day back in IST.
-function localISODate(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-// Except "this/previous month", periods follow the Indian FY (Apr 1 – Mar 31), so
-// quarters are Apr-Jun.. and "this year" starts on the latest April 1.
-function periodRange(p: Period, now: Date): { from: string; to: string } {
-  const year  = now.getFullYear()
-  const month = now.getMonth() // 0=Jan .. 11=Dec
-  const fyStartYear  = month >= 3 ? year : year - 1 // FY runs Apr(fyStartYear) -> Mar(fyStartYear+1)
-  const fiscalMonth  = (month - 3 + 12) % 12         // 0=Apr .. 11=Mar, relative to FY start
-
-  if (p === 'all') return { from: '', to: '' }
-
-  let start: Date
-  let end: Date = now
-
-  if (p === 'monthly') {
-    start = new Date(year, month, 1)
-  } else if (p === 'previousMonth') {
-    start = new Date(year, month - 1, 1)
-    end   = new Date(year, month, 0) // last day of the previous (completed) month
-  } else if (p === 'quarterly') {
-    const quarterIdx      = Math.floor(fiscalMonth / 3) // 0..3
-    const quarterStartMon = (3 + quarterIdx * 3) % 12
-    const quarterStartYr  = quarterIdx === 3 ? fyStartYear + 1 : fyStartYear // Jan-Mar quarter falls in the next calendar year
-    start = new Date(quarterStartYr, quarterStartMon, 1)
-  } else if (p === 'halfYearly') {
-    const halfIdx      = Math.floor(fiscalMonth / 6) // 0 = Apr-Sep, 1 = Oct-Mar
-    const halfStartMon = halfIdx === 0 ? 3 : 9
-    start = new Date(fyStartYear, halfStartMon, 1)
-  } else {
-    start = new Date(fyStartYear, 3, 1) // annual: April 1 of the current financial year
-  }
-  return { from: localISODate(start), to: localISODate(end) }
-}
 
 // Same Apr-start FY convention as AnnualProgressReportPage.tsx / UploadAnnualProgressModal.tsx.
 function defaultFYStartYear(now: Date): number {
@@ -170,7 +126,7 @@ export function ProjectReportPickerView({ baseReports, reportTitle, instruction,
   }, [apSnapshot])
 
   function applyPeriod(p: Period) {
-    const { from: f, to: tt } = periodRange(p, new Date())
+    const { from: f, to: tt } = p === 'all' ? { from: '', to: '' } : periodRange(p, new Date())
     setFrom(f)
     setTo(tt)
     setPeriod(p)
