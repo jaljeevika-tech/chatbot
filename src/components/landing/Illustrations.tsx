@@ -1,6 +1,10 @@
 // Line-style landing illustrations, after the IBM Developer illustration guide:
 // one stroke colour (currentColor) on a flat background, plus a few flat colour
 // highlights. No gradients or shading. Decorative only — text carries meaning.
+// Strokes draw themselves when scrolled into view (IBM/Carbon expressive motion;
+// CSS in index.css .line-draw). Skipped under prefers-reduced-motion.
+
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 const svgProps = {
   fill: 'none',
@@ -10,6 +14,30 @@ const svgProps = {
   strokeLinejoin: 'round' as const,
   'aria-hidden': true,
   className: 'w-full h-auto',
+}
+
+function Svg({ viewBox, children }: { viewBox: string; children: ReactNode }) {
+  const ref = useRef<SVGSVGElement>(null)
+  const [stage, setStage] = useState<'static' | 'armed' | 'drawn'>('static')
+  useEffect(() => {
+    const svg = ref.current
+    if (!svg || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let i = 0
+    svg.querySelectorAll<SVGElement>('path, circle, rect, ellipse').forEach(el => {
+      if (el.getAttribute('stroke') === 'none' || el.hasAttribute('stroke-dasharray')) return
+      el.setAttribute('pathLength', '1')
+      el.classList.add('ld')
+      el.style.animationDelay = `${Math.min(i++ * 35, 600)}ms`
+    })
+    setStage('armed')
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setStage('drawn'); io.disconnect() }
+    }, { threshold: 0.3 })
+    io.observe(svg)
+    return () => io.disconnect()
+  }, [])
+  const cls = `${svgProps.className}${stage === 'static' ? '' : ' line-draw'}${stage === 'drawn' ? ' is-drawn' : ''}`
+  return <svg ref={ref} viewBox={viewBox} {...svgProps} className={cls}>{children}</svg>
 }
 
 /** Standing figure; (x, y) is the head centre. */
@@ -49,7 +77,7 @@ function Tree({ x, r = 32 }: { x: number; r?: number }) {
 /** Hero: a field worker in a village sends a visit record to a live dashboard. */
 export function HeroScene({ accent = '#E8C27A', mint = '#9FD3B4' }: { accent?: string; mint?: string }) {
   return (
-    <svg viewBox="0 0 800 260" {...svgProps}>
+    <Svg viewBox="0 0 800 260">
       {/* flat highlights first, lines on top */}
       <circle cx={712} cy={52} r={20} fill={accent} stroke="none" />
       <rect x={347} y={160} width={12} height={16} rx={1} fill={accent} stroke="none" />
@@ -78,14 +106,14 @@ export function HeroScene({ accent = '#E8C27A', mint = '#9FD3B4' }: { accent?: s
       {/* clouds */}
       <path d="M90 60 h50 a12 12 0 0 0 -14 -16 a16 16 0 0 0 -28 4 a10 10 0 0 0 -8 12 Z" />
       <path d="M440 40 h40 a10 10 0 0 0 -12 -13 a13 13 0 0 0 -22 3 a8 8 0 0 0 -6 10 Z" />
-    </svg>
+    </Svg>
   )
 }
 
 /** Pain: a coordinator buried under formats and chat groups. */
 export function PaperworkScene({ accent = '#B8862E' }: { accent?: string }) {
   return (
-    <svg viewBox="0 0 360 240" {...svgProps}>
+    <Svg viewBox="0 0 360 240">
       {/* chat bubble highlights */}
       <rect x={232} y={22} width={46} height={26} rx={8} fill={accent} stroke="none" opacity={0.85} />
       <rect x={286} y={60} width={46} height={26} rx={8} fill={accent} stroke="none" opacity={0.55} />
@@ -111,14 +139,14 @@ export function PaperworkScene({ accent = '#B8862E' }: { accent?: string }) {
       <path d="M318 82 l4 8 l-10 -8" />
       <rect x={236} y={94} width={40} height={24} rx={8} />
       <path d="M240 31 h26 M294 69 h22 M246 106 h20" />
-    </svg>
+    </Svg>
   )
 }
 
 /** Step 1: capture on the phone, in the field. */
 export function CaptureSpot({ accent = '#3F7D5C' }: { accent?: string }) {
   return (
-    <svg viewBox="0 0 200 120" {...svgProps}>
+    <Svg viewBox="0 0 200 120">
       <rect x={82} y={18} width={36} height={58} rx={3} fill={accent} stroke="none" opacity={0.18} />
       <path d="M10 110 H190" />
       <path d="M20 110 V86 H56 V110 M14 87 L38 66 L62 87" />
@@ -129,14 +157,14 @@ export function CaptureSpot({ accent = '#3F7D5C' }: { accent?: string }) {
       <path d="M100 66 c-9 -10 -12 -15 -12 -20 a12 12 0 0 1 24 0 c0 5 -3 10 -12 20 Z" />
       <circle cx={100} cy={46} r={4} />
       <path d="M90 82 h20" />
-    </svg>
+    </Svg>
   )
 }
 
 /** Step 2: outcomes rising on a live chart. */
 export function OutcomesSpot({ accent = '#3F7D5C' }: { accent?: string }) {
   return (
-    <svg viewBox="0 0 200 120" {...svgProps}>
+    <Svg viewBox="0 0 200 120">
       <rect x={124} y={34} width={18} height={70} fill={accent} stroke="none" opacity={0.25} />
       <path d="M30 104 H180 M30 104 V14" />
       <rect x={46} y={78} width={18} height={26} />
@@ -145,28 +173,28 @@ export function OutcomesSpot({ accent = '#3F7D5C' }: { accent?: string }) {
       <path d="M44 62 L94 40 L132 20 L168 12 M156 10 l12 2 l-4 11" />
       <circle cx={94} cy={40} r={3} />
       <circle cx={132} cy={20} r={3} />
-    </svg>
+    </Svg>
   )
 }
 
 /** Step 3: a verified report, ready for the funder. */
 export function ReportSpot({ accent = '#B8862E' }: { accent?: string }) {
   return (
-    <svg viewBox="0 0 200 120" {...svgProps}>
+    <Svg viewBox="0 0 200 120">
       <circle cx={128} cy={84} r={18} fill={accent} stroke="none" opacity={0.3} />
       <path d="M58 10 H118 L138 30 V110 H58 Z M118 10 V30 H138" />
       <path d="M70 40 h40 M70 52 h56 M70 64 h50 M70 76 h30" />
       <circle cx={128} cy={84} r={18} />
       <path d="M119 84 l6 6 l12 -12" />
       <path d="M150 50 l22 -8 M154 64 h24 M150 78 l22 8" strokeDasharray="3 6" />
-    </svg>
+    </Svg>
   )
 }
 
 /** Origin: a community meeting under the village tree. */
 export function CommunityScene({ mint = '#9FD3B4', accent = '#E8C27A' }: { mint?: string; accent?: string }) {
   return (
-    <svg viewBox="0 0 420 260" {...svgProps}>
+    <Svg viewBox="0 0 420 260">
       <circle cx={210} cy={74} r={56} fill={mint} stroke="none" opacity={0.25} />
       <rect x={316} y={150} width={16} height={22} fill={accent} stroke="none" />
 
@@ -184,14 +212,14 @@ export function CommunityScene({ mint = '#9FD3B4', accent = '#E8C27A' }: { mint?
       <rect x={300} y={124} width={70} height={56} rx={3} />
       <path d="M310 172 v-8 M324 172 v-16 M338 172 v-12 M352 172 v-24 M310 180 l-10 60 M360 180 l10 60" />
       <path d="M263 176 l30 -14" />
-    </svg>
+    </Svg>
   )
 }
 
 /** Persona: director presenting results to a board. */
 export function DirectorSpot({ accent = '#B8862E' }: { accent?: string }) {
   return (
-    <svg viewBox="0 0 240 180" {...svgProps}>
+    <Svg viewBox="0 0 240 180">
       <rect x={110} y={30} width={110} height={74} rx={4} fill={accent} stroke="none" opacity={0.18} />
       <path d="M10 166 H230" />
       <rect x={110} y={30} width={110} height={74} rx={4} />
@@ -200,14 +228,14 @@ export function DirectorSpot({ accent = '#B8862E' }: { accent?: string }) {
       <Person x={64} y={86} />
       <path d="M77 112 L108 74" />
       <path d="M22 50 a10 10 0 0 1 20 0 M30 30 v6" />
-    </svg>
+    </Svg>
   )
 }
 
 /** Persona: M&E lead examining the data. */
 export function MandESpot({ accent = '#3F7D5C' }: { accent?: string }) {
   return (
-    <svg viewBox="0 0 240 180" {...svgProps}>
+    <Svg viewBox="0 0 240 180">
       <circle cx={150} cy={86} r={30} fill={accent} stroke="none" opacity={0.2} />
       <path d="M10 166 H230" />
       <rect x={60} y={20} width={120} height={140} rx={4} />
@@ -215,14 +243,14 @@ export function MandESpot({ accent = '#3F7D5C' }: { accent?: string }) {
       <circle cx={150} cy={86} r={30} />
       <path d="M171 107 L200 136" strokeWidth={5} />
       <path d="M134 96 l10 -10 l8 6 l14 -16" />
-    </svg>
+    </Svg>
   )
 }
 
 /** Persona: finance — ledger, coins, approvals. */
 export function FinanceSpot({ accent = '#341272' }: { accent?: string }) {
   return (
-    <svg viewBox="0 0 240 180" {...svgProps}>
+    <Svg viewBox="0 0 240 180">
       <rect x={30} y={40} width={110} height={110} rx={4} fill={accent} stroke="none" opacity={0.12} />
       <path d="M10 166 H230" />
       <rect x={30} y={40} width={110} height={110} rx={4} />
@@ -232,14 +260,14 @@ export function FinanceSpot({ accent = '#341272' }: { accent?: string }) {
       <path d="M162 150 v-36 M210 150 v-36" />
       <path d="M178 84 h16 M178 92 h16 M184 84 c10 0 10 8 0 8 l10 12" />
       <circle cx={186} cy={94} r={18} />
-    </svg>
+    </Svg>
   )
 }
 
 /** Persona: field worker with phone in the village. */
 export function FieldSpot({ accent = '#2F6F8F' }: { accent?: string }) {
   return (
-    <svg viewBox="0 0 240 180" {...svgProps}>
+    <Svg viewBox="0 0 240 180">
       <rect x={128} y={84} width={14} height={20} rx={2} fill={accent} stroke="none" opacity={0.6} />
       <path d="M10 166 H230" />
       <path d="M20 166 V126 H76 V166 M10 128 L48 96 L86 128 M42 166 v-20 h12 v20" />
@@ -249,14 +277,14 @@ export function FieldSpot({ accent = '#2F6F8F' }: { accent?: string }) {
       <path d="M125 100 l6 -6" />
       <rect x={126} y={80} width={18} height={26} rx={3} />
       <path d="M152 78 a14 14 0 0 1 0 24 M160 72 a24 24 0 0 1 0 36" />
-    </svg>
+    </Svg>
   )
 }
 
 /** Patchwork: tangled tools pulled into one clean thread. */
 export function TangleScene({ mint = '#9FD3B4', accent = '#E8C27A' }: { mint?: string; accent?: string }) {
   return (
-    <svg viewBox="0 0 640 140" {...svgProps}>
+    <Svg viewBox="0 0 640 140">
       <rect x={520} y={40} width={90} height={60} rx={10} fill={mint} stroke="none" opacity={0.25} />
       <circle cx={70} cy={40} r={6} fill={accent} stroke="none" />
       <circle cx={150} cy={110} r={6} fill={accent} stroke="none" />
@@ -267,6 +295,6 @@ export function TangleScene({ mint = '#9FD3B4', accent = '#E8C27A' }: { mint?: s
       <path d="M492 62 l8 8 l-8 8" />
       <rect x={520} y={40} width={90} height={60} rx={10} />
       <path d="M538 60 h54 M538 72 h40 M538 84 h48" />
-    </svg>
+    </Svg>
   )
 }

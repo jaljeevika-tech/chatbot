@@ -33,6 +33,14 @@
   --color-ff-red: #B0473C;
   --color-ff-red-bg: #F5E1DD;
 
+  /* IBM Carbon motion easings → ease-productive, ease-expressive-in, … utilities */
+  --ease-productive: cubic-bezier(0.2, 0, 0.38, 0.9);
+  --ease-productive-in: cubic-bezier(0, 0, 0.38, 0.9);
+  --ease-productive-out: cubic-bezier(0.2, 0, 1, 0.9);
+  --ease-expressive: cubic-bezier(0.4, 0.14, 0.3, 1);
+  --ease-expressive-in: cubic-bezier(0, 0, 0.3, 1);
+  --ease-expressive-out: cubic-bezier(0.4, 0.14, 1, 1);
+
   /* React Bits StarBorder (landing page) */
   --animate-star-movement-bottom: star-movement-bottom linear infinite alternate;
   --animate-star-movement-top: star-movement-top linear infinite alternate;
@@ -48,6 +56,23 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-star-movement-bottom, .animate-star-movement-top { animation: none; opacity: 0; }
+}
+
+/* Line illustrations draw themselves on scroll (src/components/landing/Illustrations.tsx
+   adds .line-draw, and pathLength="1" + .ld on each stroke, then .is-drawn when visible). Carbon slow-02 + expressive entrance. */
+.line-draw .ld { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.line-draw.is-drawn .ld { animation: line-draw 700ms var(--ease-expressive-in) forwards; }
+.line-draw:not(.is-drawn) :is([stroke="none"], [stroke-dasharray]:not(.ld)) { opacity: 0; }
+.line-draw.is-drawn :is([stroke="none"], [stroke-dasharray]:not(.ld)) { animation: line-fade 400ms var(--ease-productive-in) 600ms both; }
+@keyframes line-draw { to { stroke-dashoffset: 0; } }
+@keyframes line-fade { from { opacity: 0; } }
+
+/* Native <dialog> entrance — Carbon moderate-02 + expressive entrance */
+dialog.motion-dialog[open] { animation: dialog-in 240ms var(--ease-expressive-in); }
+dialog.motion-dialog[open]::backdrop { animation: line-fade 240ms var(--ease-productive-in); }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(12px) scale(0.98); } }
+@media (prefers-reduced-motion: reduce) {
+  dialog.motion-dialog[open], dialog.motion-dialog[open]::backdrop { animation: none; }
 }
 
 body { font-family: var(--font-sans); }

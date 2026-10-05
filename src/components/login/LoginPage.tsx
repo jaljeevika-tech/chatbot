@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AlertCircle, Loader2, Phone, Lock } from 'lucide-react';
 import { useAuthContext } from '../../context/AuthContext';
 import { useOrg } from '../../context/OrgContext';
+import { HeroScene } from '../landing/Illustrations';
 
 export function LoginPage() {
   const { login } = useAuthContext();
@@ -39,7 +40,7 @@ export function LoginPage() {
     setError(''); setNotice('');
     if (!orgSlug) { setError("Use your organisation's login link (it includes ?org=…) to reset your password."); return; }
     if (!phone) { setError('Enter your phone number.'); return; }
-    const digits = phone.replace(/D/g, '');
+    const digits = phone.replace(/\D/g, '');
     setBusy(true);
     try {
       const r = await fetch('/api/auth/forgot-password', {
@@ -57,10 +58,19 @@ export function LoginPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-4 font-sans"
-      style={{ background: `linear-gradient(135deg, ${sidebar} 0%, #1D0752 100%)` }}
-    >
+    <div className="min-h-screen grid lg:grid-cols-2 font-sans" style={{ background: sidebar }}>
+      {/* Line-style illustration panel (same art as the landing page), flat on the org colour */}
+      <aside className="hidden lg:flex flex-col justify-center px-14 xl:px-20 text-white" aria-hidden="true">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60 mb-4">{orgName}</p>
+        <p className="text-4xl xl:text-5xl leading-tight max-w-lg" style={{ fontFamily: 'var(--font-serif)' }}>
+          Every field visit, counted. Every story, told.
+        </p>
+        <div className="mt-14 max-w-xl text-white/85">
+          <HeroScene />
+        </div>
+      </aside>
+
+      <main className="flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm bg-white rounded-[2.5rem] shadow-2xl p-10">
         <div className="text-center mb-10">
           <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 overflow-hidden">
@@ -139,6 +149,7 @@ export function LoginPage() {
           </div>
         )}
       </div>
+      </main>
     </div>
   );
 }

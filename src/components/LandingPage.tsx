@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { cubicBezier, motion, useReducedMotion } from 'motion/react'
 import {
   ArrowRight, BarChart3, Check, X, ClipboardList, FileText, Languages, Lock,
   MapPin, MessageCircle, ShieldCheck, Sparkles, Sprout, Table, Users, Wallet,
@@ -37,6 +37,9 @@ const C = {
 }
 
 const serif = { fontFamily: 'var(--font-serif)' }
+
+// IBM Carbon expressive entrance curve (index.css --ease-expressive-in)
+const EXPRESSIVE_IN = [0, 0, 0.3, 1] as const
 
 // ── Content ──────────────────────────────────────────────────────────────────
 
@@ -181,7 +184,7 @@ function TrialDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
 
   return (
     <dialog ref={ref} onClose={onClose} aria-labelledby="trial-title"
-      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-3xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+      className="motion-dialog m-auto w-[min(32rem,calc(100vw-2rem))] rounded-3xl p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
       style={{ background: C.cream, color: C.ink }}>
       <div className="p-7 sm:p-8">
         <div className="flex items-start justify-between gap-4 mb-5">
@@ -267,7 +270,7 @@ function PersonaSwitcher({ still }: { still: boolean }) {
             <button key={t.tab} ref={el => { tabs.current[i] = el }} role="tab" id={`persona-tab-${i}`}
               aria-selected={on} aria-controls="persona-panel" tabIndex={on ? 0 : -1}
               onClick={() => setActive(i)} onKeyDown={e => onKey(e, i)}
-              className="shrink-0 flex items-center gap-3 text-left rounded-2xl px-4 py-3.5 border transition"
+              className="shrink-0 flex items-center gap-3 text-left rounded-2xl px-4 py-3.5 border transition duration-[110ms] ease-productive"
               style={on
                 ? { background: '#fff', borderColor: t.color, boxShadow: `inset 3px 0 0 ${t.color}` }
                 : { background: 'transparent', borderColor: C.line }}>
@@ -279,7 +282,7 @@ function PersonaSwitcher({ still }: { still: boolean }) {
       </div>
 
       <motion.div key={active} id="persona-panel" role="tabpanel" aria-labelledby={`persona-tab-${active}`}
-        initial={still ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
+        initial={still ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24, ease: EXPRESSIVE_IN }}
         className="grid md:grid-cols-[1fr_1.2fr] rounded-3xl overflow-hidden border bg-white" style={{ borderColor: C.line }}>
         <div className="p-8 flex items-center justify-center" style={{ background: p.color + '14', color: C.teal }}>
           <div className="w-full max-w-xs"><p.Art accent={p.color} /></div>
@@ -332,7 +335,7 @@ export function LandingPage({ onLogin }: Props) {
             <a href="#platform" className="hidden md:block text-sm text-white/70 hover:text-white">Platform</a>
             <a href="#faq" className="hidden md:block text-sm text-white/70 hover:text-white">FAQ</a>
             <button onClick={onLogin}
-              className="text-sm font-semibold px-4 py-2 rounded-full bg-white/10 text-white border border-white/20 hover:bg-white/20 transition">
+              className="text-sm font-semibold px-4 py-2 rounded-full bg-white/10 text-white border border-white/20 hover:bg-white/20 transition duration-[110ms] ease-productive">
               Sign in
             </button>
           </div>
@@ -362,7 +365,7 @@ export function LandingPage({ onLogin }: Props) {
             {still ? (
               <p className="text-4xl sm:text-6xl leading-[1.08] text-white" style={serif}>{headline}</p>
             ) : (
-              <BlurText text={headline} delay={70} animateBy="words" direction="top"
+              <BlurText text={headline} delay={70} animateBy="words" direction="top" easing={cubicBezier(...EXPRESSIVE_IN)}
                 className="justify-center text-4xl sm:text-6xl leading-[1.08] text-white [font-family:var(--font-serif)]" />
             )}
           </div>
@@ -471,12 +474,12 @@ export function LandingPage({ onLogin }: Props) {
           </div>
           <ul className="rounded-3xl border border-white/10 divide-y divide-white/10 overflow-hidden">
             {PATCHWORK.map(r => (
-              <li key={r.to} className="group grid md:grid-cols-[1fr_auto_1.4fr] gap-3 md:gap-6 items-center px-6 py-5 transition-colors hover:bg-white/[0.04]">
+              <li key={r.to} className="group grid md:grid-cols-[1fr_auto_1.4fr] gap-3 md:gap-6 items-center px-6 py-5 transition-colors duration-[110ms] ease-productive hover:bg-white/[0.04]">
                 <span className="flex items-center gap-3 text-white/45">
                   <X className="w-4 h-4 shrink-0" style={{ color: '#D98B7F' }} />
                   <span className="line-through decoration-white/25">{r.from}</span>
                 </span>
-                <ArrowRight className="hidden md:block w-5 h-5 text-white/30 transition-transform group-hover:translate-x-1 group-hover:text-white/70" />
+                <ArrowRight className="hidden md:block w-5 h-5 text-white/30 transition duration-[150ms] ease-productive group-hover:translate-x-1 group-hover:text-white/70" />
                 <span className="flex items-start gap-4">
                   <span className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center bg-white/[0.06] border border-white/10">
                     <r.icon className="w-5 h-5" style={{ color: C.mint }} />
@@ -547,7 +550,7 @@ export function LandingPage({ onLogin }: Props) {
               <details key={f.q} className="group py-5" style={{ borderColor: C.line }}>
                 <summary className="flex justify-between items-center cursor-pointer list-none text-lg font-medium" style={{ color: C.teal }}>
                   {f.q}
-                  <span className="ml-4 text-2xl transition-transform group-open:rotate-45" style={{ color: C.amber }}>+</span>
+                  <span className="ml-4 text-2xl transition-transform duration-[150ms] ease-productive group-open:rotate-45" style={{ color: C.amber }}>+</span>
                 </summary>
                 <p className="mt-3 leading-relaxed" style={{ color: C.muted }}>{f.a}</p>
               </details>
