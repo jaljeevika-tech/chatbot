@@ -32,7 +32,7 @@ export async function runMissedCheckinReminders(now = new Date()) {
 
       const { rows: people } = await client.query(
         `SELECT u.id, p.location_id FROM users u LEFT JOIN hr_employee_profiles p ON p.user_id = u.id
-          WHERE u.org_id = $1 AND u.role <> 'superadmin' AND (COALESCE((to_jsonb(u) ->> 'active')::boolean, true) AND COALESCE((to_jsonb(u) ->> 'exit_date')::date > CURRENT_DATE, true))`, [orgId])
+          WHERE u.org_id = $1 AND u.role <> 'superadmin'`, [orgId])
       const shifts = await shiftsFor(client, orgId, people.map(p => p.id))
       const { rows: present } = await client.query(
         `SELECT user_id FROM hr_attendance WHERE org_id = $1 AND work_date = $2`, [orgId, today])

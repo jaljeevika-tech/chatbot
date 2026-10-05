@@ -101,10 +101,10 @@ async function sendWhatsApp(cfg, settings, phone, msg) {
 export async function hrApproverIds(client, orgId) {
   const { rows } = await client.query(
     `SELECT p.user_id FROM hr_employee_profiles p JOIN users u ON u.id = p.user_id
-      WHERE p.org_id = $1 AND p.is_hr AND (COALESCE((to_jsonb(u) ->> 'active')::boolean, true) AND COALESCE((to_jsonb(u) ->> 'exit_date')::date > CURRENT_DATE, true))`, [orgId])
+      WHERE p.org_id = $1 AND p.is_hr`, [orgId])
   if (rows.length) return rows.map(r => r.user_id)
   const { rows: admins } = await client.query(
-    `SELECT id FROM users u WHERE org_id = $1 AND role = 'admin' AND (COALESCE((to_jsonb(u) ->> 'active')::boolean, true) AND COALESCE((to_jsonb(u) ->> 'exit_date')::date > CURRENT_DATE, true))`, [orgId])
+    `SELECT id FROM users u WHERE org_id = $1 AND role = 'admin'`, [orgId])
   return admins.map(r => r.id)
 }
 

@@ -17,7 +17,7 @@ const ME_SQL = `
          EXISTS (SELECT 1 FROM users r WHERE r.org_id = u.org_id AND r.manager_id = u.id) AS has_reports
     FROM users u
     LEFT JOIN hr_employee_profiles p ON p.user_id = u.id
-   WHERE u.org_id = $1 AND (COALESCE((to_jsonb(u) ->> 'active')::boolean, true) AND COALESCE((to_jsonb(u) ->> 'exit_date')::date > CURRENT_DATE, true))`
+   WHERE u.org_id = $1`
 
 /** Resolve the caller's users row. `role` comes from the verified Firebase
  *  token (the same source every monolith permission check uses). */

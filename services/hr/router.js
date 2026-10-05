@@ -42,7 +42,10 @@ const handle = (fn) => async (req, res) => {
   } catch (e) {
     if (e instanceof HttpError) return res.status(e.status).json({ error: e.message })
     if (e?.code === '23505') return res.status(409).json({ error: 'That already exists.' })
-    if (isMissingTable(e)) return res.status(503).json({ error: NOT_SET_UP })
+    if (isMissingTable(e)) {
+      console.error(`[hr] not set up — ${req.method} ${req.originalUrl}: ${e.code} ${e.message}`)
+      return res.status(503).json({ error: NOT_SET_UP })
+    }
     console.error(`[hr] ${req.method} ${req.originalUrl}:`, e)
     res.status(500).json({ error: 'HR service error' })
   }
