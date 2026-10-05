@@ -7,7 +7,7 @@ export const ALL_TAB_KEYS = [
   'overview', 'reports', 'media', 'settings', 'impact', 'toc', 'notebook', 'analytics', 'whatsapp', 'actionplan', 'quickreport', 'content-hub',
   'generate-report', 'story-finder', 'project-report-picker', 'case-study-picker', 'org-report-picker', 'self-report-picker', 'team-report-picker', 'impact-report-picker', 'content-picker',
   'portfolio', 'orgdash', 'dashboard', 'vault', 'beneficiaries', 'financial', 'compliance', 'projectmedia', 'annualprogress',
-  'mis', 'beneficiaryprofile', 'hr', 'financemgmt',
+  'mis', 'beneficiaryprofile', 'hr', 'financemgmt', 'custom',
 ] as const;
 export type AnyTabKey = typeof ALL_TAB_KEYS[number];
 
@@ -64,6 +64,7 @@ export const TAB_MODULES = {
   'beneficiaryprofile':    () => import('./BeneficiaryProfilePage'),
   'hr':                    () => import('../hr/HrManagementPage'),
   'financemgmt':           () => import('../finance-mgmt/FinanceManagementPage'),
+  'custom':                () => import('./CustomDashboardPage'),
 } satisfies Record<AnyTabKey, () => Promise<unknown>>;
 
 /** Prefetch a tab's chunk ahead of its first render. Errors are swallowed; the real

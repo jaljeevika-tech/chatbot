@@ -1,0 +1,19 @@
+{
+  "name": "fieldflow-dashboard-service",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "FieldFlow Dashboard microservice — org / beneficiary / MIS / impact dashboards + custom dashboards",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.22.1",
+    "pg": "^8.13.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

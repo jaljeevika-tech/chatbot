@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   ArrowLeft, LayoutGrid, Users, CreditCard, Palette, ToggleRight,
-  Database, Plug, ScrollText, Lock,
+  Database, Plug, ScrollText, Lock, LayoutDashboard,
 } from 'lucide-react'
 import { saApi, errMsg } from './api'
 import { navigate, routeHref, type OrgTab } from './route'
@@ -11,6 +11,7 @@ import { OrgUsersTab } from './OrgUsersTab'
 import { OrgPlanTab } from './OrgPlanTab'
 import { OrgBrandingTab, OrgModulesTab, OrgDataTab } from './OrgSettingsTabs'
 import { OrgIntegrationsTab } from './OrgIntegrationsTab'
+import { OrgDashboardsTab } from './OrgDashboardsTab'
 import { AuditTable } from './AuditPage'
 
 const TABS: { id: OrgTab; label: string; icon: React.ReactNode }[] = [
@@ -21,6 +22,7 @@ const TABS: { id: OrgTab; label: string; icon: React.ReactNode }[] = [
   { id: 'modules',      label: 'Modules & AI',    icon: <ToggleRight className="w-4 h-4" /> },
   { id: 'data',         label: 'Data sources',    icon: <Database className="w-4 h-4" /> },
   { id: 'integrations', label: 'Integrations',    icon: <Plug className="w-4 h-4" /> },
+  { id: 'dashboards',   label: 'Dashboards',      icon: <LayoutDashboard className="w-4 h-4" /> },
   { id: 'audit',        label: 'Activity',        icon: <ScrollText className="w-4 h-4" /> },
 ]
 
@@ -88,6 +90,7 @@ export function OrgDetailPage({ orgId, tab }: { orgId: string; tab: OrgTab }) {
       {tab === 'modules'      && <OrgModulesTab org={org} onSaved={reload} />}
       {tab === 'data'         && <OrgDataTab org={org} onSaved={reload} />}
       {tab === 'integrations' && <OrgIntegrationsTab org={org} />}
+      {tab === 'dashboards'   && <OrgDashboardsTab org={org} />}
       {tab === 'audit'        && <Card title="Activity" description="Super admin changes to this organisation." padded={false}><AuditTable orgId={org.id} /></Card>}
     </>
   )

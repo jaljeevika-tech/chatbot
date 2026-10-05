@@ -35,7 +35,7 @@ import billingRoutes      from './routes/billing.routes.js'
 import aiRoutes           from './routes/ai.routes.js'
 import aiSettingsRoutes   from './routes/ai-settings.routes.js'
 import actionPlanRoutes   from './routes/action-plan.routes.js'
-import orgDashboardRoutes from './routes/org-dashboard.routes.js'
+import dashboardRoutes from './routes/dashboard.routes.js'
 import budgetUtilisationRoutes from './routes/budget-utilisation.routes.js'
 import aiExtractRoutes    from './routes/ai-extract.routes.js'
 import correctnessRoutes  from './routes/correctness.routes.js'
@@ -49,7 +49,6 @@ import beneficiaryMisRoutes from './routes/beneficiary-mis.routes.js'
 import individualBeneficiariesRoutes from './routes/individual-beneficiaries.routes.js'
 import microEntrepreneursRoutes from './routes/micro-entrepreneurs.routes.js'
 import collectivesRoutes from './routes/collectives.routes.js'
-import beneficiaryDashboardRoutes from './routes/beneficiary-dashboard.routes.js'
 import beneficiaryProfileRoutes from './routes/beneficiary-profile.routes.js'
 import resourcesRoutes from './routes/resources.routes.js'
 import trainingsRoutes from './routes/trainings.routes.js'
@@ -63,12 +62,9 @@ import complianceSupportRoutes from './routes/compliance-support.routes.js'
 import campaignRoutes from './routes/campaign.routes.js'
 import exposureVisitsRoutes from './routes/exposure-visits.routes.js'
 import communityMeetingRoutes from './routes/community-meeting.routes.js'
-import misTabsDashboardRoutes from './routes/mis-tabs-dashboard.routes.js'
 import indicatorsRoutes   from './routes/indicators.routes.js'
 import dataSourcesRoutes  from './routes/data-sources.routes.js'
 import misEntriesRoutes   from './routes/mis-entries.routes.js'
-import misDashboardRoutes from './routes/mis-dashboard.routes.js'
-import impactFrameworkRoutes from './routes/impact-framework.routes.js'
 import complianceRoutes   from './routes/compliance.routes.js'
 import financeMgmtRoutes  from './routes/finance-mgmt.routes.js'
 import lgdRoutes          from './routes/lgd.routes.js'
@@ -245,7 +241,7 @@ app.use('/api', rwRoutes)         // GET/POST /rw/*
 app.use('/api', financeRoutes)    // GET /bq/finance, GET /bq/attendance
 app.use('/api', savedReportsRoutes) // POST/GET/DELETE /saved-reports
 app.use('/api', actionPlanRoutes)   // GET/PUT /action-plan/progress
-app.use('/api', orgDashboardRoutes) // GET /org-dashboard/overview
+app.use('/api', dashboardRoutes) // org / beneficiary / MIS / MIS-tabs / impact + custom dashboards (proxy to Cloud Run when DASHBOARD_SERVICE_URL is set)
 app.use('/api', budgetUtilisationRoutes)   // GET/POST/PUT/DELETE /action-plans/:id/budget-utilisation
 app.use('/api', aiExtractRoutes)   // POST /ai-extract/action-plan|budget-utilisation|annual-progress
 app.use('/api', documentsRoutes)    // GET/POST/DELETE /projects/:projectKey/documents
@@ -256,7 +252,6 @@ app.use('/api', beneficiaryMisRoutes) // GET/POST/DELETE /projects/:projectKey/b
 app.use('/api', individualBeneficiariesRoutes) // GET /individual-beneficiaries, GET/POST /individual-beneficiaries/registration-link(/rotate)
 app.use('/api', microEntrepreneursRoutes) // GET /micro-entrepreneurs, GET/POST /micro-entrepreneurs/registration-link(/rotate)
 app.use('/api', collectivesRoutes) // GET /collectives, GET/POST /collectives/registration-link(/rotate)
-app.use('/api', beneficiaryDashboardRoutes) // GET /beneficiary-registration-dashboard — org-wide coverage + headcount summary
 app.use('/api', beneficiaryProfileRoutes) // GET /beneficiary-profile/:uid — full record + all 7 MIS categories for one beneficiary
 app.use('/api', resourcesRoutes) // GET /resources, GET/POST /resources/registration-link(/rotate)
 app.use('/api', trainingsRoutes) // GET /trainings, POST /trainings/bulk-upload
@@ -270,12 +265,9 @@ app.use('/api', complianceSupportRoutes) // GET /compliance-support, POST /compl
 app.use('/api', campaignRoutes) // GET /campaign, POST /campaign/bulk-upload
 app.use('/api', exposureVisitsRoutes) // GET /exposure-visits, POST /exposure-visits/bulk-upload
 app.use('/api', communityMeetingRoutes) // GET /community-meeting, POST /community-meeting/bulk-upload
-app.use('/api', misTabsDashboardRoutes) // GET /projects/:projectKey/mis-tabs-dashboard — rollup across all 9 MIS categories
 app.use('/api', indicatorsRoutes)    // GET/POST/PUT /projects/:projectKey/indicators
 app.use('/api', dataSourcesRoutes)   // GET/POST/PUT /projects/:projectKey/data-sources, /mis-templates
 app.use('/api', misEntriesRoutes)    // GET/PUT /projects/:projectKey/mis-entries, workflow transitions, evidence
-app.use('/api', misDashboardRoutes)  // GET /projects/:projectKey/mis-dashboard, /indicators/:id/drilldown
-app.use('/api', impactFrameworkRoutes) // GET /impact/framework — org-wide values for the 17-indicator impact matrix
 app.use('/api', lgdRoutes)           // GET /lgd/states, /lgd/districts, /lgd/blocks, /lgd/panchayats, /lgd/villages
 app.use('/api', complianceRoutes)    // GET/POST/PUT/DELETE /compliance-items
 app.use('/api', financeMgmtRoutes)   // /finance-mgmt/* — advances, settlements, ledger requests (proxy to Cloud Run when FINANCE_SERVICE_URL is set)

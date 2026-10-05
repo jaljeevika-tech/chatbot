@@ -6,9 +6,9 @@
 //   GET /api/projects/:projectKey/indicators/:id/drilldown?fy_start_year=
 
 import { Router } from 'express'
-import { getPool } from '../db/pool.js'
-import { requireEditor } from '../lib/routeGuards.js'
-import { computeIndicatorMetrics, MONTHS } from '../lib/misCalculations.js'
+import { getPool } from './pool.js'
+import { requireEditor } from '../../../lib/routeGuards.js'
+import { computeIndicatorMetrics, MONTHS } from '../../../lib/misCalculations.js'
 
 const router = Router()
 

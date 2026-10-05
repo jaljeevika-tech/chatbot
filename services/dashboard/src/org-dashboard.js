@@ -1,4 +1,4 @@
-// routes/org-dashboard.routes.js
+// services/dashboard/src/org-dashboard.js
 //
 // Read-only, org-scoped roll-up for OrgDashboardPage: projects/budgets,
 // financial utilisation, beneficiary footprint, MIS impact indicators and
@@ -12,9 +12,9 @@
 //   GET /api/org-dashboard/overview?fy=<fyStartYear>
 
 import { Router } from 'express'
-import { getPool } from '../db/pool.js'
-import { requireEditor } from '../lib/routeGuards.js'
-import { decryptRowInPlace } from '../lib/piiCrypto.js'
+import { getPool } from './pool.js'
+import { requireEditor } from '../../../lib/routeGuards.js'
+import { decryptRowInPlace } from '../../../lib/piiCrypto.js'
 
 const router = Router()
 

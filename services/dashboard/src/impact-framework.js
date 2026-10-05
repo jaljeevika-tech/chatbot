@@ -1,4 +1,4 @@
-// routes/impact-framework.routes.js
+// services/dashboard/src/impact-framework.js
 //
 // Read-only rollup for the Impact Dashboard's 17-indicator framework panel.
 // Keys match IMPACT_FRAMEWORK[].key in src/utils/impactMetrics.ts; indicators
@@ -10,9 +10,9 @@
 //   GET /api/impact/framework[?projectKey=<key>]   (requireEditor)
 
 import { Router } from 'express'
-import { getPool } from '../db/pool.js'
-import { requireEditor } from '../lib/routeGuards.js'
-import { decryptRowInPlace } from '../lib/piiCrypto.js'
+import { getPool } from './pool.js'
+import { requireEditor } from '../../../lib/routeGuards.js'
+import { decryptRowInPlace } from '../../../lib/piiCrypto.js'
 
 const router = Router()
 

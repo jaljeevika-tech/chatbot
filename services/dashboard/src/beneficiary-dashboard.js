@@ -13,11 +13,11 @@
 //   POST /api/beneficiary-registration-dashboard/geocode-locations
 
 import { Router } from 'express'
-import { getPool } from '../db/pool.js'
-import { requireEditor, requireAdmin } from '../lib/routeGuards.js'
-import { locationKey, geocodePlace, sleep } from '../lib/geocodeLocation.js'
-import { decryptRowInPlace } from '../lib/piiCrypto.js'
-import { placeCoordsFor } from '../lib/placeCoords.js'
+import { getPool } from './pool.js'
+import { requireEditor, requireAdmin } from '../../../lib/routeGuards.js'
+import { locationKey, geocodePlace, sleep } from '../../../lib/geocodeLocation.js'
+import { decryptRowInPlace } from '../../../lib/piiCrypto.js'
+import { placeCoordsFor } from '../../../lib/placeCoords.js'
 
 const router = Router()
 

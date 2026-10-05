@@ -6,8 +6,8 @@
 //   GET /api/projects/:projectKey/mis-tabs-dashboard
 
 import { Router } from 'express'
-import { getPool } from '../db/pool.js'
-import { requireEditor } from '../lib/routeGuards.js'
+import { getPool } from './pool.js'
+import { requireEditor } from '../../../lib/routeGuards.js'
 
 const router = Router()
 

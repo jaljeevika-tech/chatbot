@@ -17,6 +17,7 @@ import { orgAppUrl } from '../org-app/orgAppRoute'
 import { FF } from '../../theme/colors'
 import { TabPill } from '../ui/TabPill'
 import { lazyNamed } from '../../utils/lazyNamed'
+import { apiFetch } from '../../utils/apiFetch'
 import { localIsoDate } from '../../utils/format'
 import { TAB_MODULES, DEFAULT_TAB, REPORT_TABS, tabFromHash, type AnyTabKey } from './dashboardTabs'
 import type { ActiveFilters, DailyReport } from '../../types/report';
@@ -52,6 +53,7 @@ const MisPage                  = lazyNamed(TAB_MODULES['mis'],                  
 const BeneficiaryProfilePage   = lazyNamed(TAB_MODULES['beneficiaryprofile'],    'BeneficiaryProfilePage');
 const HrManagementPage         = lazyNamed(TAB_MODULES['hr'],                    'HrManagementPage');
 const FinanceManagementPage    = lazyNamed(TAB_MODULES['financemgmt'],           'FinanceManagementPage');
+const CustomDashboardPage      = lazyNamed(TAB_MODULES['custom'],                'CustomDashboardPage');
 const ComplianceCalendarPage   = lazyNamed(TAB_MODULES['compliance'],            'ComplianceCalendarPage');
 const AnnualProgressReportPage = lazyNamed(TAB_MODULES['annualprogress'],        'AnnualProgressReportPage');
 const BudgetUtilisationPage    = lazyNamed(TAB_MODULES['financial'],             'BudgetUtilisationPage');
@@ -500,7 +502,7 @@ export function DashboardPage() {
 
   type TabKey = 'overview' | 'reports' | 'media' | 'settings' | 'impact' | 'toc' | 'notebook' | 'analytics' | 'whatsapp' | 'actionplan' | 'quickreport' | 'content-hub'
     | 'portfolio' | 'orgdash' | 'dashboard' | 'vault' | 'beneficiaries' | 'financial' | 'compliance' | 'projectmedia' | 'annualprogress'
-    | 'mis' | 'beneficiaryprofile' | 'hr' | 'financemgmt';
+    | 'mis' | 'beneficiaryprofile' | 'hr' | 'financemgmt' | 'custom';
 
   // The report FilterBar and hero cards are scoped to daily_reports, so only
   // the tabs that list those reports show them.
@@ -527,6 +529,7 @@ export function DashboardPage() {
     beneficiaryprofile: { title: 'Beneficiary Profile', desc: 'Individual, Micro-Entrepreneur & Collective records — complete detail plus recorded MIS data' },
     hr:            { title: 'HR Management',      desc: 'Attendance and leave — works offline, syncs when you reconnect' },
     financemgmt:   { title: 'Finance Management', desc: 'Advances, settlements, ledger statements and compliance due dates' },
+    custom:        { title: 'Custom Dashboards',  desc: 'Dashboards set up for your organisation' },
     actionplan:    { title: 'Action Plan',        desc: selectedProject?.name ?? '' },
     mis:           { title: 'MIS',                desc: 'Training, distribution, scheme access, credit/grant, support & event records — split by beneficiary type, scoped to this project.' },
     settings:      { title: 'Settings',           desc: '' },
@@ -538,10 +541,22 @@ export function DashboardPage() {
 
   const canSeeTab = makeCanSeeTab(user, org)
 
+  // Custom dashboards are built per org by the super admin; the nav item only
+  // appears once at least one is visible to this user.
+  const [hasCustom, setHasCustom] = useState(false);
+  useEffect(() => {
+    if (!user?.orgId || offlineSession) return;
+    apiFetch('/api/custom-dashboards')
+      .then(r => (r.ok ? r.json() : []))
+      .then(rows => setHasCustom(Array.isArray(rows) && rows.length > 0))
+      .catch(() => {});
+  }, [user?.orgId, offlineSession]);
+
   // Portfolio lives on a header button; 'overview' and 'toc' are reachable by
   // tab state/hash only.
   const sidebarNav: { key: TabKey; label: string; badge: string }[] = [
     ...(canSeeTab('orgdash')   ? [{ key: 'orgdash'   as TabKey, label: 'Org Dashboard', badge: 'Od' }] : []),
+    ...(hasCustom ? [{ key: 'custom' as TabKey, label: 'Custom Dashboards', badge: 'Cd' }] : []),
     ...(canImpact && canSeeTab('impact') ? [{ key: 'impact' as TabKey, label: t.tabImpact ?? 'Impact', badge: 'Im' }] : []),
     ...(canSeeTab('reports')   ? [{ key: 'reports'   as TabKey, label: t.tabReports, badge: 'Rp' }] : []),
     ...(canSeeTab('analytics') ? [{ key: 'analytics' as TabKey, label: t.tabPerformanceReview, badge: 'Pf' }] : []),
@@ -1075,6 +1090,11 @@ export function DashboardPage() {
             {activeTab === 'orgdash' && canImpact && (
               <ErrorBoundary>
                 <OrgDashboardPage onOpenProject={key => { selectProject(key); setActiveTab('dashboard'); }} />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'custom' && (
+              <ErrorBoundary>
+                <CustomDashboardPage />
               </ErrorBoundary>
             )}
             {activeTab === 'hr' && canSeeTab('hr') && (

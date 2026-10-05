@@ -7,12 +7,12 @@
 import { useEffect, useState } from 'react'
 
 export type Page = 'overview' | 'orgs' | 'plans' | 'billing' | 'prompts' | 'audit'
-export type OrgTab = 'overview' | 'users' | 'plan' | 'branding' | 'modules' | 'data' | 'integrations' | 'audit'
+export type OrgTab = 'overview' | 'users' | 'plan' | 'branding' | 'modules' | 'data' | 'integrations' | 'dashboards' | 'audit'
 
 export interface Route { page: Page; orgId?: string; orgTab?: OrgTab }
 
 const PAGES: Page[] = ['overview', 'orgs', 'plans', 'billing', 'prompts', 'audit']
-const ORG_TABS: OrgTab[] = ['overview', 'users', 'plan', 'branding', 'modules', 'data', 'integrations', 'audit']
+const ORG_TABS: OrgTab[] = ['overview', 'users', 'plan', 'branding', 'modules', 'data', 'integrations', 'dashboards', 'audit']
 
 export function parseRoute(hash: string): Route {
   // A trailing ?flag (e.g. #superadmin/orgs?new) is page state, not a path segment.
