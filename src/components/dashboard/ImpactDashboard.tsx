@@ -5,6 +5,7 @@ import type { AuthUser } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { FF } from '../../theme/colors'
 import { apiFetch } from '../../utils/apiFetch'
+import { BuiltinLayout, Panel } from './BuiltinLayout'
 import {
   getToCNodes,
   getSDGsWithCounts,
@@ -399,8 +400,8 @@ export function ImpactDashboard({ reports }: Props) {
         <h2 className="font-black text-gray-900 text-lg leading-none">Impact Dashboard</h2>
       </div>
 
-      <div className="space-y-4">
-        <ImpactFrameworkPanel />
+      <BuiltinLayout dash="impact" className="space-y-4">
+        <Panel id="framework"><ImpactFrameworkPanel /></Panel>
         {reports.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3 text-gray-400 bg-white rounded-xl border" style={{ borderColor: FF.border }}>
             <Target className="w-10 h-10 opacity-30" />
@@ -409,14 +410,14 @@ export function ImpactDashboard({ reports }: Props) {
           </div>
         ) : (
           <>
-            <OutcomeIndicatorsPanel    reports={reports} />
-            <TheoryOfChangePanel       reports={reports} />
-            <SDGProgressPanel          reports={reports} />
-            <LogicModelPanel           reports={reports} />
-            <DataQualityScorecardPanel reports={reports} />
+            <Panel id="outcomes"><OutcomeIndicatorsPanel    reports={reports} /></Panel>
+            <Panel id="toc"><TheoryOfChangePanel       reports={reports} /></Panel>
+            <Panel id="sdg"><SDGProgressPanel          reports={reports} /></Panel>
+            <Panel id="logic"><LogicModelPanel           reports={reports} /></Panel>
+            <Panel id="quality"><DataQualityScorecardPanel reports={reports} /></Panel>
           </>
         )}
-      </div>
+      </BuiltinLayout>
     </div>
   )
 }

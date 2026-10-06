@@ -7,7 +7,7 @@
 // GET  /projects/:projectKey/mis-dashboard, /projects/:projectKey/indicators/:id/drilldown
 // GET  /projects/:projectKey/mis-tabs-dashboard
 // GET  /impact/framework
-// /custom-dashboards/*, /hr-dashboard, /superadmin/org/:id/custom-dashboards/*  — see custom.js
+// /custom-dashboards/*, /hr-dashboard, /builtin-dashboards/:key, /superadmin/org/:id/custom-dashboards/*  — see custom.js
 
 import { Router } from 'express'
 import { usePool } from './pool.js'
@@ -28,6 +28,7 @@ export const DASHBOARD_PATHS = [
   '/impact/framework',
   '/custom-dashboards',
   '/hr-dashboard',
+  '/builtin-dashboards',
   '/superadmin/org/:id/custom-dashboards',
 ]
 

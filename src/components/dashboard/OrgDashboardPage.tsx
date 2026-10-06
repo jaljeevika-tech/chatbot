@@ -13,6 +13,7 @@ import { SectionCard } from '../ui/SectionCard'
 import { ProgressBar } from '../ui/ProgressBar'
 import { StatusBadge } from '../ui/StatusBadge'
 import { PlanVsActualChart, type ChartMonth } from '../ui/PlanVsActualChart'
+import { BuiltinLayout, Panel } from './BuiltinLayout'
 
 interface Kpi { label: string; value: string; note: string; fg: string }
 interface HealthBucket { key: FFStatus; label: string; count: number }
@@ -102,21 +103,27 @@ export function OrgDashboardPage({ onOpenProject }: Props) {
         )}
       </div>
 
+      <BuiltinLayout dash="orgdash" style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
+      <Panel id="kpis">
       <KpiGrid cols={4}>
         <KpiTile label="Active Projects" value={ov?.totals.activeProjects ?? '—'} valueSize={28} />
         <KpiTile label="Total Budget" value={ov?.totals.totalBudgetFmt ?? '—'} valueSize={26} note="across portfolio" />
         <KpiTile label="Budget Utilised" value={ov?.totals.totalUtilisedFmt ?? '—'} valueSize={26} note={ov ? `${ov.totals.utilisedPct}% of budget · ${ov.filters.fyLabel}` : ''} noteColor={ov && ov.totals.utilisedPct < 40 ? FF.amber : FF.green} />
         <KpiTile label="Overall Achievement" value={overallKpi?.value ?? '—'} valueSize={28} note="vs annual target" />
       </KpiGrid>
+      </Panel>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-5">
+        <Panel id="growth">
         <SectionCard title="Combined Growth — Plan vs Actual">
           <div style={{ fontSize: 12, color: FF.textMuted, marginTop: -8, marginBottom: 18 }}>
             Cumulative % of combined annual target, month on month
           </div>
           <PlanVsActualChart data={chart} />
         </SectionCard>
+        </Panel>
 
+        <Panel id="health">
         <SectionCard title="Portfolio Health">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {health.map(h => {
@@ -130,8 +137,10 @@ export function OrgDashboardPage({ onOpenProject }: Props) {
             })}
           </div>
         </SectionCard>
+        </Panel>
       </div>
 
+      <Panel id="footprint">
       {ov && (
         <SectionCard title="Footprint" titleRight={<span style={{ fontSize: 11, color: FF.textFaint }}><MapPin className="inline w-3 h-3 mr-1" />cumulative reach</span>}>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
@@ -145,7 +154,9 @@ export function OrgDashboardPage({ onOpenProject }: Props) {
           </div>
         </SectionCard>
       )}
+      </Panel>
 
+      <Panel id="digital">
       {ov && (
         <SectionCard title="Digital Footprint">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -153,7 +164,9 @@ export function OrgDashboardPage({ onOpenProject }: Props) {
           </div>
         </SectionCard>
       )}
+      </Panel>
 
+      <Panel id="impact">
       {ov && (
         <SectionCard title="Impact Indicators" titleRight={<span style={{ fontSize: 11, color: FF.textFaint }}>{ov.impact.filter(m => m.available).length}/{ov.impact.length} tracked</span>}>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -161,8 +174,10 @@ export function OrgDashboardPage({ onOpenProject }: Props) {
           </div>
         </SectionCard>
       )}
+      </Panel>
 
       {/* System drops (funnel) */}
+      <Panel id="funnel">
       {ov && ov.funnel.length > 0 && (
         <SectionCard title="System Drops — Beneficiary → Outcome Funnel">
           <div style={{ fontSize: 12, color: FF.textMuted, marginTop: -8, marginBottom: 18 }}>
@@ -192,9 +207,11 @@ export function OrgDashboardPage({ onOpenProject }: Props) {
           </div>
         </SectionCard>
       )}
+      </Panel>
 
       {ov && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <Panel id="barriers">
           <SectionCard title="Barriers Detected">
             {ov.barriers.length === 0 ? (
               <div style={{ fontSize: 13, color: FF.textMuted }}>No barriers detected for {ov.filters.fyLabel}.</div>
@@ -215,7 +232,9 @@ export function OrgDashboardPage({ onOpenProject }: Props) {
               </div>
             )}
           </SectionCard>
+          </Panel>
 
+          <Panel id="nextsteps">
           <SectionCard title="Recommended Next Steps">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {ov.nextSteps.map((s, i) => (
@@ -226,9 +245,11 @@ export function OrgDashboardPage({ onOpenProject }: Props) {
               ))}
             </div>
           </SectionCard>
+          </Panel>
         </div>
       )}
 
+      <Panel id="projects">
       <SectionCard title="Per-Project Comparison" noPadding>
         <div className="hidden md:block" style={{ overflowX: 'auto' }}>
           <div style={{ minWidth: 780 }}>
@@ -294,6 +315,8 @@ export function OrgDashboardPage({ onOpenProject }: Props) {
           })}
         </div>
       </SectionCard>
+      </Panel>
+      </BuiltinLayout>
     </div>
   )
 }

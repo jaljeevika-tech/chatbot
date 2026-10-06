@@ -16,6 +16,7 @@ import { SectionCard } from '../ui/SectionCard'
 import { StatusBadge } from '../ui/StatusBadge'
 import { ProgressBar } from '../ui/ProgressBar'
 import { PlanVsActualChart, type ChartMonth } from '../ui/PlanVsActualChart'
+import { BuiltinLayout, Panel } from './BuiltinLayout'
 import { useProjectContext } from '../../context/ProjectContext'
 import { useProjectDailyReports } from '../../hooks/useProjectDailyReports'
 import type { DashboardKpis } from '../../types/misEntry'
@@ -362,7 +363,8 @@ export function ProjectDashboardPage({ projectKey }: Props) {
   const compliance = selectedProject ? ffStatusColors(selectedProject.compliance) : null
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 26, fontFamily: "'IBM Plex Sans',sans-serif" }}>
+    <BuiltinLayout dash="project" projectKey={projectKey} style={{ display: 'flex', flexDirection: 'column', gap: 26, fontFamily: "'IBM Plex Sans',sans-serif" }}>
+      <Panel id="summary">
       {selectedProject && (
         <SectionCard>
           <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -405,7 +407,9 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           </div>
         </SectionCard>
       )}
+      </Panel>
 
+      <Panel id="focus">
       <SectionCard
         title="Focus Areas"
         titleRight={
@@ -456,7 +460,9 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           </div>
         )}
       </SectionCard>
+      </Panel>
 
+      <Panel id="kpis">
       <KpiGrid cols={4}>
         <KpiTile
           label="Overall Progress" value={hasAnnualProgress ? `${overallPct}%` : '—'}
@@ -483,7 +489,9 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           valueSize={28}
         />
       </KpiGrid>
+      </Panel>
 
+      <Panel id="progress">
       <SectionCard title="Cumulative Progress — Plan vs Actual">
         <div style={{ fontSize: 12, color: FF.textMuted, marginTop: -8, marginBottom: 18 }}>
           % of total project target achieved, from Annual Progress Report snapshots this FY
@@ -496,7 +504,9 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           </div>
         )}
       </SectionCard>
+      </Panel>
 
+      <Panel id="actionplan">
       <SectionCard title="Action Plan Progress" titleRight={<ListChecks className="w-4 h-4" style={{ color: FF.textFaint }} />}>
         {!hasActionPlan ? (
           <div style={{ fontSize: 13, color: FF.textFaint, textAlign: 'center', padding: '12px 0' }}>
@@ -556,7 +566,9 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           </>
         )}
       </SectionCard>
+      </Panel>
 
+      <Panel id="beneficiaries">
       <SectionCard title="Beneficiaries" titleRight={<Users className="w-4 h-4" style={{ color: FF.textFaint }} />}>
         {!hasBeneficiaryData ? (
           <div style={{ fontSize: 13, color: FF.textFaint, textAlign: 'center', padding: '12px 0' }}>No beneficiary data uploaded yet for this project.</div>
@@ -593,7 +605,9 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           </>
         )}
       </SectionCard>
+      </Panel>
 
+      <Panel id="socio">
       <SectionCard title="Socio-Economic Impact" titleRight={<HeartHandshake className="w-4 h-4" style={{ color: FF.textFaint }} />}>
         {!hasSocioEconomicData && groundStories.length === 0 ? (
           <div style={{ fontSize: 13, color: FF.textFaint, textAlign: 'center', padding: '12px 0' }}>
@@ -647,7 +661,9 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           </>
         )}
       </SectionCard>
+      </Panel>
 
+      <Panel id="mis">
       <SectionCard title="MIS Activity" titleRight={<TrendingUp className="w-4 h-4" style={{ color: FF.textFaint }} />}>
         {!hasMisTabsData ? (
           <div style={{ fontSize: 13, color: FF.textFaint, textAlign: 'center', padding: '12px 0' }}>
@@ -711,7 +727,9 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           </>
         )}
       </SectionCard>
+      </Panel>
 
+      <Panel id="indicators">
       <SectionCard title="Indicator Performance" titleRight={<TrendingUp className="w-4 h-4" style={{ color: FF.textFaint }} />}>
         {!hasIndicatorData || !indicatorKpis ? (
           <div style={{ fontSize: 13, color: FF.textFaint, textAlign: 'center', padding: '12px 0' }}>No indicators configured for this project yet.</div>
@@ -734,7 +752,9 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           </>
         )}
       </SectionCard>
+      </Panel>
 
+      <Panel id="compliance">
       <SectionCard title="Compliance &amp; Deadlines">
         <div style={{ fontSize: 12, color: FF.textMuted, marginTop: -8, marginBottom: 14 }}>
           {nextDeadline ? <>Next up: <strong style={{ color: FF.tealDark }}>{nextDeadline.item}</strong> — {nextDeadline.dueLabel}</> : 'Nothing upcoming.'}
@@ -758,6 +778,7 @@ export function ProjectDashboardPage({ projectKey }: Props) {
           </div>
         )}
       </SectionCard>
-    </div>
+      </Panel>
+    </BuiltinLayout>
   )
 }

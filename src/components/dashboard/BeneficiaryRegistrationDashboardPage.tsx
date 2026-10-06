@@ -12,6 +12,7 @@ import { useAuthContext } from '../../context/AuthContext'
 import { KpiTile } from '../ui/KpiTile'
 import { KpiGrid } from '../ui/KpiGrid'
 import { SectionCard } from '../ui/SectionCard'
+import { BuiltinLayout, Panel } from './BuiltinLayout'
 import { resolveDistrictCoords, resolveBlockCoords } from '../../data/locationCoords'
 
 interface StateRow {
@@ -953,7 +954,8 @@ export function BeneficiaryRegistrationDashboardPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {filterBar}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, opacity: refreshing ? 0.55 : 1, transition: 'opacity .15s' }}>
+      <BuiltinLayout dash="beneficiaries" style={{ display: 'flex', flexDirection: 'column', gap: 20, opacity: refreshing ? 0.55 : 1, transition: 'opacity .15s' }}>
+      <Panel id="coverage">
       <SectionCard title="Geographic Coverage" titleRight={<span className="text-[11px]" style={{ color: FF.textFaint }}>{filtered ? 'Matching the filters above' : 'Across all registered beneficiaries'}</span>}>
         <KpiGrid cols={5}>
           <KpiTile label="States" value={coverage.states} />
@@ -963,7 +965,9 @@ export function BeneficiaryRegistrationDashboardPage() {
           <KpiTile label="Villages" value={coverage.villages} />
         </KpiGrid>
       </SectionCard>
+      </Panel>
 
+      <Panel id="totals">
       <KpiGrid cols={5}>
         <KpiTile label="Individual Beneficiaries" value={ib.total} />
         <KpiTile label="Micro-Entrepreneurs" value={me.total} />
@@ -971,7 +975,9 @@ export function BeneficiaryRegistrationDashboardPage() {
         <KpiTile label="Resources" value={rs.total} />
         <KpiTile label="Total Production" value={`${production.totalQuintal.toLocaleString('en-IN', { maximumFractionDigits: 1 })} qtl`} note={production.totalLivestock > 0 ? `+ ${production.totalLivestock.toLocaleString('en-IN')} livestock` : ''} />
       </KpiGrid>
+      </Panel>
 
+      <Panel id="individuals">
       <SectionCard title="Individual Beneficiaries">
         <KpiGrid cols={6}>
           <KpiTile label="Male" value={ib.male} note={pct(ib.male, ib.total)} />
@@ -982,8 +988,10 @@ export function BeneficiaryRegistrationDashboardPage() {
           <KpiTile label="With Production" value={ib.production.withProduction} note={pct(ib.production.withProduction, ib.total)} />
         </KpiGrid>
       </SectionCard>
+      </Panel>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Panel id="micro">
         <SectionCard title="Micro-Entrepreneurs">
           <KpiGrid cols={3}>
             <KpiTile label="Male" value={me.male} note={pct(me.male, me.total)} />
@@ -994,6 +1002,8 @@ export function BeneficiaryRegistrationDashboardPage() {
             <KpiTile label="With Production" value={me.production.withProduction} note={pct(me.production.withProduction, me.total)} />
           </KpiGrid>
         </SectionCard>
+        </Panel>
+        <Panel id="collectives">
         <SectionCard title="Collectives">
           <KpiGrid cols={3}>
             <KpiTile label="Male Members" value={cb.totalMale} note={pct(cb.totalMale, cbMembers)} />
@@ -1003,8 +1013,10 @@ export function BeneficiaryRegistrationDashboardPage() {
             <KpiTile label="Credit Access" value={inr(cb.totalCreditAccess)} />
           </KpiGrid>
         </SectionCard>
+        </Panel>
       </div>
 
+      <Panel id="production">
       <SectionCard title="Beneficiaries by Production System" titleRight={<span className="text-[11px]" style={{ color: FF.textFaint }}>Individual + Micro-Entrepreneur + Collective · one beneficiary can be in several systems</span>}>
         <KpiGrid cols={Math.max(production.byType.length, 1)}>
           {production.byType.map(t => (
@@ -1019,53 +1031,75 @@ export function BeneficiaryRegistrationDashboardPage() {
           ))}
         </KpiGrid>
       </SectionCard>
+      </Panel>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Panel id="productionByType">
         <SectionCard title="Production System by Beneficiary Type" titleRight={<span className="text-[11px]" style={{ color: FF.textFaint }}>No. of beneficiaries per system</span>}>
           <ProductionTable ib={ib.production} me={me.production} cb={cb.production} combined={production} />
         </SectionCard>
+        </Panel>
+        <Panel id="social">
         <SectionCard title="Social Category">
           <CategoryTable ib={ib.byCategory} me={me.byCategory} />
         </SectionCard>
+        </Panel>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Panel id="collectiveTypes">
         <SectionCard title="Collectives by Type">
           <CountBarChart data={cb.byType.map(t => ({ label: t.type, total: t.total }))} emptyLabel="No collective data" />
         </SectionCard>
+        </Panel>
+        <Panel id="resourceTypes">
         <SectionCard title="Resources by Type">
           <CountBarChart data={rs.byType.map(t => ({ label: t.areaAcre ? `${t.type} · ${t.areaAcre.toFixed(2)} ac` : t.type, total: t.total }))} emptyLabel="No resource data" />
         </SectionCard>
+        </Panel>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Panel id="freshwaterType">
         <SectionCard title="Freshwater · Type of Resource">
           <CountBarChart data={rs.byWaterBodyType.map(t => ({ label: t.type, total: t.total }))} emptyLabel="No freshwater wetland data" />
         </SectionCard>
+        </Panel>
+        <Panel id="freshwaterAccess">
         <SectionCard title="Freshwater · Resource Access">
           <CountBarChart data={rs.byAccess.map(t => ({ label: t.type, total: t.total }))} emptyLabel="No resource access recorded" />
         </SectionCard>
+        </Panel>
+        <Panel id="coastalType">
         <SectionCard title="Coastal · Type of Resource">
           <CountBarChart data={rs.byWetlandStructure.map(t => ({ label: t.type, total: t.total }))} emptyLabel="No coastal wetland data" />
         </SectionCard>
+        </Panel>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Panel id="resourceArea">
         <SectionCard title="Resource Area &amp; Rafts">
           <KpiGrid cols={2}>
             <KpiTile label="Total Area" value={`${rs.totalAreaAcre.toFixed(2)} ac`} />
             <KpiTile label="No. of Rafts" value={rs.totalRaftCount} />
           </KpiGrid>
         </SectionCard>
+        </Panel>
+        <Panel id="utility">
         <SectionCard title="Resource Utility">
           <UtilityTable data={rs.utilityBreakdown} />
         </SectionCard>
+        </Panel>
       </div>
 
+      <Panel id="byState">
       <SectionCard title="Registrations by State" titleRight={<span className="text-[11px]" style={{ color: FF.textFaint }}>Beneficiaries &amp; resources, blended</span>}>
         <StateStackedBarChart data={byState} />
       </SectionCard>
+      </Panel>
 
+      <Panel id="byLocation">
       <SectionCard title="Beneficiaries by Location" titleRight={<span className="text-[11px]" style={{ color: FF.textFaint }}>Click a state to drill into District &gt; Block &gt; Village</span>}>
         <LocationDrilldown
           key={filtersToQuery(filters)}
@@ -1080,11 +1114,14 @@ export function BeneficiaryRegistrationDashboardPage() {
           onGeocode={runGeocode}
         />
       </SectionCard>
+      </Panel>
 
+      <Panel id="resourceMap">
       <SectionCard title="Resource Locations" titleRight={<span className="text-[11px]" style={{ color: FF.textFaint }}>Coloured by registering beneficiary type</span>}>
         <ResourceLocationMap locations={resourceLocations} />
       </SectionCard>
-      </div>
+      </Panel>
+      </BuiltinLayout>
     </div>
   )
 }

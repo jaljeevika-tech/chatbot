@@ -2,7 +2,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cleanWidget, widgetSql, CATALOG, hrDashboardWidgets } from './custom.js'
+import { cleanWidget, widgetSql, CATALOG, hrDashboardWidgets, BUILTINS, defaultBuiltinWidgets } from './custom.js'
 
 test('rejects anything outside the catalog', () => {
   assert.throws(() => cleanWidget({ metric: 'users.count', chart: 'bar' }), /unknown metric/)
@@ -37,4 +37,15 @@ test('HR dashboard preset: valid widgets, dates relative to today', () => {
   assert.equal(ws.find(w => w.id === 'leavetype').from, '2025-04-01')   // leave year starts in April
   assert.equal(hrDashboardWidgets('2026-05-03').find(w => w.id === 'leavetype').from, '2026-04-01')
   for (const w of ws) assert.match(widgetSql(w, 'o').text, /^SELECT /)
+})
+
+test('built-in layouts: panels only on their own dashboard, defaults round-trip', () => {
+  assert.throws(() => cleanWidget({ chart: 'panel', panel: 'kpis' }), /unknown section/)            // not on a custom dashboard
+  assert.throws(() => cleanWidget({ chart: 'panel', panel: 'funnel' }, 0, 'project'), /unknown section/)
+  const p = cleanWidget({ chart: 'panel', panel: 'funnel', title: 'x', wide: true }, 0, 'orgdash')
+  assert.deepEqual(p, { id: 'p_funnel', chart: 'panel', panel: 'funnel', title: 'System drops — beneficiary → outcome funnel', wide: true })
+  for (const key of Object.keys(BUILTINS)) {
+    const d = defaultBuiltinWidgets(key)
+    assert.deepEqual(d.map((w, i) => cleanWidget(w, i, key)), d)
+  }
 })

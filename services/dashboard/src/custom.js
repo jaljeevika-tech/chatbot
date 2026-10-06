@@ -14,6 +14,10 @@
 // DELETE /superadmin/org/:id/custom-dashboards/:dashId
 // POST   /superadmin/org/:id/custom-dashboards/preview   { widget } → rows (builder live preview)
 // GET    /hr-dashboard                                   built-in HR dashboard (admins + HR users)
+// GET    /builtin-dashboards/:key?project=               org's saved layout for a built-in dashboard (null = as shipped)
+// GET    /superadmin/org/:id/custom-dashboards/builtin       every built-in dashboard: panels + saved layout
+// PUT    /superadmin/org/:id/custom-dashboards/builtin/:key  { widgets } — save the org's layout
+// DELETE /superadmin/org/:id/custom-dashboards/builtin/:key  reset to the shipped layout
 
 import { Router } from 'express'
 import { getPool } from './pool.js'
@@ -82,6 +86,41 @@ const DIM_SQL = {
 
 export const CHARTS = ['kpi', 'bar', 'line', 'pie', 'table']
 
+// Built-in dashboards a super admin can rearrange per org (db/migrations/086).
+// Each panel is an existing section of that page, wrapped in <Panel id> on the
+// frontend — keys must match those ids. [key, label, full width by default]
+export const BUILTINS = {
+  orgdash: { label: 'Org Dashboard', project: false, panels: [
+    ['kpis', 'Headline KPIs', true], ['growth', 'Combined growth — plan vs actual', false], ['health', 'Portfolio health', false],
+    ['footprint', 'Footprint', true], ['digital', 'Digital footprint', true], ['impact', 'Impact indicators', true],
+    ['funnel', 'System drops — beneficiary → outcome funnel', true], ['barriers', 'Barriers detected', false],
+    ['nextsteps', 'Recommended next steps', false], ['projects', 'Per-project comparison', true],
+  ] },
+  project: { label: 'Project Dashboard', project: true, panels: [
+    ['summary', 'Project summary', true], ['focus', 'Focus areas & AI narrative', true], ['kpis', 'Headline KPIs', true],
+    ['progress', 'Cumulative progress — plan vs actual', true], ['actionplan', 'Action plan progress', true],
+    ['beneficiaries', 'Beneficiaries', true], ['socio', 'Socio-economic impact', true], ['mis', 'MIS activity', true],
+    ['indicators', 'Indicator performance', true], ['compliance', 'Compliance & deadlines', true],
+  ] },
+  impact: { label: 'Impact Dashboard', project: false, panels: [
+    ['framework', 'Impact framework matrix', true], ['outcomes', 'Outcome indicators', true], ['toc', 'Theory of change', true],
+    ['sdg', 'SDG progress', true], ['logic', 'Logic model', true], ['quality', 'Data quality scorecard', true],
+  ] },
+  beneficiaries: { label: 'Beneficiary Registration dashboard', project: false, panels: [
+    ['coverage', 'Geographic coverage', true], ['totals', 'Registration totals', true], ['individuals', 'Individual beneficiaries', true],
+    ['micro', 'Micro-entrepreneurs', false], ['collectives', 'Collectives', false], ['production', 'Beneficiaries by production system', true],
+    ['productionByType', 'Production system by beneficiary type', false], ['social', 'Social category', false],
+    ['collectiveTypes', 'Collectives by type', false], ['resourceTypes', 'Resources by type', false],
+    ['freshwaterType', 'Freshwater · type of resource', false], ['freshwaterAccess', 'Freshwater · resource access', false],
+    ['coastalType', 'Coastal · type of resource', false], ['resourceArea', 'Resource area & rafts', false],
+    ['utility', 'Resource utility', false], ['byState', 'Registrations by state', true],
+    ['byLocation', 'Beneficiaries by location', true], ['resourceMap', 'Resource locations', true],
+  ] },
+}
+/** The shipped layout: every panel, in page order. */
+export const defaultBuiltinWidgets = key =>
+  BUILTINS[key].panels.map(([panel, title, wide]) => ({ id: `p_${panel}`, chart: 'panel', panel, title, wide }))
+
 // Flat, client-safe view: [{ key: 'trainings.people', label, source, groupBys: [{ key, label }] }]
 export const CATALOG = Object.entries(SOURCES).flatMap(([table, s]) => {
   const groupBys = [
@@ -101,9 +140,14 @@ const MAX_WIDGETS = 24
 const MAX_ROWS = 50 // ponytail: fixed top-50 per widget; add paging if a table widget ever needs more
 
 /** Validate one widget from the builder; returns a clean copy or throws a message. */
-export function cleanWidget(w, i = 0) {
+export function cleanWidget(w, i = 0, builtinKey = null) {
   const at = `Widget ${i + 1}`
   if (!w || typeof w !== 'object') throw new Error(`${at}: invalid`)
+  if (w.chart === 'panel') {
+    const p = builtinKey && BUILTINS[builtinKey].panels.find(([k]) => k === w.panel)
+    if (!p) throw new Error(`${at}: unknown section`)
+    return { id: `p_${p[0]}`, chart: 'panel', panel: p[0], title: p[1], wide: !!w.wide }
+  }
   const meta = CATALOG_BY_KEY.get(w.metric)
   if (!meta) throw new Error(`${at}: unknown metric`)
   if (!CHARTS.includes(w.chart)) throw new Error(`${at}: unknown chart type`)
@@ -181,7 +225,7 @@ router.get('/custom-dashboards', async (req, res) => {
   if (!req.user?.orgId) return res.status(401).json({ error: 'Authentication required' })
   try {
     const { rows } = await getPool().query(
-      `SELECT ${COLS} FROM custom_dashboards WHERE org_id = $1 AND (visible_to = 'all' OR $2) ORDER BY sort_order, title`,
+      `SELECT ${COLS} FROM custom_dashboards WHERE org_id = $1 AND builtin_key IS NULL AND (visible_to = 'all' OR $2) ORDER BY sort_order, title`,
       [req.user.orgId, isAdmin(req.user.role)]
     )
     res.json(rows)
@@ -198,7 +242,7 @@ router.get('/custom-dashboards/:id/data', async (req, res) => {
   if (!UUID_RE.test(req.params.id)) return res.status(404).json({ error: 'Not found' })
   try {
     const { rows } = await getPool().query(
-      `SELECT widgets FROM custom_dashboards WHERE id = $1 AND org_id = $2 AND (visible_to = 'all' OR $3)`,
+      `SELECT widgets FROM custom_dashboards WHERE id = $1 AND org_id = $2 AND builtin_key IS NULL AND (visible_to = 'all' OR $3)`,
       [req.params.id, req.user.orgId, isAdmin(req.user.role)]
     )
     if (!rows[0]) return res.status(404).json({ error: 'Not found' })
@@ -249,6 +293,34 @@ router.get('/hr-dashboard', async (req, res) => {
   }
 })
 
+// ── Built-in dashboards: the org's saved layout ─────────────────────────────
+// Every built-in dashboard reads behind requireEditor, so other roles (and orgs
+// with no saved layout) get { widgets: null } and the page renders as shipped.
+const PROJECT_RE = /^[\w.-]{1,100}$/
+
+router.get('/builtin-dashboards/:key', async (req, res) => {
+  if (!req.user?.orgId) return res.status(401).json({ error: 'Authentication required' })
+  const b = BUILTINS[req.params.key]
+  if (!b) return res.status(404).json({ error: 'Not found' })
+  if (!['admin', 'superadmin', 'manager'].includes(req.user.role)) return res.json({ widgets: null })
+  try {
+    const { rows } = await getPool().query(
+      `SELECT widgets FROM custom_dashboards WHERE org_id = $1 AND builtin_key = $2`, [req.user.orgId, req.params.key])
+    if (!rows[0]) return res.json({ widgets: null })
+    const widgets = rows[0].widgets
+    // On the Project Dashboard a widget with no project of its own follows the open project.
+    const project = b.project && PROJECT_RE.test(String(req.query.project || '')) ? String(req.query.project) : ''
+    const catalog = widgets.filter(w => w.chart !== 'panel')
+      .map(w => (project && !w.projectKey && CATALOG_BY_KEY.get(w.metric)?.projectScoped ? { ...w, projectKey: project } : w))
+    res.json({ widgets, data: await runAll(req.user.orgId, catalog) })
+  } catch (e) {
+    // Table/column missing (migration 085/086 not run) → behave as "not customised".
+    if (e.code === '42P01' || e.code === '42703') return res.json({ widgets: null })
+    console.error('[builtin-dashboards]', e)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 // ── Super admin builder ─────────────────────────────────────────────────────
 // The monolith's /superadmin guard already ran; checked again because the
 // Cloud Run service only trusts the forwarded role.
@@ -263,7 +335,7 @@ router.get(`${SA}/catalog`, (_req, res) => res.json({ metrics: CATALOG, charts: 
 
 router.get(SA, async (req, res) => {
   try {
-    const { rows } = await getPool().query(`SELECT ${COLS} FROM custom_dashboards WHERE org_id = $1 ORDER BY sort_order, title`, [req.params.id])
+    const { rows } = await getPool().query(`SELECT ${COLS} FROM custom_dashboards WHERE org_id = $1 AND builtin_key IS NULL ORDER BY sort_order, title`, [req.params.id])
     res.json(rows)
   } catch (e) {
     console.error('[custom-dashboards] sa list', e)
@@ -287,7 +359,7 @@ async function save(req, res) {
     const { rows } = dashId
       ? await getPool().query(
           `UPDATE custom_dashboards SET title = $2, visible_to = $3, sort_order = $4, widgets = $5, updated_by = $6, updated_at = now()
-           WHERE org_id = $1 AND id = $7 RETURNING ${COLS}`, [...args, dashId])
+           WHERE org_id = $1 AND id = $7 AND builtin_key IS NULL RETURNING ${COLS}`, [...args, dashId])
       : await getPool().query(
           `INSERT INTO custom_dashboards (org_id, title, visible_to, sort_order, widgets, updated_by)
            VALUES ($1, $2, $3, $4, $5, $6) RETURNING ${COLS}`, args)
@@ -302,10 +374,68 @@ async function save(req, res) {
 router.post(SA, save)
 router.put(`${SA}/:dashId`, save)
 
+router.get(`${SA}/builtin`, async (req, res) => {
+  try {
+    const { rows } = await getPool().query(
+      `SELECT builtin_key, widgets, updated_at FROM custom_dashboards WHERE org_id = $1 AND builtin_key IS NOT NULL`, [req.params.id])
+    const saved = new Map(rows.map(r => [r.builtin_key, r]))
+    res.json(Object.entries(BUILTINS).map(([key, b]) => ({
+      key, label: b.label, projectScoped: b.project,
+      panels: b.panels.map(([k, label, wide]) => ({ key: k, label, wide })),
+      defaults: defaultBuiltinWidgets(key),
+      widgets: saved.get(key)?.widgets ?? null,
+      updated_at: saved.get(key)?.updated_at ?? null,
+    })))
+  } catch (e) {
+    console.error('[builtin-dashboards] sa list', e)
+    const notMigrated = e.code === '42P01' || e.code === '42703'
+    res.status(notMigrated ? 503 : 500).json({ error: notMigrated ? 'Run migration 086 first' : 'Internal server error' })
+  }
+})
+
+router.put(`${SA}/builtin/:key`, async (req, res) => {
+  const key = req.params.key
+  if (!BUILTINS[key]) return res.status(404).json({ error: 'Not found' })
+  let widgets
+  try {
+    const list = req.body?.widgets
+    if (!Array.isArray(list) || !list.length || list.length > MAX_WIDGETS + BUILTINS[key].panels.length) throw new Error('Add at least one section or widget')
+    widgets = list.map((w, i) => cleanWidget(w, i, key))
+    const ids = widgets.map(w => w.id)
+    if (new Set(ids).size !== ids.length) throw new Error('Each section can only appear once')
+  } catch (e) { return res.status(400).json({ error: e.message }) }
+  try {
+    const { rows } = await getPool().query(
+      `INSERT INTO custom_dashboards (org_id, builtin_key, title, widgets, updated_by)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (org_id, builtin_key) WHERE builtin_key IS NOT NULL
+       DO UPDATE SET widgets = EXCLUDED.widgets, updated_by = EXCLUDED.updated_by, updated_at = now()
+       RETURNING id, builtin_key, widgets, updated_at`,
+      [req.params.id, key, BUILTINS[key].label, JSON.stringify(widgets), req.user.uid || null])
+    res.json(rows[0])
+  } catch (e) {
+    if (e.code === '23503') return res.status(404).json({ error: 'Organisation not found' })
+    console.error('[builtin-dashboards] save', e)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.delete(`${SA}/builtin/:key`, async (req, res) => {
+  if (!BUILTINS[req.params.key]) return res.status(404).json({ error: 'Not found' })
+  try {
+    const { rows } = await getPool().query(
+      `DELETE FROM custom_dashboards WHERE org_id = $1 AND builtin_key = $2 RETURNING id`, [req.params.id, req.params.key])
+    res.json({ ok: true, id: rows[0]?.id ?? null })
+  } catch (e) {
+    console.error('[builtin-dashboards] reset', e)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 router.delete(`${SA}/:dashId`, async (req, res) => {
   if (!UUID_RE.test(req.params.dashId)) return res.status(404).json({ error: 'Not found' })
   try {
-    const { rowCount } = await getPool().query(`DELETE FROM custom_dashboards WHERE org_id = $1 AND id = $2`, [req.params.id, req.params.dashId])
+    const { rowCount } = await getPool().query(`DELETE FROM custom_dashboards WHERE org_id = $1 AND id = $2 AND builtin_key IS NULL`, [req.params.id, req.params.dashId])
     if (!rowCount) return res.status(404).json({ error: 'Not found' })
     res.json({ ok: true, id: req.params.dashId })
   } catch (e) {

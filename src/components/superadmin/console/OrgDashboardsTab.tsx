@@ -1,18 +1,26 @@
-// Custom dashboard builder for one org. Widgets come from the dashboard service's
-// fixed metric catalog (services/dashboard/src/custom.js); the org sees the result
-// in its "Custom Dashboards" tab.
+// Dashboard builder for one org. Widgets come from the dashboard service's fixed
+// metric catalog (services/dashboard/src/custom.js). Custom dashboards appear in the
+// org's "Custom Dashboards" tab; built-in dashboards (Org / Project / Impact /
+// Beneficiary Registration) can be rearranged per org — sections reordered, resized
+// or removed, catalog widgets added — and reset to the shipped layout.
 
 import { useCallback, useEffect, useState } from 'react'
-import { Plus, Trash2, ArrowUp, ArrowDown, Eye, LayoutDashboard } from 'lucide-react'
+import { Plus, Trash2, ArrowUp, ArrowDown, Eye, LayoutDashboard, RotateCcw } from 'lucide-react'
 import { useToast } from '../../../context/ToastContext'
 import { saApi, errMsg } from './api'
 import type { OrgRow } from './types'
 import { Button, Card, Field, Input, Select, Switch, EmptyState, Skeleton, Badge, useConfirm, fmtDateTime } from './ui'
 import { WidgetView, type ChartType, type CustomDashboard, type Widget, type WidgetData } from '../../dashboard/CustomDashboardPage'
+import { isPanel, type LayoutWidget, type PanelWidget } from '../../dashboard/BuiltinLayout'
 
 type CatalogMetric = { key: string; label: string; source: string; dated: boolean; projectScoped: boolean; groupBys: { key: string; label: string }[] }
 type Catalog = { metrics: CatalogMetric[]; charts: ChartType[] }
-type Draft = Omit<CustomDashboard, 'id'> & { id?: string; updated_at?: string }
+type Draft = Omit<CustomDashboard, 'id' | 'widgets'> & { id?: string; updated_at?: string; widgets: LayoutWidget[] }
+type BuiltinInfo = {
+  key: string; label: string; projectScoped: boolean
+  panels: { key: string; label: string; wide: boolean }[]
+  defaults: PanelWidget[]; widgets: LayoutWidget[] | null; updated_at: string | null
+}
 
 const CHART_LABEL: Record<ChartType, string> = { kpi: 'Single number', bar: 'Bar chart', line: 'Line chart', pie: 'Pie chart', table: 'Table' }
 const newId = () => Math.random().toString(36).slice(2, 10)
@@ -21,8 +29,8 @@ function blankWidget(m: CatalogMetric): Widget {
   return { id: newId(), title: m.label, metric: m.key, chart: 'kpi', groupBy: 'none', projectKey: '', from: '', to: '', wide: false }
 }
 
-function WidgetEditor({ w, catalog, orgId, onChange, onMove, onRemove, first, last }: {
-  w: Widget; catalog: Catalog; orgId: string; first: boolean; last: boolean
+function WidgetEditor({ w, catalog, orgId, onChange, onMove, onRemove, first, last, followsProject }: {
+  w: Widget; catalog: Catalog; orgId: string; first: boolean; last: boolean; followsProject?: boolean
   onChange: (w: Widget) => void; onMove: (dir: -1 | 1) => void; onRemove: () => void
 }) {
   const { toast } = useToast()
@@ -70,7 +78,7 @@ function WidgetEditor({ w, catalog, orgId, onChange, onMove, onRemove, first, la
             {meta?.groupBys.map(g => <option key={g.key} value={g.key}>{g.label}</option>)}
           </Select>
         )}</Field>
-        <Field label="Project key" hint={meta?.projectScoped ? 'Blank = all projects' : 'Org-wide registry'}>{id => (
+        <Field label="Project key" hint={!meta?.projectScoped ? 'Org-wide registry' : followsProject ? 'Blank = the project being viewed' : 'Blank = all projects'}>{id => (
           <Input id={id} value={w.projectKey} disabled={!meta?.projectScoped} placeholder="e.g. kosi-2026" onChange={e => set({ projectKey: e.target.value.trim() })} />
         )}</Field>
         <div className="grid grid-cols-2 gap-2">
@@ -92,26 +100,55 @@ function WidgetEditor({ w, catalog, orgId, onChange, onMove, onRemove, first, la
   )
 }
 
-function DashboardEditor({ org, catalog, initial, onSaved, onCancel }: {
-  org: OrgRow; catalog: Catalog; initial: Draft; onSaved: () => void; onCancel: () => void
+function PanelRow({ w, onChange, onMove, onRemove, first, last }: {
+  w: PanelWidget; first: boolean; last: boolean
+  onChange: (w: PanelWidget) => void; onMove: (dir: -1 | 1) => void; onRemove: () => void
+}) {
+  return (
+    <div className="rounded-lg border border-dashed border-sa-border px-4 py-2 flex flex-wrap items-center justify-between gap-2 bg-sa-subtle">
+      <div className="min-w-0">
+        <div className="text-sm font-medium text-sa-text">{w.title}</div>
+        <div className="text-xs text-sa-muted">Built-in section</div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="w-40"><Switch checked={w.wide} onChange={wide => onChange({ ...w, wide })} label="Full width" /></div>
+        <Button size="sm" aria-label="Move up" disabled={first} icon={<ArrowUp className="w-3.5 h-3.5" />} onClick={() => onMove(-1)} />
+        <Button size="sm" aria-label="Move down" disabled={last} icon={<ArrowDown className="w-3.5 h-3.5" />} onClick={() => onMove(1)} />
+        <Button size="sm" variant="danger" icon={<Trash2 className="w-3.5 h-3.5" />} onClick={onRemove}>Remove</Button>
+      </div>
+    </div>
+  )
+}
+
+function DashboardEditor({ org, catalog, initial, builtin, onSaved, onCancel }: {
+  org: OrgRow; catalog: Catalog; initial: Draft; builtin?: BuiltinInfo; onSaved: () => void; onCancel: () => void
 }) {
   const { toast } = useToast()
   const { confirm, dialog } = useConfirm()
   const [d, setD] = useState<Draft>(initial)
   const [saving, setSaving] = useState(false)
-  const setW = (widgets: Widget[]) => setD(prev => ({ ...prev, widgets }))
+  const setW = (widgets: LayoutWidget[]) => setD(prev => ({ ...prev, widgets }))
   const base = `/api/superadmin/org/${org.id}/custom-dashboards`
 
   const save = async () => {
     setSaving(true)
     try {
-      const body = { title: d.title, visible_to: d.visible_to, sort_order: d.sort_order, widgets: d.widgets }
-      await saApi(d.id ? `${base}/${d.id}` : base, { method: d.id ? 'PUT' : 'POST', body })
+      if (builtin) await saApi(`${base}/builtin/${builtin.key}`, { method: 'PUT', body: { widgets: d.widgets } })
+      else {
+        const body = { title: d.title, visible_to: d.visible_to, sort_order: d.sort_order, widgets: d.widgets }
+        await saApi(d.id ? `${base}/${d.id}` : base, { method: d.id ? 'PUT' : 'POST', body })
+      }
       toast('Dashboard saved'); onSaved()
     } catch (e) { toast(errMsg(e), 'error') }
     finally { setSaving(false) }
   }
   const remove = async () => {
+    if (builtin) {
+      if (!await confirm({ title: `Reset ${builtin.label}?`, body: `${org.name} will see the standard layout again. Added widgets are discarded.`, confirmLabel: 'Reset', danger: true })) return
+      try { await saApi(`${base}/builtin/${builtin.key}`, { method: 'DELETE' }); toast('Reset to the standard layout'); onSaved() }
+      catch (e) { toast(errMsg(e), 'error') }
+      return
+    }
     if (!d.id || !await confirm({ title: `Delete “${d.title}”?`, body: `${org.name}'s users will no longer see it.`, confirmLabel: 'Delete', danger: true })) return
     try { await saApi(`${base}/${d.id}`, { method: 'DELETE' }); toast('Dashboard deleted'); onSaved() }
     catch (e) { toast(errMsg(e), 'error') }
@@ -119,32 +156,54 @@ function DashboardEditor({ org, catalog, initial, onSaved, onCancel }: {
   const move = (i: number, dir: -1 | 1) => {
     const next = [...d.widgets]; [next[i], next[i + dir]] = [next[i + dir], next[i]]; setW(next)
   }
+  const catalogCount = d.widgets.filter(w => !isPanel(w)).length
+  const missingPanels = builtin ? builtin.panels.filter(p => !d.widgets.some(w => isPanel(w) && w.panel === p.key)) : []
 
   return (
-    <Card title={d.id ? 'Edit dashboard' : 'New dashboard'}
+    <Card title={builtin ? `Customise ${builtin.label}` : d.id ? 'Edit dashboard' : 'New dashboard'}
+      description={builtin ? `Reorder, resize or remove sections and add catalog widgets. Only ${org.name}'s managers and admins see this dashboard.` : undefined}
       actions={<>
-        {d.id && <Button variant="danger" size="sm" icon={<Trash2 className="w-3.5 h-3.5" />} onClick={remove}>Delete</Button>}
+        {builtin
+          ? builtin.widgets && <Button variant="danger" size="sm" icon={<RotateCcw className="w-3.5 h-3.5" />} onClick={remove}>Reset to default</Button>
+          : d.id && <Button variant="danger" size="sm" icon={<Trash2 className="w-3.5 h-3.5" />} onClick={remove}>Delete</Button>}
         <Button size="sm" onClick={onCancel}>Cancel</Button>
-        <Button variant="primary" size="sm" loading={saving} disabled={!d.title.trim()} onClick={save}>Save</Button>
+        <Button variant="primary" size="sm" loading={saving} disabled={builtin ? !d.widgets.length : !d.title.trim()} onClick={save}>Save</Button>
       </>}>
       <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Field label="Title">{id => <Input id={id} value={d.title} maxLength={120} onChange={e => setD({ ...d, title: e.target.value })} />}</Field>
-          <Field label="Visible to">{id => (
-            <Select id={id} value={d.visible_to} onChange={e => setD({ ...d, visible_to: e.target.value as Draft['visible_to'] })}>
-              <option value="all">Everyone in the organisation</option>
-              <option value="admin">Admins only</option>
+        {!builtin && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Field label="Title">{id => <Input id={id} value={d.title} maxLength={120} onChange={e => setD({ ...d, title: e.target.value })} />}</Field>
+            <Field label="Visible to">{id => (
+              <Select id={id} value={d.visible_to} onChange={e => setD({ ...d, visible_to: e.target.value as Draft['visible_to'] })}>
+                <option value="all">Everyone in the organisation</option>
+                <option value="admin">Admins only</option>
+              </Select>
+            )}</Field>
+            <Field label="Order" hint="Lower shows first">{id => <Input id={id} type="number" value={d.sort_order} onChange={e => setD({ ...d, sort_order: parseInt(e.target.value) || 0 })} />}</Field>
+          </div>
+        )}
+        {d.widgets.map((w, i) => {
+          const common = {
+            first: i === 0, last: i === d.widgets.length - 1,
+            onMove: (dir: -1 | 1) => move(i, dir), onRemove: () => setW(d.widgets.filter(x => x.id !== w.id)),
+          }
+          return isPanel(w)
+            ? <PanelRow key={w.id} w={w} {...common} onChange={nw => setW(d.widgets.map(x => (x.id === w.id ? nw : x)))} />
+            : <WidgetEditor key={w.id} w={w} catalog={catalog} orgId={org.id} followsProject={builtin?.projectScoped} {...common}
+                onChange={nw => setW(d.widgets.map(x => (x.id === w.id ? nw : x)))} />
+        })}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button icon={<Plus className="w-4 h-4" />} disabled={catalogCount >= 24} onClick={() => setW([...d.widgets, blankWidget(catalog.metrics[0])])}>Add widget</Button>
+          {missingPanels.length > 0 && (
+            <Select aria-label="Add a removed section back" className="w-auto" value=""
+              onChange={e => {
+                const p = builtin?.panels.find(x => x.key === e.target.value)
+                if (p) setW([...d.widgets, { id: `p_${p.key}`, chart: 'panel', panel: p.key, title: p.label, wide: p.wide }])
+              }}>
+              <option value="">Add a section back…</option>
+              {missingPanels.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
             </Select>
-          )}</Field>
-          <Field label="Order" hint="Lower shows first">{id => <Input id={id} type="number" value={d.sort_order} onChange={e => setD({ ...d, sort_order: parseInt(e.target.value) || 0 })} />}</Field>
-        </div>
-        {d.widgets.map((w, i) => (
-          <WidgetEditor key={w.id} w={w} catalog={catalog} orgId={org.id} first={i === 0} last={i === d.widgets.length - 1}
-            onChange={nw => setW(d.widgets.map(x => (x.id === w.id ? nw : x)))}
-            onMove={dir => move(i, dir)} onRemove={() => setW(d.widgets.filter(x => x.id !== w.id))} />
-        ))}
-        <div>
-          <Button icon={<Plus className="w-4 h-4" />} disabled={d.widgets.length >= 24} onClick={() => setW([...d.widgets, blankWidget(catalog.metrics[0])])}>Add widget</Button>
+          )}
         </div>
       </div>
       {dialog}
@@ -155,47 +214,85 @@ function DashboardEditor({ org, catalog, initial, onSaved, onCancel }: {
 export function OrgDashboardsTab({ org }: { org: OrgRow }) {
   const [list, setList] = useState<CustomDashboard[] | null>(null)
   const [catalog, setCatalog] = useState<Catalog | null>(null)
+  const [builtins, setBuiltins] = useState<BuiltinInfo[] | null>(null)
+  const [builtinError, setBuiltinError] = useState('')
   const [editing, setEditing] = useState<Draft | null>(null)
+  const [editingBuiltin, setEditingBuiltin] = useState<BuiltinInfo | null>(null)
   const [error, setError] = useState('')
   const base = `/api/superadmin/org/${org.id}/custom-dashboards`
 
   const load = useCallback(() => {
-    setError('')
+    setError(''); setBuiltinError('')
     Promise.all([saApi<CustomDashboard[]>(base), saApi<Catalog>(`${base}/catalog`)])
       .then(([l, c]) => { setList(l); setCatalog(c) })
       .catch(e => setError(errMsg(e)))
+    saApi<BuiltinInfo[]>(`${base}/builtin`).then(setBuiltins).catch(e => setBuiltinError(errMsg(e)))
   }, [base])
   useEffect(load, [load])
 
+  const done = () => { setEditing(null); setEditingBuiltin(null); load() }
+
   if (error) return <Card><p className="text-sm text-sa-danger">{error}</p></Card>
   if (!list || !catalog) return <Skeleton className="h-40" />
-  if (editing) return <DashboardEditor org={org} catalog={catalog} initial={editing} onCancel={() => setEditing(null)} onSaved={() => { setEditing(null); load() }} />
+  if (editingBuiltin) return (
+    <DashboardEditor key={editingBuiltin.key} org={org} catalog={catalog} builtin={editingBuiltin}
+      initial={{ title: editingBuiltin.label, visible_to: 'all', sort_order: 0, widgets: editingBuiltin.widgets ?? editingBuiltin.defaults }}
+      onCancel={() => setEditingBuiltin(null)} onSaved={done} />
+  )
+  if (editing) return <DashboardEditor org={org} catalog={catalog} initial={editing} onCancel={() => setEditing(null)} onSaved={done} />
 
   return (
-    <Card title="Custom dashboards" description={`Shown to ${org.name}'s users in a “Custom Dashboards” tab.`}
-      actions={<Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />}
-        onClick={() => setEditing({ title: '', visible_to: 'all', sort_order: list.length, widgets: [] })}>New dashboard</Button>}
-      padded={list.length > 0}>
-      {!list.length ? (
-        <EmptyState icon={<LayoutDashboard className="w-8 h-8" />} title="No custom dashboards yet">
-          Pick metrics from the catalog (training, MIS, beneficiaries, income, spend…) and choose how to show each one.
-        </EmptyState>
-      ) : (
-        <ul className="divide-y divide-sa-border">
-          {list.map(d => (
-            <li key={d.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-              <div className="min-w-0">
-                <div className="text-sm font-semibold text-sa-text">{d.title}</div>
-                <div className="text-xs text-sa-muted">{d.widgets.length} widget{d.widgets.length === 1 ? '' : 's'} · updated {fmtDateTime(d.updated_at)}</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge tone={d.visible_to === 'admin' ? 'warning' : 'success'}>{d.visible_to === 'admin' ? 'Admins only' : 'Everyone'}</Badge>
-                <Button size="sm" onClick={() => setEditing(d)}>Edit</Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
+    <div className="flex flex-col gap-6">
+      <Card title="Built-in dashboards" description={`Rearrange the standard dashboards for ${org.name}: reorder, resize or remove sections, and add catalog widgets.`} padded={false}>
+        {builtinError ? <p className="text-sm text-sa-danger p-5">{builtinError}</p>
+          : !builtins ? <Skeleton className="h-24 m-5" />
+          : (
+            <ul className="divide-y divide-sa-border">
+              {builtins.map(b => (
+                <li key={b.key} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-sa-text">{b.label}</div>
+                    <div className="text-xs text-sa-muted">
+                      {b.widgets
+                        ? `${b.widgets.filter(isPanel).length} of ${b.panels.length} sections · ${b.widgets.filter(w => !isPanel(w)).length} added widgets · updated ${fmtDateTime(b.updated_at)}`
+                        : `Standard layout · ${b.panels.length} sections`}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge tone={b.widgets ? 'primary' : 'neutral'}>{b.widgets ? 'Customised' : 'Default'}</Badge>
+                    <Button size="sm" onClick={() => setEditingBuiltin(b)}>Customise</Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+      </Card>
+
+      <Card title="Custom dashboards" description={`Shown to ${org.name}'s users in a “Custom Dashboards” tab.`}
+        actions={<Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />}
+          onClick={() => setEditing({ title: '', visible_to: 'all', sort_order: list.length, widgets: [] })}>New dashboard</Button>}
+        padded={list.length > 0}>
+        {!list.length ? (
+          <EmptyState icon={<LayoutDashboard className="w-8 h-8" />} title="No custom dashboards yet">
+            Pick metrics from the catalog (training, MIS, beneficiaries, income, spend…) and choose how to show each one.
+          </EmptyState>
+        ) : (
+          <ul className="divide-y divide-sa-border">
+            {list.map(d => (
+              <li key={d.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-sa-text">{d.title}</div>
+                  <div className="text-xs text-sa-muted">{d.widgets.length} widget{d.widgets.length === 1 ? '' : 's'} · updated {fmtDateTime(d.updated_at)}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge tone={d.visible_to === 'admin' ? 'warning' : 'success'}>{d.visible_to === 'admin' ? 'Admins only' : 'Everyone'}</Badge>
+                  <Button size="sm" onClick={() => setEditing({ ...d })}>Edit</Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
   )
 }
