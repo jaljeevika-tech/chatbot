@@ -317,6 +317,7 @@ export async function requestLeave(client, ctx, payload, timing) {
     userIds: status === 'pending_manager' ? [me.managerId] : (await hrApproverIds(client, orgId)).filter(id => id !== me.id),
     title: `Leave request from ${me.name}`,
     body: `${leaveLine(leave)}${reason ? `. Reason: ${reason}` : ''}. Waiting for your approval.`,
+    link: 'approvals', approve: { kind: 'leave', id: leave.id },
   })
   push(ctx, {
     event: 'leaveDecided', userIds: [me.id],
@@ -412,6 +413,7 @@ export async function decideLeave(client, ctx, payload) {
       userIds: (await hrApproverIds(client, orgId)).filter(id => id !== leave.userId),
       title: `Leave waiting for HR approval: ${leave.userName}`,
       body: `${leaveLine(leave)}. Approved by ${me.name}${comment ? ` ("${comment}")` : ''}.`,
+      link: 'approvals', approve: { kind: 'leave', id: leave.id },
     })
     push(ctx, {
       event: 'leaveDecided', userIds: [leave.userId],
@@ -423,6 +425,7 @@ export async function decideLeave(client, ctx, payload) {
       event: 'leaveDecided', userIds: [leave.userId],
       title: `Your leave was ${leave.status === 'approved' ? 'approved' : 'rejected'}`,
       body: `${leaveLine(leave)}. By ${me.name}${comment ? `: "${comment}"` : ''}.`,
+      link: 'leave',
     })
     // The manager who forwarded it to HR hears the final word too.
     if (req.status === 'pending_hr' && req.manager_action_by && req.manager_action_by !== me.id) {

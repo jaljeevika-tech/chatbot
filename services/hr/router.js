@@ -453,6 +453,10 @@ export function createHrRouter() {
     if (!/^[a-z0-9_]{0,512}$/.test(n.whatsappTemplate)) {
       throw new HttpError(422, 'WhatsApp template names use lowercase letters, numbers and underscores only.')
     }
+    n.whatsappApprovalTemplate = String(n.whatsappApprovalTemplate ?? '').trim()
+    if (!/^[a-z0-9_]{0,512}$/.test(n.whatsappApprovalTemplate)) {
+      throw new HttpError(422, 'WhatsApp template names use lowercase letters, numbers and underscores only.')
+    }
     if (!/^[a-z]{2,3}(_[A-Z]{2})?$/.test(n.whatsappLang)) throw new HttpError(422, 'WhatsApp language looks like en or en_US.')
     for (const k of ['reminderTime', 'checkOutReminderTime', 'autoCheckOutTime', 'approvalReminderTime']) {
       if (!TIME_RE.test(n[k] || '')) throw new HttpError(422, 'Reminder times look like 11:00.')

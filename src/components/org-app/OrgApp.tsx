@@ -148,6 +148,17 @@ export function OrgApp() {
     store(FM_SECTION_KEY, s)
   }
 
+  // Links in Finance emails / WhatsApp: #finance/<advance|settlement|ledger>/<id>.
+  const fmCtx = fm.ctx
+  useEffect(() => {
+    const m = /^#finance\/(advance|settlement|ledger)\/([0-9a-f-]{36})$/i.exec(window.location.hash)
+    if (!m || !fmCtx) return
+    history.replaceState(null, '', '#finance')
+    setFmSection(ENTITY_SECTION[m[1]])
+    const open = { advance: fmCtx.openAdvance, settlement: fmCtx.openSettlement, ledger: fmCtx.openLedger }
+    open[m[1] as keyof typeof open](m[2])
+  }, [fmCtx, route]) // eslint-disable-line react-hooks/exhaustive-deps
+
   async function refreshAll() {
     setRefreshing(true)
     try {

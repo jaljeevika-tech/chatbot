@@ -1,7 +1,10 @@
 // HR notifications over the same channels as services/finance/src/notify.js: email
 // (address from hr_employee_profiles.email) and WhatsApp (one approved template with
 // a single {{1}}, set in HR Settings). Queued in the transaction and sent after
-// COMMIT by dispatch(); best-effort, failures are logged only.
+// COMMIT by dispatch(); best-effort, failures are logged only. Every message
+// carries a link into the FieldFlow Org app (/org); leave approvals go out on
+// the optional approval template, whose quick-reply "Approve" button is handled
+// by lib/waApprovals.js.
 
 import { withOrg } from './db.js'
 import { decryptSecret } from './crypto.js'
@@ -16,6 +19,8 @@ export const DEFAULT_NOTIFY = {
   whatsappEnabled:      false,
   whatsappTemplate:     '',
   whatsappLang:         'en',
+  // Template with body {{1}} + one quick-reply button ("Approve"); blank = no button.
+  whatsappApprovalTemplate: '',
   events:               Object.fromEntries(EVENTS.map(e => [e, true])),
   // Missed check-in reminder goes out at this org-local time (field shifts
   // have no start time to measure from).
@@ -54,20 +59,29 @@ async function getTransport() {
   return _transport
 }
 
+/** Deep link into the Org app; msg.link is its hash route. Blank without APP_BASE_URL. */
+export function appLink(msg) {
+  const base = process.env.APP_BASE_URL
+  const route = msg.link
+    || (['approvalReminder', 'leaveCancelled'].includes(msg.event) ? 'approvals'
+      : /^leave/.test(msg.event || '') ? 'leave' : 'attendance')
+  return base ? `${base.replace(/\/$/, '')}/org/#${route}` : ''
+}
+
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
 async function sendEmail(to, msg) {
   const transport = await getTransport()
   if (!transport) throw new Error('Email is not configured on the server (SMTP_USER / SMTP_PASS).')
-  const link = process.env.APP_BASE_URL ? `${process.env.APP_BASE_URL.replace(/\/$/, '')}/#hr` : ''
+  const link = appLink(msg)
   await transport.sendMail({
     from:    process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
     subject: `[HR] ${msg.title}`,
-    text:    `${msg.title}\n\n${msg.body || ''}${link ? `\n\nOpen HR Management: ${link}` : ''}`,
+    text:    `${msg.title}\n\n${msg.body || ''}${link ? `\n\nView details on FieldFlow: ${link}` : ''}`,
     html:    `<p style="font:15px/1.5 sans-serif;margin:0 0 8px"><strong>${esc(msg.title)}</strong></p>`
            + (msg.body ? `<p style="font:14px/1.5 sans-serif;margin:0 0 12px;color:#333">${esc(msg.body)}</p>` : '')
-           + (link ? `<p style="font:14px sans-serif"><a href="${esc(link)}">Open HR Management</a></p>` : ''),
+           + (link ? `<p style="font:14px sans-serif"><a href="${esc(link)}">View details on FieldFlow</a></p>` : ''),
   })
 }
 
@@ -110,12 +124,18 @@ async function sameLangHint(cfg, name, lang) {
     + 'If it was approved in the last hour, wait and retry; otherwise check the template in Meta WhatsApp Manager.'
 }
 
+/** Quick-reply payload read back by lib/waApprovals.js: ffa:<kind>:<stage>:<id>. */
+export const approvePayload = a => `ffa:${a.kind}:${a.stage || '-'}:${a.id}`
+
 async function sendWhatsApp(cfg, settings, phone, msg) {
   const to = waNumber(phone)
   if (!to) throw new Error('No valid phone number.')
   // Template params may not contain newlines/tabs or long runs of spaces.
-  const text = `${msg.title}${msg.body ? ' — ' + msg.body : ''}`.replace(/\s+/g, ' ').slice(0, 1000)
-  const name = settings.whatsappTemplate
+  const link = appLink(msg)
+  const text = `${msg.title}${msg.body ? ' — ' + msg.body : ''}`.replace(/\s+/g, ' ').slice(0, 900)
+    + (link ? ` Details: ${link}` : '')
+  const approval = msg.approve && settings.whatsappApprovalTemplate
+  const name = approval ? settings.whatsappApprovalTemplate : settings.whatsappTemplate
   const send = (code) => fetch(`https://graph.facebook.com/v19.0/${cfg.phone_number_id}/messages`, {
     method:  'POST',
     headers: { Authorization: `Bearer ${cfg.access_token}`, 'Content-Type': 'application/json' },
@@ -123,7 +143,11 @@ async function sendWhatsApp(cfg, settings, phone, msg) {
       messaging_product: 'whatsapp',
       to,
       type: 'template',
-      template: { name, language: { code }, components: [{ type: 'body', parameters: [{ type: 'text', text }] }] },
+      template: { name, language: { code }, components: [
+        { type: 'body', parameters: [{ type: 'text', text }] },
+        ...(approval ? [{ type: 'button', sub_type: 'quick_reply', index: '0',
+          parameters: [{ type: 'payload', payload: approvePayload(msg.approve) }] }] : []),
+      ] },
     }),
     signal: AbortSignal.timeout(8000),
   })
@@ -151,7 +175,7 @@ export async function hrApproverIds(client, orgId) {
   return admins.map(r => r.id)
 }
 
-/** Send queued { event, userIds, title, body } after COMMIT; one result per send, never throws. */
+/** Send queued { event, userIds, title, body, link?, approve? } after COMMIT; one result per send, never throws. */
 export async function dispatch(orgId, queued, { force = false } = {}) {
   if (!queued?.length) return []
   const results = []

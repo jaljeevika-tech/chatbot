@@ -2,7 +2,10 @@
 // (queueNotifications), so nothing is lost or sent for a rolled-back change. Email
 // (SMTP_USER/SMTP_PASS, optional SMTP_FROM/HOST/PORT) and WhatsApp (one approved
 // utility template with a single {{1}}, required outside the 24h window) go out
-// after commit, best-effort: failures are logged, never surfaced.
+// after commit, best-effort: failures are logged, never surfaced. Each message
+// links to the request in the FieldFlow Org app (/org); "needs your approval"
+// messages use the optional approval template, whose quick-reply "Approve"
+// button is handled by lib/waApprovals.js.
 
 import { decryptSecret } from './crypto.js'
 
@@ -11,6 +14,7 @@ export const DEFAULT_SETTINGS = {
   whatsapp_enabled:   false,
   whatsapp_template:  '',
   whatsapp_lang:      'en',
+  whatsapp_approval_template: '',   // body {{1}} + one quick-reply button; blank = no button
   expense_categories: ['Travel', 'Local conveyance', 'Food', 'Accommodation', 'Training / meeting',
                        'Materials & supplies', 'Printing & stationery', 'Communication', 'Other'],
 }
@@ -59,20 +63,28 @@ async function getTransport() {
   return _transport
 }
 
+/** Deep link to the request in the Org app; blank without APP_BASE_URL. */
+function appLink(msg) {
+  const base = process.env.APP_BASE_URL
+  if (!base) return ''
+  const route = msg.entityType && msg.entityId ? `finance/${msg.entityType}/${msg.entityId}` : 'finance'
+  return `${base.replace(/\/$/, '')}/org/#${route}`
+}
+
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
 async function sendEmail(to, msg) {
   const transport = await getTransport()
   if (!transport) return
-  const link = process.env.APP_BASE_URL ? `${process.env.APP_BASE_URL.replace(/\/$/, '')}/#financemgmt` : ''
+  const link = appLink(msg)
   await transport.sendMail({
     from:    process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
     subject: `[Finance] ${msg.title}`,
-    text:    `${msg.title}\n\n${msg.body || ''}${link ? `\n\nOpen Finance Management: ${link}` : ''}`,
+    text:    `${msg.title}\n\n${msg.body || ''}${link ? `\n\nView details on FieldFlow: ${link}` : ''}`,
     html:    `<p style="font:15px/1.5 sans-serif;margin:0 0 8px"><strong>${esc(msg.title)}</strong></p>`
            + (msg.body ? `<p style="font:14px/1.5 sans-serif;margin:0 0 12px;color:#333">${esc(msg.body)}</p>` : '')
-           + (link ? `<p style="font:14px sans-serif"><a href="${esc(link)}">Open Finance Management</a></p>` : ''),
+           + (link ? `<p style="font:14px sans-serif"><a href="${esc(link)}">View details on FieldFlow</a></p>` : ''),
   })
 }
 
@@ -119,8 +131,12 @@ async function sendWhatsApp(cfg, settings, phone, msg) {
   const to = waNumber(phone)
   if (!to) return
   // Template params may not contain newlines/tabs or long runs of spaces.
-  const text = `${msg.title}${msg.body ? ' — ' + msg.body : ''}`.replace(/\s+/g, ' ').slice(0, 1000)
-  const name = settings.whatsapp_template
+  const link = appLink(msg)
+  const text = `${msg.title}${msg.body ? ' — ' + msg.body : ''}`.replace(/\s+/g, ' ').slice(0, 900)
+    + (link ? ` Details: ${link}` : '')
+  // Quick-reply payload read back by lib/waApprovals.js: ffa:<kind>:<stage>:<id>.
+  const approval = msg.approve && msg.entityId && settings.whatsapp_approval_template
+  const name = approval ? settings.whatsapp_approval_template : settings.whatsapp_template
   const send = (code) => fetch(`https://graph.facebook.com/v19.0/${cfg.phone_number_id}/messages`, {
     method:  'POST',
     headers: { Authorization: `Bearer ${cfg.access_token}`, 'Content-Type': 'application/json' },
@@ -128,7 +144,11 @@ async function sendWhatsApp(cfg, settings, phone, msg) {
       messaging_product: 'whatsapp',
       to,
       type: 'template',
-      template: { name, language: { code }, components: [{ type: 'body', parameters: [{ type: 'text', text }] }] },
+      template: { name, language: { code }, components: [
+        { type: 'body', parameters: [{ type: 'text', text }] },
+        ...(approval ? [{ type: 'button', sub_type: 'quick_reply', index: '0',
+          parameters: [{ type: 'payload', payload: `ffa:${msg.entityType}:${msg.approve.stage}:${msg.entityId}` }] }] : []),
+      ] },
     }),
     signal: AbortSignal.timeout(8000),
   })

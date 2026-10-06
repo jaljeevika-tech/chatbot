@@ -15,7 +15,7 @@ interface Person {
   email: string | null; is_finance: boolean; manager_name: string | null; active: boolean
 }
 interface Settings {
-  email_enabled: boolean; whatsapp_enabled: boolean; whatsapp_template: string; whatsapp_lang: string; expense_categories: string[]
+  email_enabled: boolean; whatsapp_enabled: boolean; whatsapp_template: string; whatsapp_approval_template?: string; whatsapp_lang: string; expense_categories: string[]
 }
 
 function PersonRow({ p, onSaved, canSetFinance }: { p: Person; onSaved: () => void; canSetFinance: boolean }) {
@@ -159,6 +159,11 @@ export function FinanceSettingsPanel() {
                 <Field label="Language">
                   <input className={inputCls} style={inputStyle} value={form.whatsapp_lang} placeholder="en"
                     onChange={e => setForm({ ...form, whatsapp_lang: e.target.value.trim() })} />
+                </Field>
+                <Field label="Approval template (optional)" className="col-span-3"
+                  hint="Same {{1}} body plus one Quick reply button “Approve”. Advances and settlements waiting for someone then get an Approve button on WhatsApp.">
+                  <input className={inputCls} style={inputStyle} value={form.whatsapp_approval_template ?? ''} placeholder="finance_approval"
+                    onChange={e => setForm({ ...form, whatsapp_approval_template: e.target.value.trim() })} />
                 </Field>
               </div>
             )}

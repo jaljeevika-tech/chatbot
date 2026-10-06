@@ -27,6 +27,8 @@ export interface NotifySettings {
   whatsappEnabled: boolean
   whatsappTemplate: string
   whatsappLang: string
+  /** Template with a quick-reply "Approve" button, used for leave approvals; blank = plain template. */
+  whatsappApprovalTemplate?: string
   events: Record<NotifyEvent, boolean>
   /** Org-local 'HH:MM' — missed check-in reminders go out after this. */
   reminderTime: string

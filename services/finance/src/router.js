@@ -401,6 +401,7 @@ export function createFinanceRouter({ getPool }) {
         title: `Advance ${refNo} needs your approval`,
         body:  `${me.name} requested ${inr(amount)} for ${projectName || projectKey}: ${purpose}`,
         entityType: 'advance', entityId: row.id,
+        approve: { stage: 'manager' },
       }, me.id)
       return { advance: { id: row.id, ref_no: refNo }, queued }
     })
@@ -468,6 +469,7 @@ export function createFinanceRouter({ getPool }) {
           title: `Advance ${a.ref_no} is ready for Finance approval`,
           body:  `${a.requester_name} — ${inr(a.amount_requested)} for ${a.project_name || a.project_key}. Approved by ${me.name}.`,
           entityType: 'advance', entityId: a.id,
+          approve: { stage: 'finance' },
         }, me.id),
         ...await queueNotifications(c, orgId, [a.requester_id], {
           title: `Advance ${a.ref_no} approved by your manager`,
@@ -618,6 +620,7 @@ export function createFinanceRouter({ getPool }) {
       return queueNotifications(c, orgId, [managerId], {
         title: `${label} ${row.ref_no} needs your approval`, body: `Reassigned to you by ${me.name}.`,
         entityType, entityId: row.id,
+        approve: { stage: 'manager' },
       }, me.id)
     })
     await ctx.notifyAfter(queued)
@@ -696,6 +699,7 @@ export function createFinanceRouter({ getPool }) {
         title: `Settlement ${refNo} needs your approval`,
         body:  `${me.name} submitted ${inr(total)} of bills against advance ${a.ref_no} (${a.purpose}).`,
         entityType: 'settlement', entityId: s.id,
+        approve: { stage: 'manager' },
       }, me.id)
       return { settlement: { id: s.id, ref_no: refNo }, queued }
     })
@@ -753,6 +757,7 @@ export function createFinanceRouter({ getPool }) {
         title: `Settlement ${s.ref_no} is ready for Finance review`,
         body:  `${s.submitted_by_name} — ${inr(s.amount_claimed)} against ${s.advance_ref}. Approved by ${me.name}.`,
         entityType: 'settlement', entityId: s.id,
+        approve: { stage: 'finance' },
       }, me.id)
     })
     await ctx.notifyAfter(queued)
@@ -1117,10 +1122,13 @@ export function createFinanceRouter({ getPool }) {
     if (cats.some(x => x.length > 100)) throw bad('Category names must be under 100 characters.')
     const template = text(b.whatsapp_template, 'WhatsApp template name', { max: 512 }) || ''
     if (template && !/^[a-z0-9_]+$/.test(template)) throw bad('WhatsApp template names use lowercase letters, digits and underscores only.')
+    const approvalTemplate = text(b.whatsapp_approval_template, 'WhatsApp approval template name', { max: 512 }) || ''
+    if (approvalTemplate && !/^[a-z0-9_]+$/.test(approvalTemplate)) throw bad('WhatsApp template names use lowercase letters, digits and underscores only.')
     const settings = {
       email_enabled:      b.email_enabled !== false,
       whatsapp_enabled:   b.whatsapp_enabled === true,
       whatsapp_template:  template,
+      whatsapp_approval_template: approvalTemplate,
       whatsapp_lang:      text(b.whatsapp_lang, 'Template language', { max: 20 }) || 'en',
       expense_categories: cats,
     }

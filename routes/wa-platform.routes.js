@@ -24,6 +24,7 @@ import { encryptSecret, decryptSecret } from '../lib/crypto.js'
 import { waClientFromConfig, runFlowFrom, processReply } from '../lib/flowEngine.js'
 import { detectIntent, extractSlotValue, generateFallbackResponse } from '../lib/nlp.js'
 import { redact } from '../lib/contentModeration.js'
+import { handleApprovalReply } from '../lib/waApprovals.js'
 
 const router = Router()
 
@@ -288,12 +289,16 @@ async function handleWebhookEvent(event, pool, rawBody, sigHeader, { trusted = f
   // exports don't carry sensitive identifiers. The waMessageId stays raw so
   // dedup still works; only the body payload is masked.
   const safeContent = _redactInboundContent(JSON.stringify(event.raw))
-  await pool.query(
+  const logged = await pool.query(
     `INSERT INTO wa_messages (org_id, contact_id, wa_message_id, direction, type, content)
      VALUES ($1,$2,$3,'inbound',$4,$5)
      ON CONFLICT (wa_message_id) DO NOTHING`,
     [orgId, contact.id, event.messageId, event.messageType, safeContent]
   )
+
+  // ── HR / Finance "Approve" button taps (lib/waApprovals.js) ─────────────────
+  // Skip Meta's redeliveries (already logged) so one tap never approves twice.
+  if (await handleApprovalReply(event, { orgId, pool, waClient, duplicate: !logged.rowCount && !trusted })) return
 
   // ── Find active or handoff session ──────────────────────────────────────────
   const { rows: sessionRows } = await pool.query(

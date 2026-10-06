@@ -318,6 +318,10 @@ function Notifications({ data, run }: { data: HrBootstrap; run: Run }) {
               </Field>
               <Field label="Language"><input value={n.whatsappLang} onChange={e => set({ whatsappLang: e.target.value.trim() })} style={inputStyle} /></Field>
             </div>
+            <Field label="Approval template (optional)" hint="Same {{1}} body plus one Quick reply button “Approve”. Leave requests then get an Approve button on WhatsApp.">
+              <input value={n.whatsappApprovalTemplate ?? ''} onChange={e => set({ whatsappApprovalTemplate: e.target.value.trim() })}
+                placeholder="fieldflow_approval" style={inputStyle} />
+            </Field>
           </div>
         </div>
         <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
