@@ -259,10 +259,21 @@ function ShiftForm({ shift, run, onDone }: { shift?: Shift; run: Run; onDone: ()
 
 const EVENT_LABEL: Record<NotifyEvent, string> = {
   leaveRequested:   'Leave requested → the approver (manager, then HR)',
-  leaveDecided:     'Leave approved / rejected → the employee',
+  leaveDecided:     'Leave submitted / manager approved / final decision → the employee (final decision → their manager too)',
+  leaveCancelled:   'Leave cancelled by the employee → the manager / HR',
   attendanceMarked: 'Attendance marked or corrected by a manager → the employee',
   checkInOut:       'Check-in / check-out receipt → the employee',
   missedCheckIn:    'No check-in yet → the employee (people with a shift)',
+  checkOutReminder: 'Still checked in → reminder to the employee',
+  autoCheckOut:     'Not checked out → check out automatically (flagged for review) and tell the employee',
+  approvalReminder: 'Leave waiting → daily reminder to the approver; HR when stuck with a manager',
+  leaveTomorrow:    'Leave starts tomorrow → the employee and their manager',
+}
+
+// Events with a time setting (org-local HH:MM).
+const EVENT_TIME: Partial<Record<NotifyEvent, keyof NotifySettings>> = {
+  missedCheckIn: 'reminderTime', checkOutReminder: 'checkOutReminderTime', autoCheckOut: 'autoCheckOutTime',
+  approvalReminder: 'approvalReminderTime', leaveTomorrow: 'approvalReminderTime',
 }
 
 function Notifications({ data, run }: { data: HrBootstrap; run: Run }) {
@@ -316,17 +327,23 @@ function Notifications({ data, run }: { data: HrBootstrap; run: Run }) {
               <label key={ev} className="flex items-center gap-2" style={{ fontSize: 13.5, color: FF.tealText }}>
                 <input type="checkbox" checked={n.events[ev]} onChange={e => set({ events: { ...n.events, [ev]: e.target.checked } })} />
                 {EVENT_LABEL[ev]}
-                {ev === 'missedCheckIn' && (
+                {EVENT_TIME[ev] && (
                   <span className="inline-flex items-center gap-1">
-                    {' '}— at <input type="time" value={n.reminderTime ?? '11:00'} aria-label="Reminder time"
-                      onChange={e => set({ reminderTime: e.target.value })} style={{ ...inputStyle, width: 110, padding: '3px 6px' }} />
+                    {' '}— at <input type="time" value={String(n[EVENT_TIME[ev]!] ?? '')} aria-label={`${EVENT_LABEL[ev]} time`}
+                      onChange={e => set({ [EVENT_TIME[ev]!]: e.target.value })} style={{ ...inputStyle, width: 110, padding: '3px 6px' }} />
+                  </span>
+                )}
+                {ev === 'approvalReminder' && (
+                  <span className="inline-flex items-center gap-1">
+                    , escalate after <input type="number" min={1} max={30} value={n.escalateAfterDays ?? 2} aria-label="Escalate after days"
+                      onChange={e => set({ escalateAfterDays: Number(e.target.value) })} style={{ ...inputStyle, width: 64, padding: '3px 6px' }} /> days
                   </span>
                 )}
               </label>
             ))}
           </div>
           <div style={{ fontSize: 12, color: FF.textFaint, marginTop: 6 }}>
-            Receipts and reminders mean up to two messages per person per day — on WhatsApp each one is billed by Meta.
+            Receipts and reminders can mean several messages per person per day — on WhatsApp each one is billed by Meta.
           </div>
         </fieldset>
         <div className="flex gap-2 flex-wrap">

@@ -115,6 +115,7 @@ export const FLAG_LABEL: Record<string, string> = {
   location_unavailable: 'No GPS fix',
   checkout_before_checkin: 'Check-out before check-in',
   checked_in_after_marked_absent: 'Checked in after marked absent',
+  auto_check_out: 'Checked out automatically',
 }
 export const flagText = (f: string) => FLAG_LABEL[f] ?? f.replace(/_/g, ' ')
 

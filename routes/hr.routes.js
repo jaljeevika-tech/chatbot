@@ -8,16 +8,16 @@ import { CircuitBreaker } from '../lib/circuitBreaker.js'
 import { getPool } from '../db/pool.js'
 import { createHrRouter } from '../services/hr/router.js'
 import { usePool } from '../services/hr/db.js'
-import { runMissedCheckinReminders } from '../services/hr/reminders.js'
+import { runHrReminders } from '../services/hr/reminders.js'
 
 usePool(getPool)
 
-// Missed-check-in reminders (services/hr/reminders.js). Lives here, not on
+// HR reminders + 10 pm auto check-out (services/hr/reminders.js). Lives here, not on
 // Cloud Run, because a scale-to-zero service has no timer. Production only, so
 // local dev without a DB stays quiet; HR_REMINDERS=off disables it.
 if (process.env.NODE_ENV === 'production' && process.env.HR_REMINDERS !== 'off') {
   let lastError = ''
-  const tick = () => runMissedCheckinReminders()
+  const tick = () => runHrReminders()
     .then(n => { lastError = ''; if (n) console.log(`[hr-reminders] sent ${n}`) })
     .catch(e => { if (e.message !== lastError) console.warn('[hr-reminders] failed:', (lastError = e.message)) })
   setTimeout(tick, 2 * 60_000).unref()

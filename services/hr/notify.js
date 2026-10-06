@@ -6,7 +6,10 @@
 import { withOrg } from './db.js'
 import { decryptSecret } from './crypto.js'
 
-export const EVENTS = ['leaveRequested', 'leaveDecided', 'attendanceMarked', 'checkInOut', 'missedCheckIn']
+export const EVENTS = [
+  'leaveRequested', 'leaveDecided', 'leaveCancelled', 'attendanceMarked', 'checkInOut',
+  'missedCheckIn', 'checkOutReminder', 'autoCheckOut', 'approvalReminder', 'leaveTomorrow',
+]
 
 export const DEFAULT_NOTIFY = {
   emailEnabled:         true,
@@ -17,6 +20,10 @@ export const DEFAULT_NOTIFY = {
   // Missed check-in reminder goes out at this org-local time (field shifts
   // have no start time to measure from).
   reminderTime:         '11:00',
+  checkOutReminderTime: '19:00',   // still checked in → reminder
+  autoCheckOutTime:     '22:00',   // still checked in → closed at this time and flagged
+  approvalReminderTime: '10:00',   // pending approvals, escalations, leave-tomorrow
+  escalateAfterDays:    2,         // pending with the manager this long → HR is reminded too
 }
 
 export function notifySettings(raw) {

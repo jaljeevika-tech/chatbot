@@ -19,7 +19,8 @@ export interface HrMe {
   isManager: boolean
 }
 
-export type NotifyEvent = 'leaveRequested' | 'leaveDecided' | 'attendanceMarked' | 'checkInOut' | 'missedCheckIn'
+export type NotifyEvent = 'leaveRequested' | 'leaveDecided' | 'leaveCancelled' | 'attendanceMarked' | 'checkInOut'
+  | 'missedCheckIn' | 'checkOutReminder' | 'autoCheckOut' | 'approvalReminder' | 'leaveTomorrow'
 
 export interface NotifySettings {
   emailEnabled: boolean
@@ -29,6 +30,11 @@ export interface NotifySettings {
   events: Record<NotifyEvent, boolean>
   /** Org-local 'HH:MM' — missed check-in reminders go out after this. */
   reminderTime: string
+  checkOutReminderTime: string
+  autoCheckOutTime: string
+  /** Also when leave-tomorrow reminders go out. */
+  approvalReminderTime: string
+  escalateAfterDays: number
 }
 
 export interface HrSettings {

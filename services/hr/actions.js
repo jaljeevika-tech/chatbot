@@ -318,14 +318,21 @@ export async function requestLeave(client, ctx, payload, timing) {
     title: `Leave request from ${me.name}`,
     body: `${leaveLine(leave)}${reason ? `. Reason: ${reason}` : ''}. Waiting for your approval.`,
   })
+  push(ctx, {
+    event: 'leaveDecided', userIds: [me.id],
+    title: 'Leave request submitted',
+    body: `${leaveLine(leave)}. Waiting for ${status === 'pending_manager' ? `${leave.managerName ?? 'your manager'}'s` : 'HR'} approval.`,
+  })
   return leave
 }
 
-export async function cancelLeave(client, { orgId, me, settings }, payload, timing) {
+export async function cancelLeave(client, ctx, payload, timing) {
+  const { orgId, me, settings } = ctx
   if (!UUID_RE.test(String(payload.requestId || ''))) throw new HttpError(422, 'Invalid leave request.')
   const { rows } = await client.query(
-    `SELECT id, user_id, status, start_date::text AS start_date FROM hr_leave_requests
-      WHERE org_id = $1 AND id = $2 FOR UPDATE`, [orgId, payload.requestId])
+    `SELECT r.id, r.user_id, r.status, r.start_date::text AS start_date, COALESCE(u.manager_id, r.manager_id) AS manager_id
+       FROM hr_leave_requests r JOIN users u ON u.id = r.user_id
+      WHERE r.org_id = $1 AND r.id = $2 FOR UPDATE OF r`, [orgId, payload.requestId])
   const req = rows[0]
   if (!req) throw new HttpError(404, 'Leave request not found.')
   if (req.user_id !== me.id) throw new HttpError(403, 'You can only cancel your own leave.')
@@ -340,7 +347,16 @@ export async function cancelLeave(client, { orgId, me, settings }, payload, timi
   }
   await client.query(
     `UPDATE hr_leave_requests SET status = 'cancelled', updated_at = now() WHERE id = $1`, [req.id])
-  return fetchLeave(client, orgId, req.id)
+  const leave = await fetchLeave(client, orgId, req.id)
+  // Whoever it was waiting on (or, once approved, manager and HR) hears about it.
+  const hr = req.status === 'pending_manager' ? [] : await hrApproverIds(client, orgId)
+  const manager = req.status === 'pending_hr' || !req.manager_id ? [] : [req.manager_id]
+  push(ctx, {
+    event: 'leaveCancelled', userIds: [...manager, ...hr].filter(id => id !== me.id),
+    title: `${me.name} cancelled ${req.status === 'approved' ? 'an approved' : 'a pending'} leave`,
+    body: `${leaveLine(leave)}.`,
+  })
+  return leave
 }
 
 export async function decideLeave(client, ctx, payload) {
@@ -397,12 +413,25 @@ export async function decideLeave(client, ctx, payload) {
       title: `Leave waiting for HR approval: ${leave.userName}`,
       body: `${leaveLine(leave)}. Approved by ${me.name}${comment ? ` ("${comment}")` : ''}.`,
     })
+    push(ctx, {
+      event: 'leaveDecided', userIds: [leave.userId],
+      title: 'Your manager approved your leave — now waiting for HR',
+      body: `${leaveLine(leave)}. Approved by ${me.name}${comment ? `: "${comment}"` : ''}.`,
+    })
   } else {
     push(ctx, {
       event: 'leaveDecided', userIds: [leave.userId],
       title: `Your leave was ${leave.status === 'approved' ? 'approved' : 'rejected'}`,
       body: `${leaveLine(leave)}. By ${me.name}${comment ? `: "${comment}"` : ''}.`,
     })
+    // The manager who forwarded it to HR hears the final word too.
+    if (req.status === 'pending_hr' && req.manager_action_by && req.manager_action_by !== me.id) {
+      push(ctx, {
+        event: 'leaveDecided', userIds: [req.manager_action_by],
+        title: `HR ${leave.status === 'approved' ? 'approved' : 'rejected'} ${leave.userName}'s leave`,
+        body: `${leaveLine(leave)}. By ${me.name}${comment ? `: "${comment}"` : ''}.`,
+      })
+    }
   }
   return leave
 }

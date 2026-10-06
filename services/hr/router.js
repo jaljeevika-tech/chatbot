@@ -454,7 +454,13 @@ export function createHrRouter() {
       throw new HttpError(422, 'WhatsApp template names use lowercase letters, numbers and underscores only.')
     }
     if (!/^[a-z]{2,3}(_[A-Z]{2})?$/.test(n.whatsappLang)) throw new HttpError(422, 'WhatsApp language looks like en or en_US.')
-    if (!TIME_RE.test(n.reminderTime || '')) throw new HttpError(422, 'Reminder time looks like 11:00.')
+    for (const k of ['reminderTime', 'checkOutReminderTime', 'autoCheckOutTime', 'approvalReminderTime']) {
+      if (!TIME_RE.test(n[k] || '')) throw new HttpError(422, 'Reminder times look like 11:00.')
+    }
+    n.escalateAfterDays = Number(n.escalateAfterDays)
+    if (!Number.isInteger(n.escalateAfterDays) || n.escalateAfterDays < 1 || n.escalateAfterDays > 30) {
+      throw new HttpError(422, 'Escalate after 1–30 days.')
+    }
     delete n.reminderAfterMinutes
     n.events = Object.fromEntries(EVENTS.map(e => [e, n.events[e] !== false]))
     return n
