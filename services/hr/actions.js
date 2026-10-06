@@ -84,7 +84,7 @@ export async function checkIn(client, ctx, payload, timing) {
   const t = resolveTime(timing, settings)
   const loc = parseLocation(payload.location, settings.gpsMode)
   const workDate = dateInTz(t.estimated, settings.timezone)
-  const status = payload.mode === 'field' ? 'on_field' : 'present'
+  let status = payload.mode === 'field' ? 'on_field' : 'present'
   const skewS = Math.round(timing.skewMs / 1000)
   let flags = [...t.flags, ...loc.flags]
   const shift = (await shiftsFor(client, orgId, [me.id])).get(me.id) ?? null
@@ -96,6 +96,17 @@ export async function checkIn(client, ctx, payload, timing) {
       WHERE org_id = $1 AND user_id = $2 AND work_date = $3 FOR UPDATE`, [orgId, me.id, workDate])
   const existing = rows[0]
   if (existing?.check_in_at) throw new HttpError(409, `You have already checked in on ${workDate}.`)
+
+  // Approved leave: a full day blocks check-in until the leave is cancelled;
+  // a half day lets them work the other half, so the day counts as half_day.
+  const { rows: [leave] } = await client.query(
+    `SELECT day_portion FROM hr_leave_requests
+      WHERE org_id = $1 AND user_id = $2 AND status = 'approved' AND $3 BETWEEN start_date AND end_date
+      ORDER BY day_portion = 'full' DESC LIMIT 1`, [orgId, me.id, workDate])
+  if (leave?.day_portion === 'full') {
+    throw new HttpError(409, `You are on approved leave on ${fmtDay(workDate)}. Cancel the leave to mark attendance.`)
+  }
+  if (leave) status = 'half_day'
 
   const fields = [t.estimated, t.device, loc.lat, loc.lng, loc.accuracy, loc.status, t.offline, skewS]
   let row
@@ -123,7 +134,7 @@ export async function checkIn(client, ctx, payload, timing) {
   push(ctx, {
     event: 'checkInOut', userIds: [me.id],
     title: `Checked in at ${fmtTime(t.estimated, settings.timezone)}`,
-    body: [fmtDay(workDate), status === 'on_field' ? 'On field' : null,
+    body: [fmtDay(workDate), status === 'on_field' ? 'On field' : status === 'half_day' ? 'Half day (half-day leave)' : null,
       late ? `Late by ${late} min` : null, t.offline ? 'recorded offline' : null].filter(Boolean).join(' · '),
   })
   return mapAttendance(row)
@@ -320,7 +331,8 @@ export async function cancelLeave(client, { orgId, me, settings }, payload, timi
   if (req.user_id !== me.id) throw new HttpError(403, 'You can only cancel your own leave.')
   const today = dateInTz(timing.serverNow, settings.timezone)
   const cancellable = req.status === 'pending_manager' || req.status === 'pending_hr'
-    || (req.status === 'approved' && req.start_date > today)
+    // An approved leave starting today can still be cancelled, so the employee can check in.
+    || (req.status === 'approved' && req.start_date >= today)
   if (!cancellable) {
     throw new HttpError(409, req.status === 'approved'
       ? 'This leave has already started — ask HR to change it.'

@@ -206,7 +206,7 @@ export function LeavePanel({ hr, data }: { hr: HrData; data: HrBootstrap }) {
             ))}
             {data.leaveRequests.map(r => {
               const cancellable = !pendingCancels.has(r.id)
-                && (r.status === 'pending_manager' || r.status === 'pending_hr' || (r.status === 'approved' && r.startDate > today))
+                && (r.status === 'pending_manager' || r.status === 'pending_hr' || (r.status === 'approved' && r.startDate >= today))
               return (
                 <div key={r.id} className="flex items-start justify-between gap-3 flex-wrap"
                   style={{ padding: '10px 0', borderTop: `1px solid ${FF.borderFaint}` }}>

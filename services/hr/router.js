@@ -332,7 +332,7 @@ export function createHrRouter() {
          FROM users u
          LEFT JOIN users m ON m.id = u.manager_id
          LEFT JOIN hr_employee_profiles p ON p.user_id = u.id
-        WHERE u.org_id = $1 AND u.role <> 'superadmin'
+        WHERE u.org_id = $1
         ORDER BY u.name`, [orgId])
     return {
       employees: rows.map(r => ({
@@ -741,7 +741,7 @@ export function createHrRouter() {
          FROM users u
          LEFT JOIN hr_employee_profiles p ON p.user_id = u.id
          LEFT JOIN hr_locations l ON l.id = p.location_id
-        WHERE u.org_id = $1 AND u.role <> 'superadmin'
+        WHERE u.org_id = $1
         ORDER BY u.name`, [orgId])
     // Status dots: HR/admins for everyone, managers for their whole reporting tree.
     let visible = new Set()

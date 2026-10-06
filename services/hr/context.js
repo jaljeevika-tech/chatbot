@@ -110,7 +110,7 @@ export async function loadTeam(client, orgId, me, scope = 'auto') {
   const { rows } = await client.query(
     `SELECT u.id, u.name, u.role, u.manager_id, COALESCE(p.is_hr, false) AS is_hr, p.location_id
        FROM users u LEFT JOIN hr_employee_profiles p ON p.user_id = u.id
-      WHERE u.org_id = $1 AND u.role <> 'superadmin'
+      WHERE u.org_id = $1
         AND ($2::boolean OR u.manager_id = $3)
       ORDER BY u.name`, [orgId, all, me.id])
   return rows

@@ -2,7 +2,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cleanWidget, widgetSql, CATALOG } from './custom.js'
+import { cleanWidget, widgetSql, CATALOG, hrDashboardWidgets } from './custom.js'
 
 test('rejects anything outside the catalog', () => {
   assert.throws(() => cleanWidget({ metric: 'users.count', chart: 'bar' }), /unknown metric/)
@@ -27,4 +27,14 @@ test('every catalog metric builds for every group-by', () => {
     const w = cleanWidget({ metric: m.key, chart: g.key === 'none' ? 'kpi' : 'bar', groupBy: g.key })
     assert.match(widgetSql(w, 'o').text, /^SELECT /)
   }
+})
+
+test('HR dashboard preset: valid widgets, dates relative to today', () => {
+  const ws = hrDashboardWidgets('2026-02-15')
+  assert.equal(ws.find(w => w.id === 'present').from, '2026-02-15')
+  assert.equal(ws.find(w => w.id === 'status').from, '2026-02-01')
+  assert.equal(ws.find(w => w.id === 'trend').from, '2025-09-01')
+  assert.equal(ws.find(w => w.id === 'leavetype').from, '2025-04-01')   // leave year starts in April
+  assert.equal(hrDashboardWidgets('2026-05-03').find(w => w.id === 'leavetype').from, '2026-04-01')
+  for (const w of ws) assert.match(widgetSql(w, 'o').text, /^SELECT /)
 })

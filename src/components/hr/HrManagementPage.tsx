@@ -3,7 +3,7 @@
 // change goes into an outbox that syncs when there's a connection
 // (utils/hr/hrSync.ts). Settings, reports and the flagged list need a connection.
 
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { CloudOff, Loader2, RefreshCw, Wifi } from 'lucide-react'
 import { FF } from '../../theme/colors'
 import { TabPill } from '../ui/TabPill'
@@ -19,11 +19,13 @@ import { ReportsPanel } from './ReportsPanel'
 import { HrSettingsPanel } from './HrSettingsPanel'
 import { TimesheetPanel } from './TimesheetPanel'
 import { OrgChartPanel } from './OrgChartPanel'
-import { Btn, FONT, Notice, fmtDate, fmtRange } from './hrUi'
+import { Btn, FONT, Muted, Notice, fmtDate, fmtRange } from './hrUi'
+
+const HrDashboardPanel = lazy(() => import('./HrDashboardPanel'))
 
 export { warmHrOffline } from './useHrData'
 
-type HrTab = 'attendance' | 'leave' | 'timesheet' | 'team' | 'approvals' | 'reports' | 'orgchart' | 'settings'
+type HrTab = 'dashboard' | 'attendance' | 'leave' | 'timesheet' | 'team' | 'approvals' | 'reports' | 'orgchart' | 'settings'
 
 export function HrManagementPage() {
   const hr = useHrData()
@@ -48,6 +50,7 @@ export function HrManagementPage() {
   const leads = me.isManager || me.isHr || me.isAdmin
   const approvalsCount = data.approvals.length
   const tabs: { key: HrTab; label: string }[] = [
+    ...(me.isHr || me.isAdmin ? [{ key: 'dashboard' as HrTab, label: 'Dashboard' }] : []),
     { key: 'attendance', label: 'My attendance' },
     { key: 'leave', label: 'My leave' },
     { key: 'timesheet', label: 'Timesheet' },
@@ -67,6 +70,7 @@ export function HrManagementPage() {
       {error && <Notice tone="red">{error}</Notice>}
       {sync.problems.map(p => <ProblemRow key={p.clientId} p={p} data={data} />)}
       <TabPill tabs={tabs} active={active} onChange={setTab} />
+      {active === 'dashboard' && <Suspense fallback={<Muted>Loading dashboard…</Muted>}><HrDashboardPanel /></Suspense>}
       {active === 'attendance' && <AttendancePanel hr={hr} data={data} />}
       {active === 'leave' && <LeavePanel hr={hr} data={data} />}
       {active === 'team' && <TeamPanel hr={hr} data={data} />}

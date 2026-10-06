@@ -13,6 +13,7 @@
 // PUT    /superadmin/org/:id/custom-dashboards/:dashId   same body
 // DELETE /superadmin/org/:id/custom-dashboards/:dashId
 // POST   /superadmin/org/:id/custom-dashboards/preview   { widget } → rows (builder live preview)
+// GET    /hr-dashboard                                   built-in HR dashboard (admins + HR users)
 
 import { Router } from 'express'
 import { getPool } from './pool.js'
@@ -50,6 +51,33 @@ const SOURCES = {
     metrics: { count: ['Registered micro-entrepreneurs', 'count(*)'], employees: ['Employees', 'COALESCE(sum(current_employee_count), 0)'] } },
   collectives:                  { label: 'Collectives', date: 'created_at', project: false, dims: { ...LOC, collective_type: 'Collective type', focus_area: 'Focus area' },
     metrics: { count: ['Registered collectives', 'count(*)'], members: ['Members', 'COALESCE(sum(COALESCE(male_count, 0) + COALESCE(female_count, 0)), 0)'] } },
+  // HR (services/hr tables). No per-employee group-by: custom dashboards can be visible to all staff.
+  hr_attendance:                { label: 'HR attendance', date: 'work_date', project: false, dims: { status: 'Status', source: 'Recorded by', location: 'Location' },
+    metrics: {
+      days:    ['Attendance days', 'count(*)'],
+      present: ['Present days (office + field)', "count(*) FILTER (WHERE status IN ('present', 'on_field'))"],
+      half:    ['Half days', "count(*) FILTER (WHERE status = 'half_day')"],
+      absent:  ['Absent days', "count(*) FILTER (WHERE status = 'absent')"],
+      people:  ['People attending (unique)', "count(DISTINCT user_id) FILTER (WHERE status <> 'absent')"],
+      hours:   ['Hours worked', 'COALESCE(round(sum(worked_minutes) / 60.0, 1), 0)'],
+      late:    ['Late check-ins', 'count(*) FILTER (WHERE late_minutes > 0)'],
+      flagged: ['Flagged, awaiting review', 'count(*) FILTER (WHERE cardinality(flag_reasons) > 0 AND reviewed_at IS NULL)'],
+    } },
+  hr_leave_requests:            { label: 'HR leave', date: 'start_date', project: false, dims: { leave_type: 'Leave type', status: 'Status', location: 'Location' },
+    metrics: {
+      requests: ['Leave requests', 'count(*)'],
+      approved: ['Approved leave days', "COALESCE(sum(days) FILTER (WHERE status = 'approved'), 0)"],
+      pending:  ['Pending leave requests', "count(*) FILTER (WHERE status IN ('pending_manager', 'pending_hr'))"],
+      // ponytail: IST "today"; read hr_settings.timezone if an org outside India uses HR.
+      today:    ['People on leave today', "count(DISTINCT user_id) FILTER (WHERE status = 'approved' AND (now() AT TIME ZONE 'Asia/Kolkata')::date BETWEEN start_date AND end_date)"],
+    } },
+}
+
+// Group-bys that aren't plain columns of the table (looked up per row).
+const DIM_SQL = {
+  location:   `(SELECT l.name FROM hr_employee_profiles p JOIN hr_locations l ON l.id = p.location_id WHERE p.user_id = t.user_id)`,
+  leave_type: `(SELECT lt.name FROM hr_leave_types lt WHERE lt.id = t.leave_type_id)`,
+  status:     `initcap(replace(t.status, '_', ' '))`,   // on_field → On Field
 }
 
 export const CHARTS = ['kpi', 'bar', 'line', 'pie', 'table']
@@ -118,7 +146,7 @@ export function widgetSql(w, orgId) {
     ? `to_char(date_trunc('month', t.${s.date}), 'YYYY-MM')`
     : w.groupBy === 'project'
       ? `COALESCE((SELECT a.name FROM action_plans a WHERE a.org_id = t.org_id AND a.project_key = t.project_key LIMIT 1), t.project_key)`
-      : `COALESCE(NULLIF(trim(t.${w.groupBy}::text), ''), 'Not set')`
+      : `COALESCE(NULLIF(trim((${DIM_SQL[w.groupBy] ?? `t.${w.groupBy}`})::text), ''), 'Not set')`
   if (w.groupBy === 'month') where.push(`t.${s.date} IS NOT NULL`)
   return {
     text: `SELECT ${label} AS label, ${agg}::float8 AS value FROM ${table} t WHERE ${where.join(' AND ')}
@@ -177,6 +205,46 @@ router.get('/custom-dashboards/:id/data', async (req, res) => {
     res.json(await runAll(req.user.orgId, rows[0].widgets))
   } catch (e) {
     console.error('[custom-dashboards] data', e)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// ── Built-in HR dashboard (HR tab → Dashboard) ──────────────────────────────
+// Same widgets as a custom dashboard, with dates relative to today.
+export function hrDashboardWidgets(today) {
+  const month = today.slice(0, 8) + '01'
+  const [y, m] = today.split('-').map(Number)
+  const leaveYear = `${m >= 4 ? y : y - 1}-04-01`
+  const sixMonths = new Date(Date.UTC(y, m - 6, 1)).toISOString().slice(0, 10)
+  const w = (id, title, metric, chart, groupBy, from = '', to = '', wide = false) => cleanWidget({ id, title, metric, chart, groupBy, from, to, wide })
+  return [
+    w('present', 'Present today', 'hr_attendance.present', 'kpi', 'none', today, today),
+    w('onleave', 'On leave today', 'hr_leave_requests.today', 'kpi', 'none'),
+    w('pending', 'Leave requests pending', 'hr_leave_requests.pending', 'kpi', 'none'),
+    w('flagged', 'Attendance flagged for review (this month)', 'hr_attendance.flagged', 'kpi', 'none', month, today),
+    w('status', 'Attendance this month by status', 'hr_attendance.days', 'pie', 'status', month, today),
+    w('location', 'Present days this month by location', 'hr_attendance.present', 'bar', 'location', month, today),
+    w('trend', 'Present days by month', 'hr_attendance.present', 'line', 'month', sixMonths, today, true),
+    w('leavetype', 'Approved leave days this leave year by type', 'hr_leave_requests.approved', 'bar', 'leave_type', leaveYear),
+    w('hours', 'Hours worked this month by location', 'hr_attendance.hours', 'table', 'location', month, today),
+  ]
+}
+
+router.get('/hr-dashboard', async (req, res) => {
+  if (!req.user?.orgId) return res.status(401).json({ error: 'Authentication required' })
+  try {
+    if (!isAdmin(req.user.role)) {
+      const { rows } = await getPool().query(
+        `SELECT 1 FROM users u JOIN hr_employee_profiles p ON p.user_id = u.id
+          WHERE u.org_id = $1 AND u.firebase_uid = $2 AND p.is_hr`, [req.user.orgId, req.user.uid || ''])
+      if (!rows.length) return res.status(403).json({ error: 'Only HR and admins can see the HR dashboard.' })
+    }
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+    const widgets = hrDashboardWidgets(today)
+    res.json({ widgets, data: await runAll(req.user.orgId, widgets) })
+  } catch (e) {
+    if (e.code === '42P01') return res.status(503).json({ error: 'HR Management is not set up for this organisation yet.' })
+    console.error('[hr-dashboard]', e)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

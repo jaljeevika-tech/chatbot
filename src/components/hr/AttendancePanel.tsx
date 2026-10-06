@@ -12,7 +12,7 @@ import type { AttendanceRecord, HrBootstrap, LocationFix, OutboxItem, Shift } fr
 import type { HrData } from './useHrData'
 import type { MapPoint } from './HrMap'
 import {
-  AttendanceBadge, Btn, Card, Muted, Notice, SyncBadge, errorText, flagText, fmtClock, fmtDate, fmtMinutes, fmtTime,
+  AttendanceBadge, Btn, Card, Muted, Notice, PORTION_LABEL, SyncBadge, errorText, flagText, fmtClock, fmtDate, fmtMinutes, fmtTime,
 } from './hrUi'
 
 const HrMap = lazy(() => import('./HrMap'))
@@ -100,6 +100,12 @@ export function AttendancePanel({ hr, data }: { hr: HrData; data: HrBootstrap })
   const openView = isCheckedIn(todayView) && !isCheckedOut(todayView) ? todayView
     : !isCheckedIn(todayView) && isCheckedIn(yesterdayView) && !isCheckedOut(yesterdayView) ? yesterdayView
     : undefined
+  // Approved leave today (the server enforces the same rule). Queued cancels unblock it.
+  const pendingCancels = new Set(sync.pending
+    .filter((p): p is OutboxItem<'leave_cancel'> => p.kind === 'leave_cancel').map(p => p.payload.requestId))
+  const todayLeave = data.leaveRequests
+    .filter(r => r.status === 'approved' && r.startDate <= today && r.endDate >= today && !pendingCancels.has(r.id))
+    .sort((a, b) => Number(b.dayPortion === 'full') - Number(a.dayPortion === 'full'))[0]
 
   async function locate(): Promise<LocationFix | null | undefined> {
     setGpsError(null)
@@ -193,8 +199,17 @@ export function AttendancePanel({ hr, data }: { hr: HrData; data: HrBootstrap })
                 <Btn variant="primary" big onClick={() => doCheckIn('office')} disabled={!!busy}>Check in anyway</Btn>
               </div>
             </div>
+          ) : todayLeave?.dayPortion === 'full' ? (
+            <Notice tone="amber">
+              You are on approved {todayLeave.leaveTypeName} today. Cancel the leave in the Leave tab to mark attendance.
+            </Notice>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {todayLeave && (
+                <div className="sm:col-span-2"><Notice tone="amber">
+                  Half-day leave today ({PORTION_LABEL[todayLeave.dayPortion]}) — today counts as a half day.
+                </Notice></div>
+              )}
               <Btn variant="primary" big onClick={() => doCheckIn('office')} disabled={!!busy}>
                 <span className="inline-flex items-center gap-2"><LogIn className="w-4 h-4" /> Check in · Office</span>
               </Btn>

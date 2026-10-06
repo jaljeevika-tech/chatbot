@@ -71,30 +71,51 @@ function waNumber(phone) {
   return c.length >= 11 ? c : null
 }
 
+// Meta #132001 = no APPROVED template with this name + language on the number's
+// WhatsApp Business Account. Look it up so we can say why, and pick up the
+// language it was approved in (en vs en_US is the usual mismatch).
+async function approvedTemplateLang(cfg, name) {
+  if (!cfg.business_id) throw new Error(`WhatsApp template "${name}" was not found, and no WhatsApp Business Account ID is saved to check it against.`)
+  const res = await fetch(`https://graph.facebook.com/v19.0/${cfg.business_id}/message_templates?name=${encodeURIComponent(name)}&fields=name,language,status&limit=100`, {
+    headers: { Authorization: `Bearer ${cfg.access_token}` }, signal: AbortSignal.timeout(8000),
+  })
+  const j = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(`WhatsApp template "${name}" was not found, and Meta refused the lookup: ${j?.error?.message || res.status}`)
+  const found = (j.data || []).filter(t => t.name === name)
+  const approved = found.find(t => t.status === 'APPROVED')
+  if (approved) return approved.language
+  if (found.length) throw new Error(`WhatsApp template "${name}" is ${found.map(t => `${t.status} (${t.language})`).join(', ')} in Meta — it can be sent only once APPROVED.`)
+  throw new Error(`No WhatsApp template named "${name}" on Business Account ${cfg.business_id}. Create it in Meta WhatsApp Manager, or fix the name in settings.`)
+}
+
 async function sendWhatsApp(cfg, settings, phone, msg) {
   const to = waNumber(phone)
   if (!to) throw new Error('No valid phone number.')
   // Template params may not contain newlines/tabs or long runs of spaces.
   const text = `${msg.title}${msg.body ? ' — ' + msg.body : ''}`.replace(/\s+/g, ' ').slice(0, 1000)
-  const res = await fetch(`https://graph.facebook.com/v19.0/${cfg.phone_number_id}/messages`, {
+  const name = settings.whatsappTemplate
+  const send = (code) => fetch(`https://graph.facebook.com/v19.0/${cfg.phone_number_id}/messages`, {
     method:  'POST',
     headers: { Authorization: `Bearer ${cfg.access_token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messaging_product: 'whatsapp',
       to,
       type: 'template',
-      template: {
-        name:       settings.whatsappTemplate,
-        language:   { code: settings.whatsappLang || 'en' },
-        components: [{ type: 'body', parameters: [{ type: 'text', text }] }],
-      },
+      template: { name, language: { code }, components: [{ type: 'body', parameters: [{ type: 'text', text }] }] },
     }),
     signal: AbortSignal.timeout(8000),
   })
-  if (!res.ok) {
-    const j = await res.json().catch(() => ({}))
-    throw new Error(j?.error?.message || `WhatsApp API ${res.status}`)
+  const lang = settings.whatsappLang || 'en'
+  let res = await send(lang)
+  let j = res.ok ? null : await res.json().catch(() => ({}))
+  if (j?.error?.code === 132001) {
+    const approvedLang = await approvedTemplateLang(cfg, name)
+    if (approvedLang === lang) throw new Error(j.error.message)
+    console.warn(`[notify] template "${name}" is approved as ${approvedLang}, not ${lang} — fix the language in settings`)
+    res = await send(approvedLang)
+    j = res.ok ? null : await res.json().catch(() => ({}))
   }
+  if (j) throw new Error(j?.error?.message || `WhatsApp API ${res.status}`)
 }
 
 /** HR users who give final approval; admins if nobody is flagged HR. */
@@ -124,7 +145,7 @@ export async function dispatch(orgId, queued, { force = false } = {}) {
       let wa = null
       if (settings.whatsappEnabled && settings.whatsappTemplate) {
         const { rows } = await client.query(
-          `SELECT phone_number_id, access_token FROM wa_config WHERE org_id = $1 AND enabled = true`, [orgId]
+          `SELECT phone_number_id, access_token, business_id FROM wa_config WHERE org_id = $1 AND enabled = true`, [orgId]
         ).catch(() => ({ rows: [] }))
         if (rows[0]) wa = { ...rows[0], access_token: decryptSecret(rows[0].access_token) }
       }
