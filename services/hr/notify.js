@@ -88,6 +88,21 @@ async function approvedTemplateLang(cfg, name) {
   throw new Error(`No WhatsApp template named "${name}" on Business Account ${cfg.business_id}. Create it in Meta WhatsApp Manager, or fix the name in settings.`)
 }
 
+// Approved in this very language yet Meta says it doesn't exist: the number
+// usually sits on a different Business Account than the one saved in settings.
+async function sameLangHint(cfg, name, lang) {
+  const res = await fetch(`https://graph.facebook.com/v19.0/${cfg.business_id}/phone_numbers?fields=id,display_phone_number&limit=100`, {
+    headers: { Authorization: `Bearer ${cfg.access_token}` }, signal: AbortSignal.timeout(8000),
+  }).catch(() => null)
+  const j = res?.ok ? await res.json().catch(() => ({})) : null
+  if (j && !(j.data || []).some(p => p.id === String(cfg.phone_number_id))) {
+    return `WhatsApp template "${name}" is approved on Business Account ${cfg.business_id}, but phone number ID ${cfg.phone_number_id} is not on that account `
+      + `(it has: ${(j.data || []).map(p => `${p.display_phone_number} = ${p.id}`).join(', ') || 'no numbers'}). Fix the Phone Number ID or Business Account ID in WhatsApp settings.`
+  }
+  return `WhatsApp template "${name}" (${lang}) is approved on Business Account ${cfg.business_id} and the number is on it, but Meta still rejects it (#132001). `
+    + 'If it was approved in the last hour, wait and retry; otherwise check the template in Meta WhatsApp Manager.'
+}
+
 async function sendWhatsApp(cfg, settings, phone, msg) {
   const to = waNumber(phone)
   if (!to) throw new Error('No valid phone number.')
@@ -110,7 +125,7 @@ async function sendWhatsApp(cfg, settings, phone, msg) {
   let j = res.ok ? null : await res.json().catch(() => ({}))
   if (j?.error?.code === 132001) {
     const approvedLang = await approvedTemplateLang(cfg, name)
-    if (approvedLang === lang) throw new Error(j.error.message)
+    if (approvedLang === lang) throw new Error(await sameLangHint(cfg, name, lang))
     console.warn(`[notify] template "${name}" is approved as ${approvedLang}, not ${lang} — fix the language in settings`)
     res = await send(approvedLang)
     j = res.ok ? null : await res.json().catch(() => ({}))
