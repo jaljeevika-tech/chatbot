@@ -1,4 +1,4 @@
-// Super admin: per-org form builder (migration 085). Built-in entity forms
+// Super admin: per-org form builder (migration 087). Built-in entity forms
 // exist virtually until first saved — GET returns the default system-field
 // schema. Edits go to forms.draft_schema; publish freezes a form_versions row.
 // Every write is in platform_audit_log.
@@ -19,10 +19,10 @@ const router = Router()
 router.use('/superadmin', requireSuperAdmin)
 
 const KEY_RE = /^[a-z][a-z0-9_]{1,63}$/
-const MIGRATION_085 = 'Database migration 085_forms.sql has not been run yet.'
+const MIGRATION_087 = 'Database migration 087_forms.sql has not been run yet.'
 const isMissingTable = e => e?.code === '42P01' || e?.code === '42703'
 const fail = (res, e) => isMissingTable(e)
-  ? res.status(503).json({ error: MIGRATION_085 })
+  ? res.status(503).json({ error: MIGRATION_087 })
   : (console.error('[superadmin-forms]', e), res.status(500).json({ error: 'Something went wrong' }))
 
 async function loadForm(orgId, key) {
