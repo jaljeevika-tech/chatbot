@@ -18,6 +18,7 @@ import leadsRoutes       from './routes/leads.routes.js'
 import orgRoutes         from './routes/org.routes.js'
 import superadminRoutes  from './routes/superadmin.routes.js'
 import superadminIntegrationsRoutes from './routes/superadmin-integrations.routes.js'
+import superadminFormsRoutes from './routes/superadmin-forms.routes.js'
 import workerRoutes      from './routes/workers.routes.js'
 import reportRoutes      from './routes/reports.routes.js'
 import notebookRoutes    from './routes/notebook.routes.js'
@@ -238,6 +239,7 @@ app.use('/api', authRoutes)       // POST /auth/sheet-login, POST /auth/login, P
 app.use('/api', orgRoutes)        // GET  /org/metadata, GET /subscription
 app.use('/api', superadminRoutes) // GET/POST/PATCH /superadmin/*
 app.use('/api', superadminIntegrationsRoutes) // /superadmin/org/:id/{integrations,email,whatsapp}, /superadmin/sheets/test, send-link
+app.use('/api', superadminFormsRoutes) // /superadmin/org/:id/forms[/:key[/publish|/archive]] - form builder
 app.use('/api', workerRoutes)     // POST /add-user, PUT /update-user, DELETE /delete-user, POST /analytics/worker
 app.use('/api', reportRoutes)     // POST /get-ai-report, POST /drive-folder, POST /generate-social-post, GET /proxy-image
 app.use('/api', notebookRoutes)   // POST /notebook/* (Strangler Fig proxy to Cloud Run when NOTEBOOK_SERVICE_URL is set)
