@@ -51,6 +51,7 @@ const BeneficiariesPage        = lazyNamed(TAB_MODULES['beneficiaries'],        
 const MisPage                  = lazyNamed(TAB_MODULES['mis'],                   'MisPage');
 const BeneficiaryProfilePage   = lazyNamed(TAB_MODULES['beneficiaryprofile'],    'BeneficiaryProfilePage');
 const HrManagementPage         = lazyNamed(TAB_MODULES['hr'],                    'HrManagementPage');
+const FormsPage                = lazyNamed(TAB_MODULES['forms'],                 'FormsPage');
 const FinanceManagementPage    = lazyNamed(TAB_MODULES['financemgmt'],           'FinanceManagementPage');
 const ComplianceCalendarPage   = lazyNamed(TAB_MODULES['compliance'],            'ComplianceCalendarPage');
 const AnnualProgressReportPage = lazyNamed(TAB_MODULES['annualprogress'],        'AnnualProgressReportPage');
@@ -500,7 +501,7 @@ export function DashboardPage() {
 
   type TabKey = 'overview' | 'reports' | 'media' | 'settings' | 'impact' | 'toc' | 'notebook' | 'analytics' | 'whatsapp' | 'actionplan' | 'quickreport' | 'content-hub'
     | 'portfolio' | 'orgdash' | 'dashboard' | 'vault' | 'beneficiaries' | 'financial' | 'compliance' | 'projectmedia' | 'annualprogress'
-    | 'mis' | 'beneficiaryprofile' | 'hr' | 'financemgmt';
+    | 'mis' | 'beneficiaryprofile' | 'hr' | 'financemgmt' | 'forms';
 
   // The report FilterBar and hero cards are scoped to daily_reports, so only
   // the tabs that list those reports show them.
@@ -551,6 +552,7 @@ export function DashboardPage() {
     ...(canSeeTab('beneficiaryprofile') ? [{ key: 'beneficiaryprofile' as TabKey, label: 'Beneficiary Profile', badge: 'Bp' }] : []),
     // Org-wide: most of its sub-tabs are org-wide rosters.
     ...(canSeeTab('beneficiaries') ? [{ key: 'beneficiaries' as TabKey, label: 'Beneficiary and Resource Registration', badge: 'Bn' }] : []),
+    ...(canSeeTab('forms') ? [{ key: 'forms' as TabKey, label: 'Forms', badge: 'Fo' }] : []),
     { key: 'content-hub' as TabKey, label: 'Content Hub', badge: 'Ch' },
   ];
 
@@ -1080,6 +1082,11 @@ export function DashboardPage() {
             {activeTab === 'hr' && canSeeTab('hr') && (
               <ErrorBoundary>
                 <HrManagementPage />
+              </ErrorBoundary>
+            )}
+            {activeTab === 'forms' && canSeeTab('forms') && (
+              <ErrorBoundary>
+                <FormsPage />
               </ErrorBoundary>
             )}
             {activeTab === 'financemgmt' && canSeeTab('financemgmt') && (

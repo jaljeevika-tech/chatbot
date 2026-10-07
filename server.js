@@ -19,6 +19,7 @@ import orgRoutes         from './routes/org.routes.js'
 import superadminRoutes  from './routes/superadmin.routes.js'
 import superadminIntegrationsRoutes from './routes/superadmin-integrations.routes.js'
 import superadminFormsRoutes from './routes/superadmin-forms.routes.js'
+import formsRoutes from './routes/forms.routes.js'
 import workerRoutes      from './routes/workers.routes.js'
 import reportRoutes      from './routes/reports.routes.js'
 import notebookRoutes    from './routes/notebook.routes.js'
@@ -124,7 +125,7 @@ app.use((req, res, next) => {
   // /api/finance-mgmt/budget/expenses/bulk: Excel/Tally expense upload, ≤5000 rows.
   const webhookRoutes = ['/api/wa/webhook', '/api/whatsapp/webhook']
   const fileRoutes = ['/api/notebook/upload', '/api/projects/', '/api/org/branding', '/api/ai-extract/', '/api/finance-mgmt/files',
-    '/api/finance-mgmt/budget/expenses/bulk']
+    '/api/finance-mgmt/budget/expenses/bulk', '/api/forms/']
   const aiDataRoutes = [
     '/api/get-ai-report', '/api/generate-social-post', '/api/prewarm',
     '/api/analytics/worker', '/api/notebook/', '/api/notebooks/', '/api/rw/',
@@ -240,6 +241,7 @@ app.use('/api', orgRoutes)        // GET  /org/metadata, GET /subscription
 app.use('/api', superadminRoutes) // GET/POST/PATCH /superadmin/*
 app.use('/api', superadminIntegrationsRoutes) // /superadmin/org/:id/{integrations,email,whatsapp}, /superadmin/sheets/test, send-link
 app.use('/api', superadminFormsRoutes) // /superadmin/org/:id/forms[/:key[/publish|/archive]] - form builder
+app.use('/api', formsRoutes)          // /forms, /forms/:key/submissions, /forms/:key/media/:id - staff fill custom forms
 app.use('/api', workerRoutes)     // POST /add-user, PUT /update-user, DELETE /delete-user, POST /analytics/worker
 app.use('/api', reportRoutes)     // POST /get-ai-report, POST /drive-folder, POST /generate-social-post, GET /proxy-image
 app.use('/api', notebookRoutes)   // POST /notebook/* (Strangler Fig proxy to Cloud Run when NOTEBOOK_SERVICE_URL is set)
