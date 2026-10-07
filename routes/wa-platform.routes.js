@@ -296,9 +296,9 @@ async function handleWebhookEvent(event, pool, rawBody, sigHeader, { trusted = f
     [orgId, contact.id, event.messageId, event.messageType, safeContent]
   )
 
-  // ── HR / Finance "Approve" button taps (lib/waApprovals.js) ─────────────────
+  // ── HR / Finance "Approve" + Check in / out button taps (lib/waApprovals.js) ──
   // Skip Meta's redeliveries (already logged) so one tap never approves twice.
-  if (await handleApprovalReply(event, { orgId, pool, waClient, duplicate: !logged.rowCount && !trusted })) return
+  if (await handleApprovalReply(event, { orgId, pool, waClient, contact, duplicate: !logged.rowCount && !trusted })) return
 
   // ── Find active or handoff session ──────────────────────────────────────────
   const { rows: sessionRows } = await pool.query(
@@ -545,11 +545,21 @@ router.get('/wa/config', async (req, res) => {
   res.json(rows[0] || null)
 })
 
-// POST /api/wa/templates/approval — create the "Approve" quick-reply template used
-// by HR / Finance approval alerts (lib/waApprovals.js) on this org's WhatsApp
-// Business Account, with the token already saved here. Idempotent: an existing
-// template of that name is reported, not duplicated.
-const APPROVAL_TEMPLATE = 'fieldflow_approval'
+// POST /api/wa/templates/approval — create the quick-reply templates used by
+// lib/waApprovals.js on this org's WhatsApp Business Account, with the token
+// already saved here: "Approve" (HR / Finance approvals) and "Check in" /
+// "Check out" (HR attendance reminders). Idempotent: existing ones are reported.
+const BUTTON_TEMPLATES = [
+  { name: 'fieldflow_approval', button: 'Approve',
+    text: 'New approval request on FieldFlow: {{1}} Tap Approve below to approve it, or open the link above to review the details first.',
+    example: base => `Leave request from Ravi Kumar, 3 days from 12 Oct. Details: ${base}/org/#approvals` },
+  { name: 'fieldflow_checkin', button: 'Check in',
+    text: 'FieldFlow attendance reminder: {{1}} Tap Check in below and share your location to record your attendance.',
+    example: base => `You have not checked in today. Details: ${base}/org/#attendance` },
+  { name: 'fieldflow_checkout', button: 'Check out',
+    text: 'FieldFlow attendance reminder: {{1}} Tap Check out below and share your location to record your check-out.',
+    example: base => `You are still checked in. Details: ${base}/org/#attendance` },
+]
 router.post('/wa/templates/approval', async (req, res) => {
   if (!['admin','superadmin'].includes(req.user.role)) return res.status(403).json({ error: 'Admin only' })
   const lang = String(req.body?.lang || 'en').trim()
@@ -563,25 +573,27 @@ router.post('/wa/templates/approval', async (req, res) => {
     const graph = (path, init = {}) => fetch(`https://graph.facebook.com/v19.0/${cfg.business_id}/${path}`, {
       ...init, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(10_000),
     }).then(async r => ({ ok: r.ok, j: await r.json().catch(() => ({})) }))
-
-    const existing = await graph(`message_templates?name=${APPROVAL_TEMPLATE}&fields=name,language,status&limit=100`)
-    const same = (existing.j.data || []).find(t => t.name === APPROVAL_TEMPLATE && t.language === lang)
-    if (same) return res.json({ name: APPROVAL_TEMPLATE, status: same.status, existed: true })
-
     const base = (process.env.APP_BASE_URL || 'https://app.example.org').replace(/\/$/, '')
-    const created = await graph('message_templates', { method: 'POST', body: JSON.stringify({
-      name: APPROVAL_TEMPLATE, language: lang, category: 'UTILITY',
-      components: [
-        { type: 'BODY',
-          text: 'New approval request on FieldFlow: {{1}} Tap Approve below to approve it, or open the link above to review the details first.',
-          example: { body_text: [[`Leave request from Ravi Kumar, 3 days from 12 Oct. Details: ${base}/org/#approvals`]] } },
-        { type: 'BUTTONS', buttons: [{ type: 'QUICK_REPLY', text: 'Approve' }] },
-      ],
-    }) })
-    if (!created.ok) return res.status(400).json({ error: `Meta refused the template: ${created.j?.error?.error_user_msg || created.j?.error?.message || 'unknown error'}` })
-    res.json({ name: APPROVAL_TEMPLATE, status: created.j.status || 'PENDING', existed: false })
+
+    const templates = []
+    for (const t of BUTTON_TEMPLATES) {
+      const existing = await graph(`message_templates?name=${t.name}&fields=name,language,status&limit=100`)
+      const same = (existing.j.data || []).find(x => x.name === t.name && x.language === lang)
+      if (same) { templates.push({ name: t.name, status: same.status, existed: true }); continue }
+      const created = await graph('message_templates', { method: 'POST', body: JSON.stringify({
+        name: t.name, language: lang, category: 'UTILITY',
+        components: [
+          { type: 'BODY', text: t.text, example: { body_text: [[t.example(base)]] } },
+          { type: 'BUTTONS', buttons: [{ type: 'QUICK_REPLY', text: t.button }] },
+        ],
+      }) })
+      templates.push(created.ok
+        ? { name: t.name, status: created.j.status || 'PENDING', existed: false }
+        : { name: t.name, status: 'ERROR', error: created.j?.error?.error_user_msg || created.j?.error?.message || 'Meta refused it' })
+    }
+    res.json({ name: BUTTON_TEMPLATES[0].name, templates })
   } catch (e) {
-    console.error('[wa-platform] approval template:', e.message)
+    console.error('[wa-platform] button templates:', e.message)
     res.status(500).json({ error: 'Could not reach Meta. Try again.' })
   }
 })

@@ -21,6 +21,9 @@ export const DEFAULT_NOTIFY = {
   whatsappLang:         'en',
   // Template with body {{1}} + one quick-reply button ("Approve"); blank = no button.
   whatsappApprovalTemplate: '',
+  // Reminders get a Check in / Check out button (templates fieldflow_checkin /
+  // fieldflow_checkout, created from settings); the tap asks for a location share.
+  whatsappAttendanceButtons: false,
   events:               Object.fromEntries(EVENTS.map(e => [e, true])),
   // Missed check-in reminder goes out at this org-local time (field shifts
   // have no start time to measure from).
@@ -135,7 +138,11 @@ async function sendWhatsApp(cfg, settings, phone, msg) {
   const text = `${msg.title}${msg.body ? ' — ' + msg.body : ''}`.replace(/\s+/g, ' ').slice(0, 900)
     + (link ? ` Details: ${link}` : '')
   const approval = msg.approve && settings.whatsappApprovalTemplate
-  const name = approval ? settings.whatsappApprovalTemplate : settings.whatsappTemplate
+  const attendance = !approval && msg.attendance && msg.userId && settings.whatsappAttendanceButtons
+  const name = approval ? settings.whatsappApprovalTemplate
+    : attendance ? `fieldflow_${msg.attendance}` : settings.whatsappTemplate
+  const payload = approval ? approvePayload(msg.approve)
+    : attendance ? approvePayload({ kind: msg.attendance, id: msg.userId }) : null
   const send = (code) => fetch(`https://graph.facebook.com/v19.0/${cfg.phone_number_id}/messages`, {
     method:  'POST',
     headers: { Authorization: `Bearer ${cfg.access_token}`, 'Content-Type': 'application/json' },
@@ -145,8 +152,8 @@ async function sendWhatsApp(cfg, settings, phone, msg) {
       type: 'template',
       template: { name, language: { code }, components: [
         { type: 'body', parameters: [{ type: 'text', text }] },
-        ...(approval ? [{ type: 'button', sub_type: 'quick_reply', index: '0',
-          parameters: [{ type: 'payload', payload: approvePayload(msg.approve) }] }] : []),
+        ...(payload ? [{ type: 'button', sub_type: 'quick_reply', index: '0',
+          parameters: [{ type: 'payload', payload }] }] : []),
       ] },
     }),
     signal: AbortSignal.timeout(8000),
@@ -211,7 +218,7 @@ export async function dispatch(orgId, queued, { force = false } = {}) {
             console.warn(`[hr-notify] ${channel} to ${id} failed:`, e.message)
           }))
         if (settings.emailEnabled && p.email && (emailConfigured() || force)) track('email', sendEmail(p.email, msg))
-        if (wa?.access_token && p.phone) track('whatsapp', sendWhatsApp(wa, settings, p.phone, msg))
+        if (wa?.access_token && p.phone) track('whatsapp', sendWhatsApp(wa, settings, p.phone, { ...msg, userId: id }))
       }
     }
     // Bounded: Cloud Run only guarantees CPU while the request is open, and a

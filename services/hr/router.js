@@ -446,7 +446,7 @@ export function createHrRouter() {
 
   function parseNotify(raw, current) {
     const n = notifySettings({ ...current, ...raw, events: { ...current.events, ...(raw?.events || {}) } })
-    for (const k of ['emailEnabled', 'whatsappEnabled']) {
+    for (const k of ['emailEnabled', 'whatsappEnabled', 'whatsappAttendanceButtons']) {
       if (typeof n[k] !== 'boolean') throw new HttpError(422, `Invalid ${k}.`)
     }
     n.whatsappTemplate = String(n.whatsappTemplate ?? '').trim()

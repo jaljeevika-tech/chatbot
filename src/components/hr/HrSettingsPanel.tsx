@@ -325,9 +325,17 @@ function Notifications({ data, run }: { data: HrBootstrap; run: Run }) {
             </Field>
             <div>
               <Btn onClick={() => void createApprovalTemplate(n.whatsappLang)
-                .then(r => { set({ whatsappApprovalTemplate: r.name }); toast(r.message, 'success') })
-                .catch(e => toast(errorText(e), 'error'))}>Create it in Meta for me</Btn>
+                .then(r => { set({ whatsappApprovalTemplate: r.name }); toast(r.message, r.ok ? 'success' : 'error') })
+                .catch(e => toast(errorText(e), 'error'))}>Create button templates in Meta for me</Btn>
             </div>
+            <label className="flex items-start gap-2" style={{ fontSize: 13.5, color: FF.tealText }}>
+              <input type="checkbox" className="mt-1" checked={!!n.whatsappAttendanceButtons} onChange={e => set({ whatsappAttendanceButtons: e.target.checked })} />
+              <span>Check in / Check out button on the attendance reminders
+                <span style={{ display: 'block', fontSize: 12, color: FF.textFaint }}>
+                  Uses the templates fieldflow_checkin and fieldflow_checkout (created by the button above). The tap asks the person to share their location.
+                </span>
+              </span>
+            </label>
           </div>
         </div>
         <fieldset style={{ border: 0, padding: 0, margin: 0 }}>

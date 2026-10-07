@@ -170,8 +170,8 @@ export function FinanceSettingsPanel() {
                 <div className="col-span-3 flex items-center gap-3">
                   <Btn onClick={() => void createApprovalTemplate(form.whatsapp_lang)
                     .then(r => { setForm(f => f && ({ ...f, whatsapp_approval_template: r.name })); setTplNote(r.message); setError(null) })
-                    .catch(e => { setTplNote(null); setError((e as Error).message) })}>Create it in Meta for me</Btn>
-                  {tplNote && <span className="text-xs" style={{ color: FF.green }}>{tplNote}</span>}
+                    .catch(e => { setTplNote(null); setError((e as Error).message) })}>Create button templates in Meta for me</Btn>
+                  {tplNote && <span className="text-xs" style={{ color: FF.textMuted }}>{tplNote}</span>}
                 </div>
               </div>
             )}

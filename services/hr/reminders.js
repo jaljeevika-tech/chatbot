@@ -92,7 +92,7 @@ async function missedCheckIn({ client, orgId, n, today, once }) {
     if (await once(p.id, 'missed_check_in')) {
       out.push({
         event: 'missedCheckIn', userIds: [p.id],
-        title: 'You have not checked in today',
+        title: 'You have not checked in today', attendance: 'checkin',
         body: `It's past ${fmtClock(n.reminderTime)}. Open HR Management to check in, or apply for leave if you're off.`,
       })
     }
@@ -109,7 +109,7 @@ async function checkOutReminder({ client, orgId, n, today, once }) {
     if (await once(r.user_id, 'check_out')) {
       out.push({
         event: 'checkOutReminder', userIds: [r.user_id],
-        title: 'You are still checked in',
+        title: 'You are still checked in', attendance: 'checkout',
         body: `Remember to check out when you finish. If you don't, you'll be checked out automatically at ${fmtClock(n.autoCheckOutTime)} and your manager will review the day.`,
       })
     }

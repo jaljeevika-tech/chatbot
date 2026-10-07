@@ -29,6 +29,8 @@ export interface NotifySettings {
   whatsappLang: string
   /** Template with a quick-reply "Approve" button, used for leave approvals; blank = plain template. */
   whatsappApprovalTemplate?: string
+  /** Check in / Check out buttons on the attendance reminders (fieldflow_checkin / fieldflow_checkout). */
+  whatsappAttendanceButtons?: boolean
   events: Record<NotifyEvent, boolean>
   /** Org-local 'HH:MM' — missed check-in reminders go out after this. */
   reminderTime: string
