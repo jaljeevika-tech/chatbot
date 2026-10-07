@@ -9,6 +9,7 @@ import { FF } from '../../theme/colors'
 import { Btn, inputStyle } from '../hr/hrUi'
 import { getLocationFix } from '../../utils/hr/geo'
 import { lgdOptions, type LgdLevel } from './lgdOptions'
+import { apiFetch } from '../../utils/apiFetch'
 
 const LGD_LEVELS: LgdLevel[] = ['state', 'district', 'block', 'panchayat', 'village']
 
@@ -226,8 +227,11 @@ function Question({ row, value, siblings, choices, error, onChange }: {
         break
       }
       if (row.appearance === 'beneficiary-lookup') {
-        control = <input {...common} type="text" autoCapitalize="characters" spellCheck={false} style={{ ...ctl, textTransform: 'uppercase' }} value={str}
-          onChange={e => onChange(e.target.value.trim().toUpperCase() || undefined)} />
+        control = <>
+          <input {...common} type="text" autoCapitalize="characters" spellCheck={false} style={{ ...ctl, textTransform: 'uppercase' }} value={str}
+            onChange={e => onChange(e.target.value.trim().toUpperCase() || undefined)} />
+          <BeneficiaryPreview uid={str} />
+        </>
         break
       }
       control = row.appearance?.includes('multiline')
@@ -278,5 +282,42 @@ function LgdInput({ level, common, style, value, siblings, onChange }: {
         onChange={e => onChange(e.target.value || undefined)} />
       {options && <datalist id={listId}>{options.map(o => <option key={o} value={o} />)}</datalist>}
     </>
+  )
+}
+
+type Lookup = { state: 'found'; name: string; type: string; location: string } | { state: 'missing' | 'offline'; message: string }
+const lookups = new Map<string, Lookup>()
+
+/** Shows who a beneficiary UID belongs to before submit. Advisory only — the server re-checks on submit. */
+function BeneficiaryPreview({ uid }: { uid: string }) {
+  const [result, setResult] = useState<Lookup | null>(null)
+  const complete = /^(IB|EB|CB)-[A-Z]+-\d+$/.test(uid)
+  useEffect(() => {
+    if (!complete) { setResult(null); return }
+    if (lookups.has(uid)) { setResult(lookups.get(uid)!); return }
+    let live = true
+    const t = setTimeout(async () => {
+      let next: Lookup
+      try {
+        const r = await apiFetch(`/api/forms/beneficiary-lookup?uid=${encodeURIComponent(uid)}`)
+        const j = await r.json().catch(() => ({}))
+        next = r.ok ? { state: 'found', name: j.name, type: j.type, location: j.location }
+          : r.status === 404 || r.status === 400 ? { state: 'missing', message: j.error || 'No beneficiary found' }
+          : { state: 'offline', message: "Couldn't check this UID right now. It will be checked when the form is sent." }
+        if (next.state === 'found') lookups.set(uid, next) // a missing UID may be registered later this session
+      } catch {
+        next = { state: 'offline', message: "Can't check while offline. It will be checked when the form is sent." }
+      }
+      if (live) setResult(next)
+    }, 400)
+    return () => { live = false; clearTimeout(t) }
+  }, [uid, complete])
+
+  if (!result) return null
+  const tone = result.state === 'found' ? FF.green : result.state === 'missing' ? FF.red : FF.textMuted
+  return (
+    <span role="status" style={{ fontSize: 12.5, color: tone }}>
+      {result.state === 'found' ? <><strong>{result.name}</strong> · {result.type}{result.location ? ` · ${result.location}` : ''}</> : result.message}
+    </span>
   )
 }

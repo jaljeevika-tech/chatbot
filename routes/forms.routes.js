@@ -8,13 +8,14 @@
 // POST /api/forms/:key/submissions              { instance_id, version, data } — idempotent on instance_id
 // GET  /api/forms/:key/submissions              admin/manager: all; employee: own
 // GET  /api/forms/:key/media/:mediaId           a photo/audio answer
+// GET  /api/forms/beneficiary-lookup?uid=        name + location for a UID (resource form preview)
 
 import { Router } from 'express'
 import crypto from 'crypto'
 import { getPool } from '../db/pool.js'
 import { buildTree, evaluateForm } from '../lib/odkForm.js'
 import { withDynamicChoices } from '../lib/forms.js'
-import { ENTITY_WRITERS, WRITER_ROLES, WriteError, splitAnswers, writeEntity } from '../lib/entityWriters.js'
+import { ENTITY_WRITERS, WRITER_ROLES, WriteError, findBeneficiary, splitAnswers, writeEntity } from '../lib/entityWriters.js'
 
 const router = Router()
 
@@ -50,6 +51,17 @@ router.get('/forms', async (req, res) => {
     const projects = visible.some(f => f.form_key === 'beneficiary') ? await orgProjects(req.user.orgId) : []
     res.json(visible.map(f => (f.kind === 'entity' ? { ...f, schema: withDynamicChoices(f.schema, { projects }) } : f)))
   } catch (e) { fail(res, e) }
+})
+
+// Only what's needed to confirm the right person — no phone or other PII.
+router.get('/forms/beneficiary-lookup', async (req, res) => {
+  try {
+    const { uid, name, type, location } = await findBeneficiary(getPool(), req.user.orgId, req.query.uid)
+    res.json({ uid, name, type, location })
+  } catch (e) {
+    if (e instanceof WriteError) return res.status(e.status).json({ error: e.message })
+    fail(res, e)
+  }
 })
 
 /** Moves data-URL photo/audio answers out of `data` into media rows; mutates data in place. */
