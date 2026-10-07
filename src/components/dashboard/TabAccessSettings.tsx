@@ -5,7 +5,7 @@ import { apiFetch } from '../../utils/apiFetch'
 
 export type TabKey = 'overview' | 'reports' | 'media' | 'impact' | 'analytics' | 'notebook' | 'whatsapp' | 'toc'
   | 'portfolio' | 'orgdash' | 'vault' | 'beneficiaries' | 'financial' | 'compliance' | 'projectmedia' | 'annualprogress'
-  | 'mis' | 'beneficiaryprofile' | 'hr' | 'financemgmt'
+  | 'mis' | 'beneficiaryprofile' | 'hr' | 'financemgmt' | 'forms'
 export type TabPermMap = Record<TabKey, ('admin' | 'manager' | 'employee')[]>
 
 export const TAB_DEFS: { key: TabKey; label: string; description: string }[] = [
@@ -29,6 +29,7 @@ export const TAB_DEFS: { key: TabKey; label: string; description: string }[] = [
   { key: 'beneficiaryprofile', label: 'Beneficiary Profile', description: 'Individual / Micro-Entrepreneur / Collective rosters — complete registered detail plus all MIS data recorded against each beneficiary' },
   { key: 'hr',            label: 'HR Management',          description: 'Attendance check-in/out with GPS, team register, leave requests & approvals — works offline' },
   { key: 'financemgmt',   label: 'Finance Management',     description: 'Advance requests & settlements (manager → Finance), ledger statement requests, compliance calendar' },
+  { key: 'forms',         label: 'Forms',                  description: 'Fill the organisation’s published survey forms (works offline) and view submissions' },
 ]
 
 export const DEFAULT_TAB_PERMISSIONS: TabPermMap = {
@@ -58,6 +59,8 @@ export const DEFAULT_TAB_PERMISSIONS: TabPermMap = {
   // Anyone can raise an advance / ask for a ledger statement; approvals and
   // Finance actions inside the tab are gated by services/finance.
   financemgmt: ['admin', 'manager', 'employee'],
+  // Field staff fill forms; the server limits staff to their own submissions.
+  forms: ['admin', 'manager', 'employee'],
 }
 
 interface Props {

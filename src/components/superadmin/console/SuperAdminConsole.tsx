@@ -103,7 +103,7 @@ export function SuperAdminConsole() {
 
   let content: ReactNode
   switch (route.page) {
-    case 'orgs':    content = route.orgId ? <OrgDetailPage key={route.orgId} orgId={route.orgId} tab={route.orgTab ?? 'overview'} /> : <OrgsPage />; break
+    case 'orgs':    content = route.orgId ? <OrgDetailPage key={route.orgId} orgId={route.orgId} tab={route.orgTab ?? 'overview'} formKey={route.formKey} /> : <OrgsPage />; break
     case 'plans':   content = <PlansPage />; break
     case 'billing': content = <LightIsland title="Usage & costs" subtitle="Estimated AI cost per organisation, from usage events."><BillingDashboard /></LightIsland>; break
     case 'prompts': content = <LightIsland title="AI prompts" subtitle="Prompt library used by the AI features."><PromptManager /></LightIsland>; break

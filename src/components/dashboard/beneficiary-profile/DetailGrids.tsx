@@ -1,8 +1,14 @@
 import { FF } from '../../../theme/colors'
 import { HIDDEN_FIELDS, READONLY_DETAIL_FIELDS, FIELD_OPTIONS, humanizeKey, formatFieldValue } from './helpers'
 
+// custom_data (form builder answers) is shown as its own cells after the built-in columns.
+const withCustomFields = (record: Record<string, unknown>): [string, unknown][] => {
+  const custom = record.custom_data && typeof record.custom_data === 'object' && !Array.isArray(record.custom_data) ? record.custom_data as Record<string, unknown> : {}
+  return [...Object.entries(record).filter(([k]) => k !== 'custom_data'), ...Object.entries(custom)]
+}
+
 export function DetailGrid({ record }: { record: Record<string, unknown> }) {
-  const entries = Object.entries(record).filter(([k]) => !HIDDEN_FIELDS.has(k))
+  const entries = withCustomFields(record).filter(([k]) => !HIDDEN_FIELDS.has(k))
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px 20px' }}>
       {entries.map(([key, value]) => (
@@ -31,7 +37,8 @@ export function EditableDetailGrid({ record, draft, onChange }: {
   draft: Record<string, unknown>
   onChange: (key: string, value: unknown) => void
 }) {
-  const entries = Object.entries(record).filter(([k]) => !HIDDEN_FIELDS.has(k))
+  // Custom answers aren't editable here (they need the form's own question types).
+  const entries = Object.entries(record).filter(([k]) => !HIDDEN_FIELDS.has(k) && k !== 'custom_data')
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px 20px' }}>
       {entries.map(([key, value]) => {
