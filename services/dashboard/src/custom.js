@@ -230,8 +230,8 @@ router.get('/custom-dashboards', async (req, res) => {
     )
     res.json(rows)
   } catch (e) {
-    // Before migration 085 runs the table doesn't exist — show "no dashboards", not an error.
-    if (e.code === '42P01') return res.json([])
+    // Before migration 085 (table) / 086 (builtin_key) runs — show "no dashboards", not an error.
+    if (e.code === '42P01' || e.code === '42703') return res.json([])
     console.error('[custom-dashboards] list', e)
     res.status(500).json({ error: 'Internal server error' })
   }
@@ -339,7 +339,8 @@ router.get(SA, async (req, res) => {
     res.json(rows)
   } catch (e) {
     console.error('[custom-dashboards] sa list', e)
-    res.status(e.code === '42P01' ? 503 : 500).json({ error: e.code === '42P01' ? 'Run migration 085 first' : 'Internal server error' })
+    const notMigrated = e.code === '42P01' || e.code === '42703'
+    res.status(notMigrated ? 503 : 500).json({ error: notMigrated ? 'Run migrations 085 and 086 first' : 'Internal server error' })
   }
 })
 
