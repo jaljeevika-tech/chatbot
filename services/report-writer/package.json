@@ -2,7 +2,7 @@
   "name": "fieldflow-report-writer-service",
   "version": "1.0.0",
   "type": "module",
-  "description": "FieldFlow Report Writer microservice — AI-assisted NGO field report drafting",
+  "description": "FieldFlow Report Writer microservice — voice profiles, glossary, feedback (Google Sheet) + AI drafting (shares src/router.js with the monolith)",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

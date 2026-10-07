@@ -2,7 +2,7 @@
   "name": "fieldflow-notebook-service",
   "version": "1.0.0",
   "type": "module",
-  "description": "FieldFlow Notebook AI microservice — stateless Gemini-powered notebook endpoints",
+  "description": "FieldFlow Notebook AI microservice — chat, study guide, slide deck, mind map, flashcards, guide (shares src/router.js with the monolith)",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -12,7 +12,8 @@
     "@mozilla/readability": "^0.6.0",
     "express": "^4.22.1",
     "jsdom": "^29.1.1",
-    "officeparser": "^7.2.3"
+    "officeparser": "^7.2.3",
+    "pg": "^8.13.3"
   },
   "engines": {
     "node": ">=22"
