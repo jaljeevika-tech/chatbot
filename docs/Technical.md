@@ -142,7 +142,7 @@ Companion documents:
 │   ├── saved-reports.routes.js
 │   ├── superadmin.routes.js
 │   ├── wa-platform.routes.js
-│   ├── whatsapp.routes.js     # Legacy Glific receiver
+│   ├── whatsapp.routes.js     # Optional Glific connector (Meta direct is default)
 │   └── workers.routes.js
 ├── scripts/                   # One-off ops scripts
 │   ├── generate_manual.py
@@ -222,7 +222,7 @@ Everything is in **Postgres on Neon**. There are 24 tables. All multi-tenant —
 |---|---|
 | `audit_log` | Every state-changing action. `actor_uid`, `actor_name`, `action`, `target_type`, `target_id`, `diff JSONB`. |
 | `usage_events` | Per-org token + cost telemetry. `model`, `input_tokens`, `output_tokens`, `cost_usd`. |
-| `whatsapp_submissions` | Legacy Glific webhook payload archive. |
+| `whatsapp_submissions` | Glific connector webhook payload archive. |
 
 ### 4.6 Report Writer
 

@@ -29,6 +29,7 @@ export type PlatformIntegrations = {
   email: { provider: string | null; resend_configured: boolean; from_address: string | null; ready: boolean }
   google: { service_account_email: string | null }
   whatsapp: { webhook_url: string | null; global_verify_token: boolean; global_app_secret: boolean }
+  app_base_url: string | null
 }
 
 function TestResult({ ok, text }: { ok: boolean; text: string }) {
@@ -179,7 +180,7 @@ function WhatsAppCard({ org, cfg, platform, onSaved }: { org: OrgRow; cfg: WaCfg
   const qualityTone = (q?: string) => q === 'GREEN' ? 'success' as const : q === 'YELLOW' ? 'warning' as const : q === 'RED' ? 'danger' as const : 'neutral' as const
 
   return (
-    <Card title={<span className="flex items-center gap-2"><MessageCircle className="w-4 h-4" />WhatsApp Business</span>}
+    <Card title={<span className="flex items-center gap-2"><MessageCircle className="w-4 h-4" />WhatsApp Business <Badge>Default</Badge></span>}
       description="Meta WhatsApp Cloud API: field reports, flows and notifications over WhatsApp."
       actions={cfg.configured ? <Badge tone={cfg.enabled ? 'success' : 'neutral'}>{cfg.enabled ? 'Connected' : 'Paused'}</Badge> : <Badge>Not connected</Badge>}>
       <div className="flex flex-col gap-4">
@@ -221,8 +222,62 @@ function WhatsAppCard({ org, cfg, platform, onSaved }: { org: OrgRow; cfg: WaCfg
   )
 }
 
+// ── Glific (optional connector) ───────────────────────────────────────────────
+// For orgs that already run their bots on Glific: their flow POSTs reports to
+// /api/whatsapp/webhook. Stored in organizations.metadata (secret masked/encrypted).
+function GlificCard({ org, platform, onSaved }: { org: OrgRow; platform: PlatformIntegrations | null; onSaved: () => void }) {
+  const { toast } = useToast()
+  const meta = (org.metadata ?? {}) as Record<string, unknown>
+  const initial = { glific_org_code: String(meta.glific_org_code ?? ''), glific_webhook_secret: String(meta.glific_webhook_secret ?? '') }
+  const [g, setG] = useState(initial)
+  const [saving, setSaving] = useState(false)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => setG(initial), [org.metadata])
+  const dirty = JSON.stringify(g) !== JSON.stringify(initial)
+  const connected = !!initial.glific_webhook_secret
+  const url = platform?.app_base_url ? `${platform.app_base_url}/api/whatsapp/webhook` : null
+
+  const save = async () => {
+    setSaving(true)
+    try { await saApi(`/api/superadmin/org/${org.id}/metadata`, { method: 'PATCH', body: g }); toast('Glific settings saved'); onSaved() }
+    catch (e) { toast(errMsg(e), 'error') }
+    finally { setSaving(false) }
+  }
+
+  return (
+    <Card title={<span className="flex items-center gap-2"><MessageCircle className="w-4 h-4" />Glific <Badge>Optional</Badge></span>}
+      description="Only for orgs already running their bots on Glific. Their Glific flow posts field reports here; Meta direct above is not needed for this."
+      actions={<Badge tone={connected ? 'success' : 'neutral'}>{connected ? 'Connected' : 'Not connected'}</Badge>}>
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Org code" hint={`Sent as org_code by the Glific flow. Blank = use the slug "${org.slug}".`}>{id => <Input id={id} value={g.glific_org_code} className="font-mono" onChange={e => setG(p => ({ ...p, glific_org_code: e.target.value.trim() }))} />}</Field>
+          <Field label="Webhook secret" hint={g.glific_webhook_secret === MASK ? 'Saved (encrypted). Type to replace.' : 'Same secret as the Glific webhook. Required: unsigned calls are refused.'}>
+            {id => <Input id={id} type="password" autoComplete="new-password" value={g.glific_webhook_secret}
+              onFocus={() => { if (g.glific_webhook_secret === MASK) setG(p => ({ ...p, glific_webhook_secret: '' })) }}
+              onBlur={() => { if (!g.glific_webhook_secret && initial.glific_webhook_secret === MASK) setG(p => ({ ...p, glific_webhook_secret: MASK })) }}
+              onChange={e => setG(p => ({ ...p, glific_webhook_secret: e.target.value }))} />}
+          </Field>
+        </div>
+        {url && (
+          <Field label="Webhook URL for Glific">
+            {() => (
+              <div className="flex gap-2 items-center">
+                <code className="flex-1 min-w-0 truncate rounded-lg bg-sa-subtle border border-sa-border px-3 py-2 text-xs text-sa-text">{url}</code>
+                <CopyButton text={url} />
+              </div>
+            )}
+          </Field>
+        )}
+        <div className="flex justify-end">
+          <Button variant="primary" loading={saving} disabled={!dirty} onClick={save}>Save Glific settings</Button>
+        </div>
+      </div>
+    </Card>
+  )
+}
+
 // ── Tab ───────────────────────────────────────────────────────────────────────
-export function OrgIntegrationsTab({ org }: { org: OrgRow }) {
+export function OrgIntegrationsTab({ org, onOrgSaved }: { org: OrgRow; onOrgSaved: () => void }) {
   const [data, setData] = useState<OrgIntegrations | null>(null)
   const [platform, setPlatform] = useState<PlatformIntegrations | null>(null)
   const [error, setError] = useState('')
@@ -250,6 +305,7 @@ export function OrgIntegrationsTab({ org }: { org: OrgRow }) {
           ? <EmailCard org={org} cfg={data.email} log={data.email_log} platform={platform} onSaved={load} />
           : <Card title="Email"><p className="text-sm text-sa-muted">Available after migration 083 is run.</p></Card>}
         <WhatsAppCard org={org} cfg={data.whatsapp} platform={platform} onSaved={load} />
+        <GlificCard org={org} platform={platform} onSaved={onOrgSaved} />
       </div>
       <Card title={<span className="flex items-center gap-2"><Sheet className="w-4 h-4" />Google Sheets</span>}
         description="Sheets are shared with one platform service account. Set the sheet links and test them on the Data sources tab."

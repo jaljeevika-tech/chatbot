@@ -89,7 +89,7 @@ export function OrgDetailPage({ orgId, tab }: { orgId: string; tab: OrgTab }) {
       {tab === 'branding'     && <OrgBrandingTab org={org} onSaved={reload} />}
       {tab === 'modules'      && <OrgModulesTab org={org} onSaved={reload} />}
       {tab === 'data'         && <OrgDataTab org={org} onSaved={reload} />}
-      {tab === 'integrations' && <OrgIntegrationsTab org={org} />}
+      {tab === 'integrations' && <OrgIntegrationsTab org={org} onOrgSaved={reload} />}
       {tab === 'dashboards'   && <OrgDashboardsTab org={org} />}
       {tab === 'audit'        && <Card title="Activity" description="Super admin changes to this organisation." padded={false}><AuditTable orgId={org.id} /></Card>}
     </>

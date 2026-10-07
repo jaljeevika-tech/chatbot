@@ -19,7 +19,7 @@ token comes from the Firebase Auth client SDK after a successful login.
 - `POST /api/verify-otp`
 - `GET  /api/wa/webhook`     (Meta verification challenge)
 - `POST /api/wa/webhook`     (Meta inbound events — signature-verified instead)
-- `POST /api/whatsapp/webhook`  (legacy Glific webhook)
+- `POST /api/whatsapp/webhook`  (optional Glific connector)
 - `GET  /api/whatsapp/health`
 - `GET  /api/_ah/warmup`        (App Engine warmup)
 
@@ -398,8 +398,8 @@ All require role `superadmin`.
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
 | GET | `/api/_ah/warmup` | public | App Engine warmup (pre-fetches DB) |
-| GET | `/api/whatsapp/health` | public | Glific legacy health probe |
-| POST | `/api/whatsapp/webhook` | public | Glific legacy webhook receiver |
+| GET | `/api/whatsapp/health` | public | Glific connector health probe |
+| POST | `/api/whatsapp/webhook` | public | Glific connector webhook receiver (optional; Meta direct is the default) |
 | POST | `/api/whatsapp/inbound` | public (stub) | Future raw-inbound hook |
 
 ---
