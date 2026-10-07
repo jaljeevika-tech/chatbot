@@ -1,4 +1,7 @@
--- 085_forms.sql — KoBo/ODK-style form builder (super admin + org admin)
+-- 087_forms.sql — KoBo/ODK-style form builder (super admin + org admin)
+-- (First written as 085_forms.sql and applied to Neon prod under that name on
+-- 2026-10-07; renumbered because 085_custom_dashboards.sql took 085. Idempotent,
+-- so re-running it is a no-op.)
 --
 -- Additive + reversible:
 --   DROP TABLE form_media, form_submissions, form_versions, forms;

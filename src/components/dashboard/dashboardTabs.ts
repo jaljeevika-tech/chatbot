@@ -7,11 +7,7 @@ export const ALL_TAB_KEYS = [
   'overview', 'reports', 'media', 'settings', 'impact', 'toc', 'notebook', 'analytics', 'whatsapp', 'actionplan', 'quickreport', 'content-hub',
   'generate-report', 'story-finder', 'project-report-picker', 'case-study-picker', 'org-report-picker', 'self-report-picker', 'team-report-picker', 'impact-report-picker', 'content-picker',
   'portfolio', 'orgdash', 'dashboard', 'vault', 'beneficiaries', 'financial', 'compliance', 'projectmedia', 'annualprogress',
-<<<<<<< HEAD
-  'mis', 'beneficiaryprofile', 'hr', 'financemgmt', 'custom',
-=======
-  'mis', 'beneficiaryprofile', 'hr', 'financemgmt', 'forms',
->>>>>>> Ayush/custom-form-build-system-e0cbd1
+  'mis', 'beneficiaryprofile', 'hr', 'financemgmt', 'custom', 'forms',
 ] as const;
 export type AnyTabKey = typeof ALL_TAB_KEYS[number];
 
@@ -68,11 +64,8 @@ export const TAB_MODULES = {
   'beneficiaryprofile':    () => import('./BeneficiaryProfilePage'),
   'hr':                    () => import('../hr/HrManagementPage'),
   'financemgmt':           () => import('../finance-mgmt/FinanceManagementPage'),
-<<<<<<< HEAD
   'custom':                () => import('./CustomDashboardPage'),
-=======
   'forms':                 () => import('../forms/FormsPage'),
->>>>>>> Ayush/custom-form-build-system-e0cbd1
 } satisfies Record<AnyTabKey, () => Promise<unknown>>;
 
 /** Prefetch a tab's chunk ahead of its first render. Errors are swallowed; the real

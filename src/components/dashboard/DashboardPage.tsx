@@ -503,11 +503,7 @@ export function DashboardPage() {
 
   type TabKey = 'overview' | 'reports' | 'media' | 'settings' | 'impact' | 'toc' | 'notebook' | 'analytics' | 'whatsapp' | 'actionplan' | 'quickreport' | 'content-hub'
     | 'portfolio' | 'orgdash' | 'dashboard' | 'vault' | 'beneficiaries' | 'financial' | 'compliance' | 'projectmedia' | 'annualprogress'
-<<<<<<< HEAD
-    | 'mis' | 'beneficiaryprofile' | 'hr' | 'financemgmt' | 'custom';
-=======
-    | 'mis' | 'beneficiaryprofile' | 'hr' | 'financemgmt' | 'forms';
->>>>>>> Ayush/custom-form-build-system-e0cbd1
+    | 'mis' | 'beneficiaryprofile' | 'hr' | 'financemgmt' | 'custom' | 'forms';
 
   // The report FilterBar and hero cards are scoped to daily_reports, so only
   // the tabs that list those reports show them.

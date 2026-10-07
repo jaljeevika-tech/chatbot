@@ -23,9 +23,9 @@ const MEDIA_RE = /^data:((?:image\/(?:jpeg|png|webp))|(?:audio\/(?:mpeg|mp4|aac|
 const MAX_MEDIA_BYTES = 10 * 1024 * 1024
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }
 const canSeeAll = (req) => ['admin', 'manager', 'superadmin'].includes(req.user.role)
-const MIGRATION_085 = 'Database migration 085_forms.sql has not been run yet.'
+const MIGRATION_087 = 'Database migration 087_forms.sql has not been run yet.'
 const fail = (res, e) => (e?.code === '42P01'
-  ? res.status(503).json({ error: MIGRATION_085 })
+  ? res.status(503).json({ error: MIGRATION_087 })
   : (console.error('[forms]', e), res.status(500).json({ error: 'Something went wrong' })))
 
 const canWrite = (req, key) => !!ENTITY_WRITERS[key] && (!WRITER_ROLES[key] || WRITER_ROLES[key].includes(req.user.role))
