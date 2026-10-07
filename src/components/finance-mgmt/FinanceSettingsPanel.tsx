@@ -8,6 +8,7 @@ import { Search, Save, Mail, MessageCircle, Users } from 'lucide-react'
 import { FF } from '../../theme/colors'
 import { useFm } from './fmContext'
 import { fmGet, fmPatch, fmPut } from './fmApi'
+import { createApprovalTemplate } from '../../utils/waApprovalTemplate'
 import { Btn, Card, ErrorBox, Field, LoadingRow, inputCls, inputStyle, tdCls, thCls, useFmLoad } from './fmUi'
 
 interface Person {
@@ -62,6 +63,7 @@ export function FinanceSettingsPanel() {
   const [catsText, setCatsText] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [tplNote, setTplNote] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -162,9 +164,15 @@ export function FinanceSettingsPanel() {
                 </Field>
                 <Field label="Approval template (optional)" className="col-span-3"
                   hint="Same {{1}} body plus one Quick reply button “Approve”. Advances and settlements waiting for someone then get an Approve button on WhatsApp.">
-                  <input className={inputCls} style={inputStyle} value={form.whatsapp_approval_template ?? ''} placeholder="finance_approval"
+                  <input className={inputCls} style={inputStyle} value={form.whatsapp_approval_template ?? ''} placeholder="fieldflow_approval"
                     onChange={e => setForm({ ...form, whatsapp_approval_template: e.target.value.trim() })} />
                 </Field>
+                <div className="col-span-3 flex items-center gap-3">
+                  <Btn onClick={() => void createApprovalTemplate(form.whatsapp_lang)
+                    .then(r => { setForm(f => f && ({ ...f, whatsapp_approval_template: r.name })); setTplNote(r.message); setError(null) })
+                    .catch(e => { setTplNote(null); setError((e as Error).message) })}>Create it in Meta for me</Btn>
+                  {tplNote && <span className="text-xs" style={{ color: FF.green }}>{tplNote}</span>}
+                </div>
               </div>
             )}
 

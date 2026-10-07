@@ -10,6 +10,7 @@ import { useToast } from '../../context/ToastContext'
 import { useReportContext } from '../../context/ReportContext'
 import type { GpsMode, Holiday, HrBootstrap, LeaveType, NotifyEvent, NotifySettings, Shift, TeamMember } from '../../types/hr'
 import { hrGet, hrSend } from './useHrData'
+import { createApprovalTemplate } from '../../utils/waApprovalTemplate'
 import { Btn, Card, Field, Muted, Notice, errorText, fmtClock, fmtDate, fmtMinutes, inputStyle } from './hrUi'
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -322,6 +323,11 @@ function Notifications({ data, run }: { data: HrBootstrap; run: Run }) {
               <input value={n.whatsappApprovalTemplate ?? ''} onChange={e => set({ whatsappApprovalTemplate: e.target.value.trim() })}
                 placeholder="fieldflow_approval" style={inputStyle} />
             </Field>
+            <div>
+              <Btn onClick={() => void createApprovalTemplate(n.whatsappLang)
+                .then(r => { set({ whatsappApprovalTemplate: r.name }); toast(r.message, 'success') })
+                .catch(e => toast(errorText(e), 'error'))}>Create it in Meta for me</Btn>
+            </div>
           </div>
         </div>
         <fieldset style={{ border: 0, padding: 0, margin: 0 }}>

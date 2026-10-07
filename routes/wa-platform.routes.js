@@ -545,6 +545,47 @@ router.get('/wa/config', async (req, res) => {
   res.json(rows[0] || null)
 })
 
+// POST /api/wa/templates/approval — create the "Approve" quick-reply template used
+// by HR / Finance approval alerts (lib/waApprovals.js) on this org's WhatsApp
+// Business Account, with the token already saved here. Idempotent: an existing
+// template of that name is reported, not duplicated.
+const APPROVAL_TEMPLATE = 'fieldflow_approval'
+router.post('/wa/templates/approval', async (req, res) => {
+  if (!['admin','superadmin'].includes(req.user.role)) return res.status(403).json({ error: 'Admin only' })
+  const lang = String(req.body?.lang || 'en').trim()
+  if (!/^[a-z]{2,3}(_[A-Z]{2})?$/.test(lang)) return res.status(400).json({ error: 'Language looks like en or en_US.' })
+  try {
+    const { rows: [cfg] } = await getPool().query(
+      `SELECT business_id, access_token FROM wa_config WHERE org_id = $1 AND enabled = true`, [req.user.orgId])
+    if (!cfg) return res.status(400).json({ error: 'Connect a WhatsApp number first (WhatsApp tab → settings).' })
+    if (!cfg.business_id) return res.status(400).json({ error: 'Save the WhatsApp Business Account ID in WhatsApp settings first.' })
+    const token = decryptSecret(cfg.access_token)
+    const graph = (path, init = {}) => fetch(`https://graph.facebook.com/v19.0/${cfg.business_id}/${path}`, {
+      ...init, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(10_000),
+    }).then(async r => ({ ok: r.ok, j: await r.json().catch(() => ({})) }))
+
+    const existing = await graph(`message_templates?name=${APPROVAL_TEMPLATE}&fields=name,language,status&limit=100`)
+    const same = (existing.j.data || []).find(t => t.name === APPROVAL_TEMPLATE && t.language === lang)
+    if (same) return res.json({ name: APPROVAL_TEMPLATE, status: same.status, existed: true })
+
+    const base = (process.env.APP_BASE_URL || 'https://app.example.org').replace(/\/$/, '')
+    const created = await graph('message_templates', { method: 'POST', body: JSON.stringify({
+      name: APPROVAL_TEMPLATE, language: lang, category: 'UTILITY',
+      components: [
+        { type: 'BODY',
+          text: 'New approval request on FieldFlow: {{1}} Tap Approve below to approve it, or open the link above to review the details first.',
+          example: { body_text: [[`Leave request from Ravi Kumar, 3 days from 12 Oct. Details: ${base}/org/#approvals`]] } },
+        { type: 'BUTTONS', buttons: [{ type: 'QUICK_REPLY', text: 'Approve' }] },
+      ],
+    }) })
+    if (!created.ok) return res.status(400).json({ error: `Meta refused the template: ${created.j?.error?.error_user_msg || created.j?.error?.message || 'unknown error'}` })
+    res.json({ name: APPROVAL_TEMPLATE, status: created.j.status || 'PENDING', existed: false })
+  } catch (e) {
+    console.error('[wa-platform] approval template:', e.message)
+    res.status(500).json({ error: 'Could not reach Meta. Try again.' })
+  }
+})
+
 router.put('/wa/config', async (req, res) => {
   if (!['admin','superadmin'].includes(req.user.role)) return res.status(403).json({ error: 'Admin only' })
   // Accept both camelCase and snake_case from frontend
