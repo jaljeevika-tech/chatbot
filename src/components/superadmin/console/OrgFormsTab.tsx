@@ -400,6 +400,7 @@ function ChoiceEditor({ list, lists, items, usage, disabled, onPick, onChange }:
           <Button disabled={!newList || lists.includes(newList)} onClick={() => { onPick(newList); setNewList('') }}>New list</Button>
         </>}
       </div>
+      {list === 'project' && <p className="text-xs text-sa-muted">Options come from the organisation’s project list when staff open the form.</p>}
       <table className="w-full text-sm">
         <thead><tr className="text-xs text-sa-muted text-left"><th className="font-semibold pb-1">Value (saved)</th><th className="font-semibold pb-1">Label (shown)</th><th /></tr></thead>
         <tbody>

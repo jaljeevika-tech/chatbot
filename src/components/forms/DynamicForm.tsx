@@ -2,12 +2,15 @@
 // skip logic, calculations, repeat counts, required, constraints — comes from
 // lib/odkForm.js, the same code the server validates submissions with.
 
-import { useId, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import { MapPin, Plus, Trash2, X } from 'lucide-react'
 import { buildTree, evaluateForm, type Answers, type FormRow, type FormSchema, type TreeNode } from '../../../lib/odkForm'
 import { FF } from '../../theme/colors'
 import { Btn, inputStyle } from '../hr/hrUi'
 import { getLocationFix } from '../../utils/hr/geo'
+import { lgdOptions, type LgdLevel } from './lgdOptions'
+
+const LGD_LEVELS: LgdLevel[] = ['state', 'district', 'block', 'panchayat', 'village']
 
 type Path = (string | number)[]
 
@@ -100,16 +103,24 @@ export function DynamicForm({ schema, value, onChange, showErrors }: {
     }
 
     return (
-      <Question key={key} row={row} value={obj[row.name]} choices={schema.choices[row.list ?? ''] ?? []}
-        error={showErrors ? errors[key] : undefined} onChange={v => set([...path, row.name], v)} />
+      <Question key={key} row={row} value={obj[row.name]} siblings={obj} choices={schema.choices[row.list ?? ''] ?? []}
+        error={showErrors ? errors[key] : undefined}
+        onChange={v => {
+          const level = row.appearance?.startsWith('lgd-') ? row.appearance.slice(4) as LgdLevel : null
+          if (!level) return set([...path, row.name], v)
+          // A new state/district/... invalidates every level below it (as in the registration forms).
+          let next = setAt(value, [...path, row.name], v)
+          for (const lower of LGD_LEVELS.slice(LGD_LEVELS.indexOf(level) + 1)) if (lower in obj) next = setAt(next, [...path, lower], undefined)
+          onChange(next)
+        }} />
     )
   })
 
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>{renderNodes(tree, value, [], '')}</div>
 }
 
-function Question({ row, value, choices, error, onChange }: {
-  row: FormRow; value: unknown; choices: { name: string; label: string }[]; error?: string; onChange: (v: unknown) => void
+function Question({ row, value, siblings, choices, error, onChange }: {
+  row: FormRow; value: unknown; siblings: Answers; choices: { name: string; label: string }[]; error?: string; onChange: (v: unknown) => void
 }) {
   const id = useId()
   const [busy, setBusy] = useState('')
@@ -210,6 +221,15 @@ function Question({ row, value, choices, error, onChange }: {
       break
     }
     default:
+      if (row.appearance?.startsWith('lgd-')) {
+        control = <LgdInput level={row.appearance.slice(4) as LgdLevel} common={common} style={ctl} value={str} siblings={siblings} onChange={onChange} />
+        break
+      }
+      if (row.appearance === 'beneficiary-lookup') {
+        control = <input {...common} type="text" autoCapitalize="characters" spellCheck={false} style={{ ...ctl, textTransform: 'uppercase' }} value={str}
+          onChange={e => onChange(e.target.value.trim().toUpperCase() || undefined)} />
+        break
+      }
       control = row.appearance?.includes('multiline')
         ? <textarea {...common} rows={3} style={ctl} value={str} onChange={e => onChange(e.target.value || undefined)} />
         : <input {...common} type="text" inputMode={row.appearance?.includes('numbers') ? 'numeric' : undefined} style={ctl} value={str} onChange={e => onChange(e.target.value || undefined)} />
@@ -224,5 +244,39 @@ function Question({ row, value, choices, error, onChange }: {
       {control}
       {error && <span id={`${id}-err`} role="alert" style={{ fontSize: 12.5, color: FF.red }}>{error}</span>}
     </div>
+  )
+}
+
+function LgdInput({ level, common, style, value, siblings, onChange }: {
+  level: LgdLevel; common: Record<string, unknown>; style: React.CSSProperties; value: string; siblings: Answers; onChange: (v: unknown) => void
+}) {
+  const [options, setOptions] = useState<string[] | null>(null)
+  const listId = useId()
+  const dropdown = level === 'state' || level === 'district'
+  // Parent answers scope the lookup; for typeahead levels the typed text narrows it too.
+  const scope = LGD_LEVELS.slice(0, LGD_LEVELS.indexOf(level)).map(l => String(siblings[l] ?? '')).join('|')
+  useEffect(() => {
+    let live = true
+    const t = setTimeout(() => { void lgdOptions(level, siblings, dropdown ? '' : value).then(o => { if (live) setOptions(o) }) }, dropdown ? 0 : 250)
+    return () => { live = false; clearTimeout(t) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [level, scope, dropdown ? '' : value])
+
+  if (dropdown && options) {
+    return (
+      <select {...common} style={style} value={value} onChange={e => onChange(e.target.value || undefined)}>
+        <option value="">Select {level}…</option>
+        {value && !options.includes(value) && <option value={value}>{value}</option>}
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+    )
+  }
+  return (
+    <>
+      <input {...common} type="text" list={options ? listId : undefined} autoComplete="off" style={style} value={value}
+        placeholder={level === 'district' && !siblings.state ? 'Select state first, or type' : undefined}
+        onChange={e => onChange(e.target.value || undefined)} />
+      {options && <datalist id={listId}>{options.map(o => <option key={o} value={o} />)}</datalist>}
+    </>
   )
 }

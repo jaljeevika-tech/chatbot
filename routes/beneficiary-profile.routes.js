@@ -154,7 +154,8 @@ router.get('/beneficiary-profile/:uid', async (req, res) => {
 // alter a beneficiary's registered identity. Unknown and PROTECTED_COLUMNS
 // keys are silently ignored; column names come from the DB row, not the
 // request, so the dynamic SET clause has no injection surface.
-const PROTECTED_COLUMNS = new Set(['id', 'uid', 'org_id', 'created_at'])
+// custom_data holds form-builder answers (JSONB); edited through the form, not this flat editor.
+const PROTECTED_COLUMNS = new Set(['id', 'uid', 'org_id', 'created_at', 'custom_data'])
 
 router.put('/beneficiary-profile/:uid', async (req, res) => {
   if (!requireAdmin(req, res)) return

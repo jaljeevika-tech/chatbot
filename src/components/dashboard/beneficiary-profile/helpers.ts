@@ -184,6 +184,7 @@ export function formatFieldValue(key: string, value: unknown): string {
     return value.map(v => (typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v))).join(', ')
   }
   if (typeof value === 'boolean') return BOOLEAN_LABELS[String(value)]
+  if (typeof value === 'object') return JSON.stringify(value)
   if (CURRENCY_FIELDS.some(f => key.endsWith(f)) && typeof value === 'number') return inr(value)
   if (DATE_FIELDS.some(f => key.endsWith(f)) && typeof value === 'string') {
     const d = new Date(value)
@@ -196,7 +197,7 @@ export function formatFieldValue(key: string, value: unknown): string {
 // Read-only even in edit mode. The server ignores writes to uid/created_at
 // (PROTECTED_COLUMNS), and production_systems is a JSONB array that needs the
 // registration form's editor rather than a plain input.
-export const READONLY_DETAIL_FIELDS = new Set(['uid', 'created_at', 'production_systems'])
+export const READONLY_DETAIL_FIELDS = new Set(['uid', 'created_at', 'production_systems', 'custom_data'])
 
 // Columns with DB CHECK constraints get a <select> so a typo can't be rejected
 // by the constraint.

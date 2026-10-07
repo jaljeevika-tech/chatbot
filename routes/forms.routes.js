@@ -1,8 +1,10 @@
-// Staff side of the form builder: fill published custom forms (web/PWA, offline
-// queue) and read submissions. Built-in entity forms are filled through their
-// own screens (they write real tables), so only kind='custom' is served here.
+// Staff side of the form builder: fill published forms (web/PWA, offline queue) and
+// read submissions. Custom forms store answers in form_submissions; built-in entity
+// forms (beneficiaries, resources) write their real table via lib/entityWriters.js
+// and keep only the custom answers in form_submissions (system PII stays encrypted
+// in its own columns).
 //
-// GET  /api/forms                               published custom forms + schemas (cached offline by the client)
+// GET  /api/forms                               published forms + schemas (cached offline by the client)
 // POST /api/forms/:key/submissions              { instance_id, version, data } — idempotent on instance_id
 // GET  /api/forms/:key/submissions              admin/manager: all; employee: own
 // GET  /api/forms/:key/media/:mediaId           a photo/audio answer
@@ -11,6 +13,8 @@ import { Router } from 'express'
 import crypto from 'crypto'
 import { getPool } from '../db/pool.js'
 import { buildTree, evaluateForm } from '../lib/odkForm.js'
+import { withDynamicChoices } from '../lib/forms.js'
+import { ENTITY_WRITERS, WRITER_ROLES, WriteError, splitAnswers, writeEntity } from '../lib/entityWriters.js'
 
 const router = Router()
 
@@ -23,6 +27,13 @@ const fail = (res, e) => (e?.code === '42P01'
   ? res.status(503).json({ error: MIGRATION_085 })
   : (console.error('[forms]', e), res.status(500).json({ error: 'Something went wrong' })))
 
+const canWrite = (req, key) => !!ENTITY_WRITERS[key] && (!WRITER_ROLES[key] || WRITER_ROLES[key].includes(req.user.role))
+
+async function orgProjects(orgId) {
+  const { rows } = await getPool().query(`SELECT metadata->'projects' AS projects FROM organizations WHERE id = $1`, [orgId])
+  return Array.isArray(rows[0]?.projects) ? rows[0].projects : []
+}
+
 async function userId(req) {
   const { rows } = await getPool().query(`SELECT id FROM users WHERE org_id = $1 AND firebase_uid = $2 LIMIT 1`, [req.user.orgId, req.user.uid])
   return rows[0]?.id || null
@@ -31,11 +42,13 @@ async function userId(req) {
 router.get('/forms', async (req, res) => {
   try {
     const { rows } = await getPool().query(
-      `SELECT f.form_key, f.title, v.version, v.schema
+      `SELECT f.form_key, f.kind, f.title, v.version, v.schema
          FROM forms f JOIN form_versions v ON v.id = f.current_version_id
-        WHERE f.org_id = $1 AND f.kind = 'custom' AND f.archived_at IS NULL
-        ORDER BY f.title`, [req.user.orgId])
-    res.json(rows)
+        WHERE f.org_id = $1 AND f.archived_at IS NULL
+        ORDER BY f.kind DESC, f.title`, [req.user.orgId])
+    const visible = rows.filter(f => f.kind === 'custom' || canWrite(req, f.form_key))
+    const projects = visible.some(f => f.form_key === 'beneficiary') ? await orgProjects(req.user.orgId) : []
+    res.json(visible.map(f => (f.kind === 'entity' ? { ...f, schema: withDynamicChoices(f.schema, { projects }) } : f)))
   } catch (e) { fail(res, e) }
 })
 
@@ -68,36 +81,53 @@ router.post('/forms/:key/submissions', async (req, res) => {
   try {
     // Validate against the version the answers were collected with (it may have been filled offline before a republish).
     const { rows } = await pool.query(
-      `SELECT f.id AS form_id, v.id AS version_id, v.schema
+      `SELECT f.id AS form_id, f.kind, v.id AS version_id, v.schema
          FROM forms f JOIN form_versions v ON v.form_id = f.id
-        WHERE f.org_id = $1 AND f.form_key = $2 AND f.kind = 'custom'
+        WHERE f.org_id = $1 AND f.form_key = $2
           AND v.version = COALESCE($3::int, (SELECT version FROM form_versions WHERE id = f.current_version_id))`,
       [req.user.orgId, req.params.key, Number.isInteger(version) ? version : null])
     const form = rows[0]
-    if (!form) return res.status(404).json({ error: 'Form not found or not published' })
+    if (!form || (form.kind === 'entity' && !ENTITY_WRITERS[req.params.key])) return res.status(404).json({ error: 'Form not found or not published' })
+    const entity = form.kind === 'entity' ? req.params.key : null
+    if (entity && !canWrite(req, entity)) return res.status(403).json({ error: 'You do not have permission to add these records' })
+    const projects = entity === 'beneficiary' ? await orgProjects(req.user.orgId) : []
+    const schema = entity ? withDynamicChoices(form.schema, { projects }) : form.schema
 
-    const { data: clean, errors } = evaluateForm(form.schema, data)
+    const { data: clean, errors } = evaluateForm(schema, data)
     if (Object.keys(errors).length) return res.status(422).json({ error: 'Some answers are missing or invalid.', errors })
-    const media = extractMedia(clean, buildTree(form.schema.survey).defs)
+    const media = extractMedia(clean, buildTree(schema.survey).defs)
 
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
+      await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [String(req.user.orgId)])
+      // Claim the instance_id first: a resend then can't create a second record.
       const { rows: ins } = await client.query(
         `INSERT INTO form_submissions (org_id, form_id, version_id, instance_id, data, source, submitted_by)
          VALUES ($1, $2, $3, $4, $5, 'web', $6)
          ON CONFLICT (org_id, instance_id) DO NOTHING RETURNING id`,
-        [req.user.orgId, form.form_id, form.version_id, instanceId, JSON.stringify(clean), await userId(req)])
-      if (!ins.length) { await client.query('ROLLBACK'); return res.json({ ok: true, duplicate: true }) }
+        [req.user.orgId, form.form_id, form.version_id, instanceId, JSON.stringify(entity ? splitAnswers(entity, clean).custom : clean), await userId(req)])
+      if (!ins.length) {
+        await client.query('ROLLBACK')
+        const { rows: prev } = await pool.query(`SELECT entity_row_id FROM form_submissions WHERE org_id = $1 AND instance_id = $2`, [req.user.orgId, instanceId])
+        return res.json({ ok: true, duplicate: true, uid: prev[0]?.entity_row_id ?? undefined })
+      }
+      let record = null
+      if (entity) {
+        record = await writeEntity(client, entity, req.user.orgId, clean, { projects })
+        await client.query(`UPDATE form_submissions SET entity_row_id = $1 WHERE id = $2`, [String(record.uid), ins[0].id])
+      }
       for (const m of media) {
         await client.query(
           `INSERT INTO form_media (org_id, submission_id, file_name, content_type, size_bytes, storage_path) VALUES ($1, $2, $3, $4, $5, $6)`,
           [req.user.orgId, ins[0].id, m.fileName, m.contentType, m.size, m.dataUrl])
       }
       await client.query('COMMIT')
-      res.status(201).json({ ok: true, id: ins[0].id })
+      res.status(201).json({ ok: true, id: ins[0].id, ...(record && { uid: record.uid, label: record.label }) })
     } catch (e) {
       await client.query('ROLLBACK').catch(() => {})
+      // 23505 = the registration tables' (org, phone hash, name) unique index — a race the dup-check can't close.
+      if (e.code === '23505') throw new WriteError(409, 'This record appears to already be registered with these details.')
       throw e
     } finally { client.release() }
   } catch (e) {

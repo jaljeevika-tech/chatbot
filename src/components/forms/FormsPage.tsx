@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, ClipboardList, RefreshCw, Send } from 'lucide-react'
 import { useAuthContext } from '../../context/AuthContext'
 import { apiFetch } from '../../utils/apiFetch'
-import { cacheForms, cachedForms, discard, enqueue, flush, listQueued, type PublishedForm, type QueuedSubmission } from '../../utils/formOutbox'
+import { cacheForms, cachedForms, discard, enqueue, flush, listQueued, type PublishedForm, type QueuedSubmission, type SentResult } from '../../utils/formOutbox'
 import { buildTree, evaluateForm, type Answers } from '../../../lib/odkForm'
 import { FF } from '../../theme/colors'
 import { Btn, Card, Muted, Notice } from '../hr/hrUi'
@@ -23,7 +23,12 @@ export function FormsPage() {
   const [view, setView] = useState<View>({ kind: 'list' })
 
   const refreshQueue = useCallback(async () => { if (userKey) setQueue(await listQueued(userKey)) }, [userKey])
-  const sync = useCallback(async () => { if (userKey) { await flush(userKey); await refreshQueue() } }, [userKey, refreshQueue])
+  const sync = useCallback(async (): Promise<Record<string, SentResult>> => {
+    if (!userKey) return {}
+    const sent = await flush(userKey)
+    await refreshQueue()
+    return sent
+  }, [userKey, refreshQueue])
 
   useEffect(() => {
     if (!userKey) return
@@ -71,11 +76,14 @@ export function FormsPage() {
               {forms.map(f => (
                 <li key={f.form_key} className="flex items-center justify-between gap-3 flex-wrap" style={{ border: `1px solid ${FF.border}`, borderRadius: 10, padding: '12px 14px' }}>
                   <div>
-                    <div style={{ fontSize: 14.5, fontWeight: 600, color: FF.tealDark }}>{f.title}</div>
+                    <div style={{ fontSize: 14.5, fontWeight: 600, color: FF.tealDark }}>
+                      {f.title}
+                      {f.kind === 'entity' && <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 600, color: FF.purple, background: '#F1ECFA', borderRadius: 999, padding: '2px 8px' }}>Registration</span>}
+                    </div>
                     <div style={{ fontSize: 12, color: FF.textFaint }}>Version {f.version} · {f.schema.survey.filter(r => !r.type.startsWith('end_') && !r.type.startsWith('begin_') && r.type !== 'calculate' && !r.archived).length} questions</div>
                   </div>
                   <div className="flex gap-2">
-                    {!offlineCopy && <Btn onClick={() => setView({ kind: 'subs', form: f })}>Submissions</Btn>}
+                    {!offlineCopy && f.kind !== 'entity' && <Btn onClick={() => setView({ kind: 'subs', form: f })}>Submissions</Btn>}
                     <Btn variant="primary" onClick={() => setView({ kind: 'fill', form: f })}>Fill</Btn>
                   </div>
                 </li>
@@ -87,7 +95,7 @@ export function FormsPage() {
   )
 }
 
-function FillForm({ form, userKey, onBack, onQueued }: { form: PublishedForm; userKey: string; onBack: () => void; onQueued: () => Promise<void> }) {
+function FillForm({ form, userKey, onBack, onQueued }: { form: PublishedForm; userKey: string; onBack: () => void; onQueued: () => Promise<Record<string, SentResult>> }) {
   const fresh = useCallback(() => defaultAnswers(buildTree(form.schema.survey).tree), [form])
   const [answers, setAnswers] = useState<Answers>(fresh)
   const [showErrors, setShowErrors] = useState(false)
@@ -114,11 +122,12 @@ function FillForm({ form, userKey, onBack, onQueued }: { form: PublishedForm; us
       setSaving(false)
       return setStatus({ tone: 'red', text: "Couldn't save on this device (storage full or blocked). Your answers are still on screen — don't close this page." })
     }
-    await onQueued()
+    const sent = await onQueued()
     const stillQueued = (await listQueued(userKey)).find(q => q.instanceId === instanceId)
+    const uid = sent[instanceId]?.uid
     setSaving(false)
     setAnswers(fresh()); setShowErrors(false)
-    setStatus(!stillQueued ? { tone: 'green', text: 'Submitted. You can fill another.' }
+    setStatus(!stillQueued ? { tone: 'green', text: uid && form.kind === 'entity' ? `Registered ${uid}. You can fill another.` : 'Submitted. You can fill another.' }
       : stillQueued.status === 'rejected' ? { tone: 'red', text: `Saved on this device but the server didn't accept it: ${stillQueued.error} Go back to All forms to retry or discard it.` }
       : { tone: 'amber', text: 'Saved on this device. It will send automatically when the connection is back.' })
     window.scrollTo({ top: 0 })

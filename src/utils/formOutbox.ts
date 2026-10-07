@@ -6,7 +6,9 @@
 import { apiFetch } from './apiFetch'
 import type { Answers, FormSchema } from '../../lib/odkForm'
 
-export interface PublishedForm { form_key: string; title: string; version: number; schema: FormSchema }
+export interface PublishedForm { form_key: string; kind: 'custom' | 'entity'; title: string; version: number; schema: FormSchema }
+/** What the server returned for a sent submission (built-in forms report the new record's UID). */
+export interface SentResult { uid?: string; label?: string }
 export interface QueuedSubmission {
   instanceId: string; userKey: string; formKey: string; formTitle: string; version: number
   data: Answers; createdAt: string; status: 'pending' | 'rejected'; error?: string
@@ -43,10 +45,13 @@ export async function listQueued(userKey: string): Promise<QueuedSubmission[]> {
 export const enqueue = (item: QueuedSubmission) => run<void>('outbox', 'readwrite', s => { s.put(item) })
 export const discard = (instanceId: string) => run<void>('outbox', 'readwrite', s => { s.delete(instanceId) })
 
-let flushing: Promise<void> | null = null
-/** Sends every pending submission once; returns after the pass. Concurrent callers share one pass. */
-export function flush(userKey: string): Promise<void> {
-  flushing ??= (async () => {
+let flushing: Promise<Record<string, SentResult>> | null = null
+/** Sends every pending submission once; resolves with what was accepted, by instanceId.
+ *  A call made during a pass waits for it, then runs its own (so a just-queued item is included). */
+export function flush(userKey: string): Promise<Record<string, SentResult>> {
+  if (flushing) return flushing.then(() => flush(userKey))
+  flushing = (async () => {
+    const sent: Record<string, SentResult> = {}
     for (const q of await listQueued(userKey)) {
       if (q.status !== 'pending') continue
       let res: Response
@@ -55,13 +60,14 @@ export function flush(userKey: string): Promise<void> {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ instance_id: q.instanceId, version: q.version, data: q.data }),
         })
-      } catch { return } // offline: stop, try again later
-      if (res.ok) { await discard(q.instanceId); continue }
-      if (res.status >= 500 || res.status === 401 || res.status === 429) return
+      } catch { return sent } // offline: stop, try again later
+      if (res.ok) { sent[q.instanceId] = await res.json().catch(() => ({})); await discard(q.instanceId); continue }
+      if (res.status >= 500 || res.status === 401 || res.status === 429) return sent
       const body = await res.json().catch(() => ({})) as { error?: string; errors?: Record<string, string> }
       const detail = body.errors ? Object.entries(body.errors).map(([k, v]) => `${k}: ${v}`).join('; ') : ''
       await enqueue({ ...q, status: 'rejected', error: [body.error || `Rejected (${res.status})`, detail].filter(Boolean).join(' ') })
     }
+    return sent
   })().finally(() => { flushing = null })
   return flushing
 }
