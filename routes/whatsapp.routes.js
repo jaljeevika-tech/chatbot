@@ -1,4 +1,5 @@
-// Glific WhatsApp webhook receiver: Glific's data-collection flow POSTs the
+// Optional Glific connector (Meta direct in wa-platform.routes.js is the default).
+// Glific's data-collection flow POSTs the
 // collected fields to /api/whatsapp/webhook, which appends a row to the org's
 // reports sheet and returns a confirmation for the worker.
 
