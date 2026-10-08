@@ -105,20 +105,24 @@ jobs:
     name: Cloud Run (${{ matrix.service }})
     needs: deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
         service: [notebook, report-writer, individual-beneficiary, micro-entrepreneur, collective, resource]
     env:
-      IMAGE: asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-source-deploy/fieldflow-${{ matrix.service }}:${{ github.sha }}
+      IMAGE: asia-south1-docker.pkg.dev/chatbot-492915/cloud-run-source-deploy/fieldflow-${{ matrix.service }}:${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: projects/725980175357/locations/global/workloadIdentityPools/github/providers/chatbot
+          service_account: github-deployer@chatbot-492915.iam.gserviceaccount.com
       - uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          project_id: chatbot-492915
       - name: Build and push image
         run: |
           gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
