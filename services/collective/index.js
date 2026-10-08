@@ -22,92 +22,35 @@
 // The monolith reads the resulting roster directly from Postgres for the
 // Beneficiaries tab > Collective sub-tab.
 //
-// Deploy: gcloud run deploy fieldflow-collective --source . --region asia-south1
+// Deploy — build context is the REPO ROOT (shares services/registration-shared, lib/):
+//   docker build -f services/collective/Dockerfile -t asia-south1-docker.pkg.dev/<project>/fieldflow/collective .
+//   docker push asia-south1-docker.pkg.dev/<project>/fieldflow/collective
+//   gcloud run deploy fieldflow-collective --image asia-south1-docker.pkg.dev/<project>/fieldflow/collective --region asia-south1
+//   (keep the service's existing env/secrets — the image change alone doesn't touch them)
 
 import express from 'express'
-import pg from 'pg'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { randomUUID } from 'crypto'
-import { encryptPii, hashContactNo } from './crypto.js'
+import { createRegistrationDb, toNullableNumber, toNullableInt, districtCode, validateProductionSystems } from '../registration-shared/common.js'
+import { correlationId } from '../../lib/correlationId.js'
+import { createLgdRouter } from '../../lib/lgdRouter.js'
+import { encryptPii, hashContactNo } from '../registration-shared/crypto.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const { Pool } = pg
 const app  = express()
 const PORT = process.env.PORT || 8085
 
 app.use(express.json({ limit: '256kb' }))
 
 // ── Correlation ID ────────────────────────────────────────────────────────────
-app.use((req, res, next) => {
-  req.correlationId = req.headers['x-correlation-id'] || randomUUID()
-  res.setHeader('x-correlation-id', req.correlationId)
-  next()
-})
+app.use(correlationId)
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/healthz', (_req, res) => res.json({ ok: true, service: 'collective', version: '1.0.0' }))
 
-// ── DB Pool (cb_service role — restricted to cb_*/collective* tables + read-only lgd_* ) ──
-// DB_HOST-first resolution — see services/individual-beneficiary/index.js's
-// comment for why this deliberately does NOT gate on K_SERVICE alone
-// (Cloud Run sets it regardless of which DB is behind it).
-const useCloudSQLSocket = !process.env.DB_HOST && !!(process.env.GAE_APPLICATION || process.env.K_SERVICE)
-let _pool = null
-function getPool() {
-  if (_pool) return _pool
-  _pool = new Pool(useCloudSQLSocket
-    ? {
-        host:     `/cloudsql/${process.env.CLOUD_SQL_INSTANCE || 'chatbot-492915:us-central1:fieldflow-pg'}`,
-        database: process.env.DB_NAME     || 'fieldflow',
-        user:     process.env.CB_DB_USER  || 'cb_service',
-        password: process.env.CB_DB_PASSWORD || '',
-        max: 5,
-      }
-    : {
-        host:     process.env.DB_HOST     || 'localhost',
-        port:     parseInt(process.env.DB_PORT || '5432'),
-        database: process.env.DB_NAME     || 'fieldflow',
-        user:     process.env.CB_DB_USER  || 'fieldflow_app',
-        password: process.env.CB_DB_PASSWORD || '',
-        ssl:      process.env.DB_HOST ? { rejectUnauthorized: false } : false,
-        max: 5,
-      }
-  )
-  _pool.on('error', (err) => console.error('[cb-db] Pool error:', err.message))
-  return _pool
-}
-
-/** Execute a query with org-level RLS set. See
- * services/individual-beneficiary/index.js's orgQuery for the BUG TRAP note
- * on why both statements must share one transaction. */
-async function orgQuery(orgId, text, values = []) {
-  const pool = getPool()
-  const client = await pool.connect()
-  try {
-    await client.query('BEGIN')
-    await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [String(orgId)])
-    const result = await client.query(text, values)
-    await client.query('COMMIT')
-    return result
-  } catch (e) {
-    await client.query('ROLLBACK').catch(() => {})
-    throw e
-  } finally {
-    client.release()
-  }
-}
-
-async function validateLink(orgId, key) {
-  if (!orgId || !key) return false
-  try {
-    const { rows } = await orgQuery(orgId, `SELECT token FROM cb_registration_tokens WHERE org_id = $1`, [orgId])
-    return !!rows[0] && rows[0].token === String(key)
-  } catch (e) {
-    console.error('[cb] validateLink error:', e.message)
-    return false
-  }
-}
+// ── DB (cb_service role on Cloud SQL) — pool, RLS-scoped orgQuery and the
+// registration-link check live in services/registration-shared/common.js.
+const { getPool, orgQuery, validateLink } = createRegistrationDb({ prefix: 'CB', tokenTable: 'cb_registration_tokens' })
 
 // ── GET /api/validate — the form's first call, to show/hide itself ──────────
 app.get('/api/validate', async (req, res) => {
@@ -115,148 +58,11 @@ app.get('/api/validate', async (req, res) => {
   res.json({ ok: await validateLink(org, key) })
 })
 
-// ── LGD (Local Government Directory) location lookups ────────────────────────
-// Same State → District → Block → Panchayat → Village reference data and
-// query shapes as routes/lgd.routes.js / the other registration services —
-// no org scoping needed, global reference tables with no RLS.
-const LGD_TYPEAHEAD_LIMIT = 50
-
-app.get('/api/lgd/states', async (_req, res) => {
-  try {
-    const { rows } = await getPool().query(`SELECT code, name, is_ut AS "isUt" FROM lgd_states ORDER BY name`)
-    res.json(rows)
-  } catch (e) {
-    console.error('[cb lgd states]', e.message)
-    res.status(500).json({ error: e.message })
-  }
-})
-
-app.get('/api/lgd/districts', async (req, res) => {
-  const stateCode = parseInt(req.query.state, 10)
-  if (!Number.isFinite(stateCode)) return res.status(400).json({ error: 'state (LGD state code) required' })
-  try {
-    const { rows } = await getPool().query(`SELECT code, name FROM lgd_districts WHERE state_code = $1 ORDER BY name`, [stateCode])
-    res.json(rows)
-  } catch (e) {
-    console.error('[cb lgd districts]', e.message)
-    res.status(500).json({ error: e.message })
-  }
-})
-
-app.get('/api/lgd/blocks', async (req, res) => {
-  const districtCode = parseInt(req.query.district, 10)
-  if (!Number.isFinite(districtCode)) return res.status(400).json({ error: 'district (LGD district code) required' })
-  const q = String(req.query.q || '').trim()
-  try {
-    const { rows } = await getPool().query(
-      `SELECT code, name FROM lgd_blocks WHERE district_code = $1 ${q ? 'AND name ILIKE $2' : ''} ORDER BY name LIMIT ${LGD_TYPEAHEAD_LIMIT}`,
-      q ? [districtCode, `${q}%`] : [districtCode]
-    )
-    res.json(rows)
-  } catch (e) {
-    console.error('[cb lgd blocks]', e.message)
-    res.status(500).json({ error: e.message })
-  }
-})
-
-app.get('/api/lgd/panchayats', async (req, res) => {
-  const blockCode = parseInt(req.query.block, 10)
-  if (!Number.isFinite(blockCode)) return res.status(400).json({ error: 'block (LGD block code) required' })
-  const q = String(req.query.q || '').trim()
-  try {
-    const { rows } = await getPool().query(
-      `SELECT code, name FROM lgd_panchayats WHERE block_code = $1 ${q ? 'AND name ILIKE $2' : ''} ORDER BY name LIMIT ${LGD_TYPEAHEAD_LIMIT}`,
-      q ? [blockCode, `${q}%`] : [blockCode]
-    )
-    res.json(rows)
-  } catch (e) {
-    console.error('[cb lgd panchayats]', e.message)
-    res.status(500).json({ error: e.message })
-  }
-})
-
-app.get('/api/lgd/villages', async (req, res) => {
-  const panchayatCode = parseInt(req.query.panchayat, 10)
-  const blockCode = parseInt(req.query.block, 10)
-  const scopeCol = Number.isFinite(panchayatCode) ? 'panchayat_code' : Number.isFinite(blockCode) ? 'block_code' : null
-  const scopeVal = scopeCol === 'panchayat_code' ? panchayatCode : blockCode
-  if (!scopeCol) return res.status(400).json({ error: 'panchayat or block (LGD code) required' })
-  const q = String(req.query.q || '').trim()
-  try {
-    // Substring, not prefix, match — see routes/lgd.routes.js's equivalent
-    // endpoint for why (numbered villages like "<Parent> village no:06"
-    // wouldn't surface for a search on "06" or "village no 06" otherwise,
-    // pushing the registrant toward free-typing a mismatched duplicate).
-    const { rows } = await getPool().query(
-      `SELECT code, name FROM lgd_villages WHERE ${scopeCol} = $1 ${q ? 'AND name ILIKE $2' : ''} ORDER BY name LIMIT ${LGD_TYPEAHEAD_LIMIT}`,
-      q ? [scopeVal, `%${q}%`] : [scopeVal]
-    )
-    res.json(rows)
-  } catch (e) {
-    console.error('[cb lgd villages]', e.message)
-    res.status(500).json({ error: e.message })
-  }
-})
+// ── LGD location lookups — the same governed reference data and query shapes as the
+// monolith's /api/lgd (lib/lgdRouter.js), read through this service's pool.
+app.use('/api', createLgdRouter(getPool, { requireState: true }))
 
 const COLLECTIVE_TYPES = ['FPO', 'SHG', 'Cooperative', 'MCMC', 'PG', 'Vendor Collective']
-// Type of Production System — multiselect, optional (a collective need not
-// be production-based at all, e.g. a Vendor Collective). Livestock is
-// counted (a headcount), the other three are measured by production in
-// Quintal — see validateProductionSystems below.
-const PRODUCTION_SYSTEMS = ['Aquaculture', 'Agriculture', 'Livestock', 'Horticulture']
-
-function toNullableNumber(v) {
-  if (v === '' || v === null || v === undefined) return null
-  const n = Number(v)
-  return Number.isFinite(n) ? n : NaN // NaN signals "was provided but not a number"
-}
-
-function toNullableInt(v) {
-  if (v === '' || v === null || v === undefined) return null
-  const n = Number(v)
-  return Number.isInteger(n) ? n : NaN
-}
-
-/** Validates the client-submitted Production System multiselect — same
- * shape and rules as services/individual-beneficiary/index.js's
- * validateProductionSystems, except this one is OPTIONAL (an absent/empty
- * array is valid — this field was already optional on this form before
- * the multiselect redesign). Returns { error } or { value }. */
-function validateProductionSystems(productionSystems) {
-  if (productionSystems == null) return { value: [] }
-  if (!Array.isArray(productionSystems)) return { error: 'Type of Production System must be a list' }
-  const out = []
-  const seen = new Set()
-  for (const item of productionSystems) {
-    const type = item && item.type
-    if (!PRODUCTION_SYSTEMS.includes(type)) continue // silently drop unknown/disallowed entries
-    if (seen.has(type)) continue // dedupe a type submitted twice
-    seen.add(type)
-    if (type === 'Livestock') {
-      const count = toNullableInt(item.livestock_count)
-      if (Number.isNaN(count) || (count != null && count < 0)) {
-        return { error: 'Number of Livestock must be a non-negative whole number' }
-      }
-      out.push({ type, livestock_count: count })
-    } else {
-      const quintal = toNullableNumber(item.production_quintal)
-      if (Number.isNaN(quintal) || (quintal != null && quintal < 0)) {
-        return { error: `${type} production (Quintal) must be a non-negative number` }
-      }
-      out.push({ type, production_quintal: quintal })
-    }
-  }
-  return { value: out }
-}
-
-// UID district code: first 3 letters of the district name (alpha chars
-// only), or "GEN" when no district was entered — District is optional here.
-// Purely cosmetic/informational: the counter itself is still one running
-// sequence per org (collective_seq), not restarted per district.
-function districtCode(district) {
-  const letters = String(district || '').toUpperCase().replace(/[^A-Z]/g, '')
-  return letters ? letters.slice(0, 3) : 'GEN'
-}
 
 // ── POST /api/register — the only write path into collectives ─────────────
 app.post('/api/register', async (req, res) => {
@@ -282,7 +88,7 @@ app.post('/api/register', async (req, res) => {
   if (!contact_no || !/^\d{10}$/.test(String(contact_no).trim())) {
     return res.status(400).json({ error: 'A valid 10-digit contact number is required' })
   }
-  const productionResult = validateProductionSystems(production_systems)
+  const productionResult = validateProductionSystems(production_systems, { required: false })
   if (productionResult.error) return res.status(400).json({ error: productionResult.error })
   const productionSystems = productionResult.value
   const maleCount   = toNullableInt(male_count)
