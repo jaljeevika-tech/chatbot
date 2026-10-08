@@ -111,7 +111,7 @@ interface MisRowBase {
   project_name: string
 }
 export interface TrainingRow extends MisRowBase { training_topic: string; training_date: string | null }
-export interface InputDistributionRow extends MisRowBase { input_distributed: string; distribution_date: string | null }
+export interface InputDistributionRow extends MisRowBase { input_distributed: string; quantity: string | null; unit: string | null; distribution_date: string | null }
 export interface SchemeAccessRow extends MisRowBase { scheme_name: string; access_date: string | null }
 export interface CreditGrantAccessRow extends MisRowBase {
   credit_grant_source: string; credit_grant_type: string | null; entity_name: string | null

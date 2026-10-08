@@ -123,7 +123,7 @@ export function BeneficiaryProfileDetail({ data, uid, editable, onRecordAdded, c
         <div style={{ fontFamily: "'Newsreader',serif", fontSize: 16, fontWeight: 600, color: FF.tealDark, margin: '4px 0 12px' }}>Intervention Recorded Data</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <MisTable<TrainingRow> title="Training" rows={data.mis.training} primaryLabel="Topic" primaryOf={r => r.training_topic} dateOf={r => r.training_date} onAdd={addHandler('training')} />
-          <MisTable<InputDistributionRow> title="Input Distribution" rows={data.mis.inputDistribution} primaryLabel="Input Distributed" primaryOf={r => r.input_distributed} dateOf={r => r.distribution_date} onAdd={addHandler('inputDistribution')} />
+          <MisTable<InputDistributionRow> title="Input Distribution" rows={data.mis.inputDistribution} primaryLabel="Input Distributed" primaryOf={r => r.quantity != null ? `${r.input_distributed} — ${Number(r.quantity)}${r.unit ? ' ' + r.unit : ''}` : r.input_distributed} dateOf={r => r.distribution_date} onAdd={addHandler('inputDistribution')} />
           <MisTable<SchemeAccessRow> title="Scheme Access" rows={data.mis.schemeAccess} primaryLabel="Scheme" primaryOf={r => r.scheme_name} dateOf={r => r.access_date} onAdd={addHandler('schemeAccess')} />
           <MisTable<CreditGrantAccessRow>
             title="Credit/Grant Access" rows={data.mis.creditGrantAccess} primaryLabel="Source" primaryOf={r => r.credit_grant_source}
