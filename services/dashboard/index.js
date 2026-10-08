@@ -26,7 +26,8 @@
 
 import express from 'express'
 import pg from 'pg'
-import { randomUUID, timingSafeEqual } from 'crypto'
+import { correlationId } from '../../lib/correlationId.js'
+import { requireInternalKey, isOrgId } from '../../lib/internalCaller.js'
 import { createDashboardRouter } from './src/router.js'
 
 const app  = express()
@@ -35,30 +36,14 @@ const PORT = process.env.PORT || 8084
 app.disable('x-powered-by')
 app.use(express.json({ limit: '1mb' }))
 
-app.use((req, res, next) => {
-  req.correlationId = req.headers['x-correlation-id'] || randomUUID()
-  res.setHeader('x-correlation-id', req.correlationId)
-  next()
-})
+app.use(correlationId)
 
 app.get('/healthz', (_req, res) => res.json({ ok: true, service: 'dashboard', version: '1.0.0' }))
 
-const INTERNAL_KEY = process.env.DASHBOARD_INTERNAL_KEY || ''
-if (!INTERNAL_KEY && process.env.K_SERVICE) {
-  console.error('[dashboard] DASHBOARD_INTERNAL_KEY is not set — refusing all API requests')
-}
-function keyMatches(given) {
-  const a = Buffer.from(String(given || ''))
-  const b = Buffer.from(INTERNAL_KEY)
-  return a.length === b.length && timingSafeEqual(a, b)
-}
-app.use('/api', (req, res, next) => {
-  if (INTERNAL_KEY ? !keyMatches(req.headers['x-internal-key']) : !!process.env.K_SERVICE) {
-    return res.status(401).json({ error: 'Unauthorized caller' })
-  }
+app.use('/api', requireInternalKey('dashboard', 'DASHBOARD_INTERNAL_KEY'), (req, res, next) => {
   const orgId = String(req.headers['x-org-id'] || '')
   const uid   = String(req.headers['x-user-uid'] || '')
-  if (!/^[0-9a-fA-F-]{36}$/.test(orgId) || !uid) return res.status(401).json({ error: 'Authentication required' })
+  if (!isOrgId(orgId) || !uid) return res.status(401).json({ error: 'Authentication required' })
   req.user = { orgId, uid, role: String(req.headers['x-user-role'] || 'employee'), name: String(req.headers['x-user-name'] || '') }
   next()
 })

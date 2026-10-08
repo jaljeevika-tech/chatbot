@@ -1,0 +1,9 @@
+# Builds one Cloud Run service image from the repo root (services share lib/ and
+# services/registration-shared/). Usage:
+#   gcloud builds submit --config cloudbuild.services.yaml --ignore-file cloudrun.gcloudignore \
+#     --substitutions _SERVICE=notebook,_TAG=<tag> .
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ['build', '-f', 'services/${_SERVICE}/Dockerfile', '-t', 'asia-south1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/fieldflow-${_SERVICE}:${_TAG}', '.']
+images:
+  - asia-south1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/fieldflow-${_SERVICE}:${_TAG}

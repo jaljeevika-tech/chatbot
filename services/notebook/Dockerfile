@@ -1,20 +1,22 @@
-# FieldFlow Notebook Service — Cloud Run container
-# Stateless: no DB, no persistent state. Purely Gemini API calls.
+# FieldFlow Notebook AI — sources → chat, study guide, slide deck, mind map, flashcards, guide (SSE) — Cloud Run container
+# Build from the REPO ROOT: docker build -f services/notebook/Dockerfile .
+# (it reuses the monolith's lib/ helpers rather than copying them).
 
 FROM node:22-slim
 
 WORKDIR /app
 
-# Install dependencies first (cached layer)
-COPY package.json ./
+COPY services/notebook/package.json ./package.json
 RUN npm install --omit=dev
 
-# Copy source
-COPY index.js ./
+COPY lib/correlationId.js lib/internalCaller.js lib/gemini.js lib/promptStore.js lib/usageTracker.js lib/aiContext.js lib/orgMetaCache.js lib/extractDocumentText.js lib/extractWebArticle.js lib/tts.js lib/ssrfGuard.js ./lib/
+COPY lib/prompts ./lib/prompts
+COPY db/pool.js ./db/
+COPY services/notebook/index.js ./services/notebook/
+COPY services/notebook/src ./services/notebook/src
 
-# Cloud Run sets PORT automatically; default to 8080 for local dev
 ENV PORT=8080
 EXPOSE 8080
 
 USER node
-CMD ["node", "index.js"]
+CMD ["node", "services/notebook/index.js"]

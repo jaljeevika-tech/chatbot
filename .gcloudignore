@@ -16,13 +16,14 @@ node_modules/
 /src/
 /public/
 # services/* (not services/) so subfolders can be re-included: the monolith
-# runs services/hr, finance and dashboard routers in-process when their
-# *_SERVICE_URL is unset or Cloud Run is down (routes/hr.routes.js,
-# routes/finance-mgmt.routes.js).
+# runs the hr, finance, dashboard, notebook and report-writer routers in-process
+# when their *_SERVICE_URL is unset or Cloud Run is down (routes/*.routes.js).
 services/*
 !services/hr/
 !services/finance/
 !services/dashboard/
+!services/notebook/
+!services/report-writer/
 db/migrations/
 *.md
 tsconfig*.json

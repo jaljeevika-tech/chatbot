@@ -1,15 +1,13 @@
-// services/individual-beneficiary/crypto.js — field-level PII encryption for
-// this microservice's one write path (POST /api/register).
+// services/registration-shared/crypto.js — field-level PII encryption for
+// the registration services' write paths (POST /api/register).
 //
-// Self-contained copy, not an import from the monolith's lib/piiCrypto.js —
-// this service has its own package.json and is deployed via
-// `gcloud run deploy --source .`, which only packages this directory; a
-// relative import reaching into ../../lib wouldn't be in the build
-// context. Same AES-256-GCM format (enc:v1:<iv>:<ciphertext+tag>) and same
-// HMAC-derived blind-index scheme as lib/piiCrypto.js, so the two stay
-// interoperable (this service's ENCRYPTION_KEY must be the SAME value as
-// the monolith's — both read it from GCP Secret Manager's ENCRYPTION_KEY
-// secret).
+// Deliberately not lib/piiCrypto.js: that one falls back to a derived dev key
+// when ENCRYPTION_KEY is missing outside NODE_ENV=production, and these public
+// forms must never encrypt with a guessable key — here a missing key always throws.
+// Same AES-256-GCM format (enc:v1:<iv>:<ciphertext+tag>) and same HMAC-derived
+// blind-index scheme as lib/piiCrypto.js, so the two stay interoperable
+// (ENCRYPTION_KEY must be the SAME value as the monolith's — both read it from
+// GCP Secret Manager's ENCRYPTION_KEY secret).
 //
 // DPDP Phase 4: contact_no is both encrypted (contact_no_enc, randomized
 // IV, safe at rest) AND hashed (contact_no_hash, deterministic HMAC) — the

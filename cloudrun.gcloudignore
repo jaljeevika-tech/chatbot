@@ -1,0 +1,11 @@
+# Upload list for `gcloud builds submit` of the Cloud Run service images
+# (the App Engine .gcloudignore drops services/* and /public/, which these need).
+.git/
+node_modules/
+dist/
+.env
+*.env
+app.yaml
+/db/migrations/
+# Leading slash = repo root only; a bare `src/` would also drop services/*/src.
+/src/

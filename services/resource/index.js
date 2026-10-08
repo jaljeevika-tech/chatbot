@@ -34,91 +34,33 @@
 // The monolith reads the resulting roster directly from Postgres for the
 // Beneficiaries tab > Resources sub-tab.
 //
-// Deploy: gcloud run deploy fieldflow-resource --source . --region asia-south1
+// Deploy — build context is the REPO ROOT (shares services/registration-shared, lib/):
+//   docker build -f services/resource/Dockerfile -t asia-south1-docker.pkg.dev/<project>/fieldflow/resource .
+//   docker push asia-south1-docker.pkg.dev/<project>/fieldflow/resource
+//   gcloud run deploy fieldflow-resource --image asia-south1-docker.pkg.dev/<project>/fieldflow/resource --region asia-south1
+//   (keep the service's existing env/secrets — the image change alone doesn't touch them)
 
 import express from 'express'
-import pg from 'pg'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { randomUUID } from 'crypto'
+import { createRegistrationDb, toNullableNumber, toNullableInt, districtCode } from '../registration-shared/common.js'
+import { correlationId } from '../../lib/correlationId.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const { Pool } = pg
 const app  = express()
 const PORT = process.env.PORT || 8086
 
 app.use(express.json({ limit: '256kb' }))
 
 // ── Correlation ID ────────────────────────────────────────────────────────────
-app.use((req, res, next) => {
-  req.correlationId = req.headers['x-correlation-id'] || randomUUID()
-  res.setHeader('x-correlation-id', req.correlationId)
-  next()
-})
+app.use(correlationId)
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/healthz', (_req, res) => res.json({ ok: true, service: 'resource', version: '1.0.0' }))
 
-// ── DB Pool (rs_service role) ─────────────────────────────────────────────────
-// DB_HOST-first resolution — see services/individual-beneficiary/index.js's
-// comment for why this deliberately does NOT gate on K_SERVICE alone
-// (Cloud Run sets it regardless of which DB is behind it).
-const useCloudSQLSocket = !process.env.DB_HOST && !!(process.env.GAE_APPLICATION || process.env.K_SERVICE)
-let _pool = null
-function getPool() {
-  if (_pool) return _pool
-  _pool = new Pool(useCloudSQLSocket
-    ? {
-        host:     `/cloudsql/${process.env.CLOUD_SQL_INSTANCE || 'chatbot-492915:us-central1:fieldflow-pg'}`,
-        database: process.env.DB_NAME     || 'fieldflow',
-        user:     process.env.RS_DB_USER  || 'rs_service',
-        password: process.env.RS_DB_PASSWORD || '',
-        max: 5,
-      }
-    : {
-        host:     process.env.DB_HOST     || 'localhost',
-        port:     parseInt(process.env.DB_PORT || '5432'),
-        database: process.env.DB_NAME     || 'fieldflow',
-        user:     process.env.RS_DB_USER  || 'fieldflow_app',
-        password: process.env.RS_DB_PASSWORD || '',
-        ssl:      process.env.DB_HOST ? { rejectUnauthorized: false } : false,
-        max: 5,
-      }
-  )
-  _pool.on('error', (err) => console.error('[rs-db] Pool error:', err.message))
-  return _pool
-}
-
-/** Execute a query with org-level RLS set. See
- * services/individual-beneficiary/index.js's orgQuery for the BUG TRAP note
- * on why both statements must share one transaction. */
-async function orgQuery(orgId, text, values = []) {
-  const pool = getPool()
-  const client = await pool.connect()
-  try {
-    await client.query('BEGIN')
-    await client.query(`SELECT set_config('app.current_org_id', $1, true)`, [String(orgId)])
-    const result = await client.query(text, values)
-    await client.query('COMMIT')
-    return result
-  } catch (e) {
-    await client.query('ROLLBACK').catch(() => {})
-    throw e
-  } finally {
-    client.release()
-  }
-}
-
-async function validateLink(orgId, key) {
-  if (!orgId || !key) return false
-  try {
-    const { rows } = await orgQuery(orgId, `SELECT token FROM rs_registration_tokens WHERE org_id = $1`, [orgId])
-    return !!rows[0] && rows[0].token === String(key)
-  } catch (e) {
-    console.error('[rs] validateLink error:', e.message)
-    return false
-  }
-}
+// ── DB (rs_service role on Cloud SQL) — pool, RLS-scoped orgQuery and the
+// registration-link check live in services/registration-shared/common.js.
+const { getPool, orgQuery, validateLink } = createRegistrationDb({ prefix: 'RS', tokenTable: 'rs_registration_tokens' })
 
 // ── GET /api/validate — the form's first call, to show/hide itself ──────────
 app.get('/api/validate', async (req, res) => {
@@ -221,30 +163,6 @@ const UID_PREFIX = {
   'Coastal Wetland':    'CW',
   'Agricultural Land':  'AG',
   'Brackish Water':     'BW',
-}
-
-function toNullableNumber(v) {
-  if (v === '' || v === null || v === undefined) return null
-  const n = Number(v)
-  return Number.isFinite(n) ? n : NaN // NaN signals "was provided but not a number"
-}
-
-// UID district code — same convention as the other three registration
-// services (e.g. services/individual-beneficiary/index.js's districtCode):
-// first 3 letters of the district name, or "GEN" when unknown. Here it's
-// derived from the MAPPED BENEFICIARY's district (this form doesn't collect
-// one itself — it captures GPS coordinates instead), and is purely
-// cosmetic/informational: the counter is still one running sequence per
-// (org, resource_type), not restarted per district or beneficiary type.
-function districtCode(district) {
-  const letters = String(district || '').toUpperCase().replace(/[^A-Z]/g, '')
-  return letters ? letters.slice(0, 3) : 'GEN'
-}
-
-function toNullableInt(v) {
-  if (v === '' || v === null || v === undefined) return null
-  const n = Number(v)
-  return Number.isInteger(n) ? n : NaN
 }
 
 /** Validates a client-submitted resource_utility array against the option
