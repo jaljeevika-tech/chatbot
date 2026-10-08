@@ -17,27 +17,18 @@
 //     --set-env-vars NODE_ENV=production
 //   and set NOTEBOOK_INTERNAL_KEY on the monolith (Secret Manager) before redeploying it.
 
-import express from 'express'
-import { correlationId } from '../../lib/correlationId.js'
-import { requireInternalKey, isOrgId } from '../../lib/internalCaller.js'
+import { createServiceApp } from '../../lib/serviceApp.js'
+import { isOrgId } from '../../lib/internalCaller.js'
 import router from './src/router.js'
 
-const app  = express()
 const PORT = process.env.PORT || 8081
 
-app.disable('x-powered-by')
-app.use(express.json({ limit: '5mb' }))
-app.use(correlationId)
-
-app.get('/healthz', (_req, res) => res.json({ ok: true, service: 'notebook', version: '2.0.0' }))
-
-app.use('/api', requireInternalKey('notebook', 'NOTEBOOK_INTERNAL_KEY'), (req, res, next) => {
-  const orgId = String(req.headers['x-org-id'] || '')
-  if (!isOrgId(orgId)) return res.status(401).json({ error: 'Authentication required' })
-  req.user = { orgId }
-  next()
-})
-app.use('/api', router)
-app.use((_req, res) => res.status(404).json({ error: 'Not found' }))
-
-app.listen(PORT, () => console.log(`[notebook] listening on :${PORT}`))
+createServiceApp({
+  name: 'notebook', version: '2.0.0', keyEnv: 'NOTEBOOK_INTERNAL_KEY', bodyLimit: '5mb',
+  identityKey: 'user',
+  identity: req => {
+    const orgId = String(req.headers['x-org-id'] || '')
+    return isOrgId(orgId) ? { orgId } : null
+  },
+  mount: app => app.use('/api', router),
+}).listen(PORT, () => console.log(`[notebook] listening on :${PORT}`))

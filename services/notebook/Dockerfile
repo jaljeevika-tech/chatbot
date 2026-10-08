@@ -9,7 +9,7 @@ WORKDIR /app
 COPY services/notebook/package.json ./package.json
 RUN npm install --omit=dev
 
-COPY lib/correlationId.js lib/internalCaller.js lib/gemini.js lib/promptStore.js lib/usageTracker.js lib/aiContext.js lib/orgMetaCache.js lib/extractDocumentText.js lib/extractWebArticle.js lib/tts.js lib/ssrfGuard.js ./lib/
+COPY lib/serviceApp.js lib/correlationId.js lib/internalCaller.js lib/gemini.js lib/promptStore.js lib/usageTracker.js lib/aiContext.js lib/orgMetaCache.js lib/extractDocumentText.js lib/extractWebArticle.js lib/tts.js lib/ssrfGuard.js ./lib/
 COPY lib/prompts ./lib/prompts
 COPY db/pool.js ./db/
 COPY services/notebook/index.js ./services/notebook/
