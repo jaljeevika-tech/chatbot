@@ -178,7 +178,7 @@ export function DashboardPage() {
   const { user, logout, offlineSession } = useAuthContext();
   const { reports, users, loading } = useReportContext();
   const { t, lang, setLang, languages } = useLanguage();
-  const { org, orgSlug } = useOrg();
+  const { org, orgSlug, subscription } = useOrg();
   const { selectedProject, selectedProjectKey, selectProject, loadProjects } = useProjectContext();
   const [showLangMenu, setShowLangMenu] = useState(false);
   // Slide-out nav drawer below lg, where the sidebar itself is hidden.
@@ -540,7 +540,7 @@ export function DashboardPage() {
   };
   const pageMeta = PAGE_META[activeTab as TabKey] ?? { title: '', desc: '' };
 
-  const canSeeTab = makeCanSeeTab(user, org)
+  const canSeeTab = makeCanSeeTab(user, org, subscription?.plan?.apps)
 
   // Custom dashboards are built per org by the super admin; the nav item only
   // appears once at least one is visible to this user.

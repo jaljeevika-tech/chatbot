@@ -25,7 +25,11 @@ import { normPhone } from '../lib/sheets.js'
 import { invalidateOrgMeta } from '../lib/orgMetaCache.js'
 import { maskSecretMeta, prepareSecretPatch } from '../lib/secretMeta.js'
 import { auditPlatform, writePlatformAudit } from '../lib/platformAudit.js'
-import { computeAccess, invalidateOrgAccess, checkSeatAvailable } from '../lib/subscriptionGuard.js'
+import { computeAccess, invalidateOrgAccess, checkSeatAvailable, APP_PREFIXES } from '../lib/subscriptionGuard.js'
+
+// plans.apps: null = every app, else a subset of APP_PREFIXES keys. undefined = not sent.
+const badApps = apps => apps !== undefined && apps !== null &&
+  (!Array.isArray(apps) || apps.some(a => !Object.hasOwn(APP_PREFIXES, a)))
 
 const BCRYPT_ROUNDS = 12
 const MIN_PASSWORD_LEN = 10
@@ -256,13 +260,15 @@ router.get('/superadmin/plans', async (req, res) => {
 router.post('/superadmin/plans',
   auditPlatform('plan.create', 'plan', { orgId: () => null }),
   async (req, res) => {
-  const { name, slug, description = '', price_monthly = 0, max_users = 10, ai_enabled = false, sort_order = 0 } = req.body || {}
+  const { name, slug, description = '', price_monthly = 0, max_users = 10, ai_enabled = false, sort_order = 0, apps } = req.body || {}
   if (!name?.trim() || !slug?.trim()) return res.status(400).json({ error: 'name and slug required' })
+  if (badApps(apps)) return res.status(400).json({ error: 'unknown app in apps' })
   try {
+    const withApps = Array.isArray(apps)  // omit the column otherwise, so this works before migration 088
     const { rows } = await getPool().query(
-      `INSERT INTO plans (name,slug,description,price_monthly,max_users,ai_enabled,sort_order)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [name.trim(), slug.trim(), description, price_monthly, max_users, ai_enabled, sort_order]
+      `INSERT INTO plans (name,slug,description,price_monthly,max_users,ai_enabled,sort_order${withApps ? ',apps' : ''})
+       VALUES ($1,$2,$3,$4,$5,$6,$7${withApps ? ',$8' : ''}) RETURNING *`,
+      [name.trim(), slug.trim(), description, price_monthly, max_users, ai_enabled, sort_order, ...(withApps ? [apps] : [])]
     )
     res.json(rows[0])
   } catch (e) {
@@ -275,7 +281,8 @@ router.patch('/superadmin/plans/:id',
   auditPlatform('plan.update', 'plan', { orgId: () => null }),
   async (req, res) => {
   const { id } = req.params
-  const { name, description, price_monthly, max_users, ai_enabled, sort_order, is_active } = req.body || {}
+  const { name, description, price_monthly, max_users, ai_enabled, sort_order, is_active, apps } = req.body || {}
+  if (badApps(apps)) return res.status(400).json({ error: 'unknown app in apps' })
   try {
     const pool = getPool()
     const fields = [], vals = []
@@ -287,6 +294,7 @@ router.patch('/superadmin/plans/:id',
     if (ai_enabled    !== undefined) { fields.push(`ai_enabled=$${i++}`);    vals.push(ai_enabled) }
     if (sort_order    !== undefined) { fields.push(`sort_order=$${i++}`);    vals.push(sort_order) }
     if (is_active     !== undefined) { fields.push(`is_active=$${i++}`);     vals.push(is_active) }
+    if (apps          !== undefined) { fields.push(`apps=$${i++}`);          vals.push(apps) }
     if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
     vals.push(id)
     const { rows } = await pool.query(
