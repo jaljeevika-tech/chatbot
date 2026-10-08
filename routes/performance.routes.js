@@ -91,18 +91,19 @@ router.get('/performance/reviews', requireAuth, async (req, res) => {
 
     let where, params
     if (role === 'admin' || role === 'superadmin') {
-      where = `org_id = $1`
+      // pr.-qualified: the users join below also has org_id (ambiguous otherwise)
+      where = `pr.org_id = $1`
       params = [req.user.orgId]
     } else if (role === 'manager') {
       // Reviews of direct reports OR self
-      where = `org_id = $1 AND (
-        employee_id = $2
-        OR employee_id IN (SELECT id FROM users WHERE manager_id = $2 AND org_id = $1)
+      where = `pr.org_id = $1 AND (
+        pr.employee_id = $2
+        OR pr.employee_id IN (SELECT id FROM users WHERE manager_id = $2 AND org_id = $1)
       )`
       params = [req.user.orgId, viewer.id]
     } else {
       // Employee — self only
-      where = `org_id = $1 AND employee_id = $2`
+      where = `pr.org_id = $1 AND pr.employee_id = $2`
       params = [req.user.orgId, viewer.id]
     }
 
