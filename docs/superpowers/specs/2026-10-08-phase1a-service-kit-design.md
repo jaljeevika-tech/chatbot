@@ -25,13 +25,13 @@ Report Writer and the 4 registration services are out of scope (Report Writer de
 ### 3.1 `lib/serviceApp.js` (new)
 
 ```js
-createServiceApp({ name, version, keyEnv, keyHeader = 'x-internal-key', keyError = 'Unauthorized caller', bodyLimit = '1mb', identity, mount }) → express app
+createServiceApp({ name, version, keyEnv, keyHeader = 'x-internal-key', keyError = 'Unauthorized caller', bodyLimit = '1mb', identity, identityKey, identityError = 'Authentication required', mount }) → express app
 ```
 
 Wires, in order:
 1. `app.disable('x-powered-by')`, `express.json({ limit: bodyLimit })`, `correlationId`.
 2. `GET /healthz` → `{ ok: true, service: name, version }`.
-3. On `/api`: `requireInternalKey(name, keyEnv, keyHeader, keyError)`; then `identity(req)` — returns the object the service already uses and the kit assigns it, or returns `null` → `401`. The identity callback owns its own field names and 401 message so each service keeps its current responses.
+3. On `/api`: `requireInternalKey(name, keyEnv, keyHeader, keyError)`; then `identity(req)` — returns the object the service already uses, which the kit puts on `req[identityKey]` (`fm`, `hrIdent` or `user`), or `null` → `401 { error: identityError }`, so each service keeps its current field names and messages.
 4. `mount(app)` — the service mounts its router(s).
 5. Fallback `404 { error: 'Not found' }`.
 
