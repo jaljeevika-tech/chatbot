@@ -119,7 +119,7 @@ Core Records' schema + views land in Phase 1 because beneficiary tables are join
 | Latency from extra hops | `SERVICES=all` in prod — no hops |
 | Cross-service consistency | transactions stay inside one service; no distributed transactions |
 | Self-host drift | not shipped until Phase 4; then CI runs the compose stack each release |
-| Prod drift (stale service copies, as found 2026-10-07) | CI deploys every service on push to main (already in place) |
+| Prod drift (stale service copies, as found 2026-10-07) | CI deploys every service that prod routes to; a service joins the CI matrix in the PR that sets its `*_SERVICE_URL` |
 
 ## 11. Testing
 
