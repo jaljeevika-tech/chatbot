@@ -35,9 +35,6 @@ jobs:
       - name: Audit dependencies for critical vulnerabilities
         run: npm audit --audit-level=critical
 
-      - name: Build frontend
-        run: npm run build
-
       # Generate app.yaml at deploy time — it's gitignored (see .gitignore),
       # so CI must write it fresh on every run. Keep this in sync with the
       # local app.yaml a developer uses for manual `gcloud app deploy`.
@@ -77,6 +74,14 @@ jobs:
             max_instances: 3
             target_cpu_utilization: 0.65
           EOF
+
+      # Vite bakes VITE_* into the bundle at build time, and CI has no .env —
+      # without these the Firebase config is empty and the app hangs on the
+      # loading screen. Reuse the values from app.yaml above (single source).
+      - name: Build frontend
+        run: |
+          grep -E '^\s+VITE_[A-Z_]+:' app.yaml | sed -E 's/^\s+([A-Z_]+):\s*"?([^"]*)"?\s*$/\1=\2/' > .env.production.local
+          npm run build
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
