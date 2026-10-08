@@ -5,6 +5,7 @@
 // Only the monolith may call it: deployed private (Cloud Run ID token) and every
 // request needs x-internal-key = FINANCE_INTERNAL_KEY (missing key fails closed).
 // Identity comes from the monolith's x-org-id / x-user-uid / x-user-role headers.
+// Setup shared with the other services: lib/serviceApp.js.
 //
 // Env:
 //   FINANCE_INTERNAL_KEY            shared secret with the monolith (Secret Manager)
@@ -14,58 +15,23 @@
 //   SMTP_USER, SMTP_PASS, SMTP_FROM Gmail / Workspace SMTP (email alerts)
 //   APP_BASE_URL                    link included in notification emails
 //
-// Deploy:
-//   gcloud run deploy fieldflow-finance --source services/finance --region asia-south1 \
-//     --no-allow-unauthenticated \
+// Build context is the REPO ROOT (it reuses lib/serviceApp.js), so:
+//   docker build -f services/finance/Dockerfile -t asia-south1-docker.pkg.dev/<project>/fieldflow/finance .
+//   docker push asia-south1-docker.pkg.dev/<project>/fieldflow/finance
+//   gcloud run deploy fieldflow-finance --image asia-south1-docker.pkg.dev/<project>/fieldflow/finance \
+//     --region asia-south1 --no-allow-unauthenticated \
 //     --set-secrets FINANCE_INTERNAL_KEY=FINANCE_INTERNAL_KEY:latest,FM_DATABASE_URL=FM_DATABASE_URL:latest,ENCRYPTION_KEY=ENCRYPTION_KEY:latest,SMTP_PASS=SMTP_PASS:latest \
 //     --set-env-vars NODE_ENV=production,SMTP_USER=<mailbox>,APP_BASE_URL=<app url>
 //   then grant the App Engine service account roles/run.invoker on the service
 //   and set FINANCE_SERVICE_URL (+ FINANCE_INTERNAL_KEY) on the monolith.
 
-import express from 'express'
 import pg from 'pg'
-import { randomUUID, timingSafeEqual } from 'crypto'
+import { createServiceApp } from '../../lib/serviceApp.js'
+import { isOrgId } from '../../lib/internalCaller.js'
 import { createFinanceRouter } from './src/router.js'
 
 const { Pool } = pg
-const app  = express()
 const PORT = process.env.PORT || 8083
-
-app.disable('x-powered-by')
-app.use(express.json({ limit: '20mb' }))
-
-app.use((req, res, next) => {
-  req.correlationId = req.headers['x-correlation-id'] || randomUUID()
-  res.setHeader('x-correlation-id', req.correlationId)
-  next()
-})
-
-app.get('/healthz', (_req, res) => res.json({ ok: true, service: 'finance', version: '1.0.0' }))
-
-// ── Caller check (monolith only) ─────────────────────────────────────────────
-const INTERNAL_KEY = process.env.FINANCE_INTERNAL_KEY || ''
-if (!INTERNAL_KEY && process.env.K_SERVICE) {
-  console.error('[finance] FINANCE_INTERNAL_KEY is not set — refusing all API requests')
-}
-function keyMatches(given) {
-  const a = Buffer.from(String(given || ''))
-  const b = Buffer.from(INTERNAL_KEY)
-  return a.length === b.length && timingSafeEqual(a, b)
-}
-app.use('/api', (req, res, next) => {
-  if (INTERNAL_KEY ? !keyMatches(req.headers['x-internal-key']) : !!process.env.K_SERVICE) {
-    return res.status(401).json({ error: 'Unauthorized caller' })
-  }
-  const orgId = String(req.headers['x-org-id'] || '')
-  const uid   = String(req.headers['x-user-uid'] || '')
-  if (!/^[0-9a-fA-F-]{36}$/.test(orgId) || !uid) return res.status(401).json({ error: 'Authentication required' })
-  req.fm = {
-    orgId, uid,
-    role:  String(req.headers['x-user-role'] || 'employee'),
-    phone: String(req.headers['x-user-phone'] || '') || null,
-  }
-  next()
-})
 
 // ── DB pool (fm_service role on Cloud SQL; connection string elsewhere) ──────
 let _pool = null
@@ -95,8 +61,18 @@ function getPool() {
   return _pool
 }
 
-app.use('/api', createFinanceRouter({ getPool }))
-
-app.use((_req, res) => res.status(404).json({ error: 'Not found' }))
-
-app.listen(PORT, () => console.log(`[finance] listening on :${PORT}`))
+createServiceApp({
+  name: 'finance', version: '1.0.0', keyEnv: 'FINANCE_INTERNAL_KEY', bodyLimit: '20mb',
+  identityKey: 'fm',
+  identity: req => {
+    const orgId = String(req.headers['x-org-id'] || '')
+    const uid   = String(req.headers['x-user-uid'] || '')
+    if (!isOrgId(orgId) || !uid) return null
+    return {
+      orgId, uid,
+      role:  String(req.headers['x-user-role'] || 'employee'),
+      phone: String(req.headers['x-user-phone'] || '') || null,
+    }
+  },
+  mount: app => app.use('/api', createFinanceRouter({ getPool })),
+}).listen(PORT, () => console.log(`[finance] listening on :${PORT}`))

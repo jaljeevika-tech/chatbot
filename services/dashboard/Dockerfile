@@ -10,7 +10,7 @@ WORKDIR /app
 COPY services/dashboard/package.json ./package.json
 RUN npm install --omit=dev
 
-COPY lib/correlationId.js lib/internalCaller.js lib/routeGuards.js lib/geocodeLocation.js lib/piiCrypto.js lib/crypto.js lib/placeCoords.js lib/misCalculations.js ./lib/
+COPY lib/serviceApp.js lib/correlationId.js lib/internalCaller.js lib/routeGuards.js lib/geocodeLocation.js lib/piiCrypto.js lib/crypto.js lib/placeCoords.js lib/misCalculations.js ./lib/
 COPY db/seed-data/lgd/place-coords.json.gz ./db/seed-data/lgd/
 COPY services/dashboard/index.js ./services/dashboard/
 COPY services/dashboard/src ./services/dashboard/src

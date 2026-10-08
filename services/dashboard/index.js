@@ -24,29 +24,12 @@
 //   then grant the App Engine service account roles/run.invoker and set
 //   DASHBOARD_SERVICE_URL (+ DASHBOARD_INTERNAL_KEY) on the monolith.
 
-import express from 'express'
 import pg from 'pg'
-import { correlationId } from '../../lib/correlationId.js'
-import { requireInternalKey, isOrgId } from '../../lib/internalCaller.js'
+import { createServiceApp } from '../../lib/serviceApp.js'
+import { isOrgId } from '../../lib/internalCaller.js'
 import { createDashboardRouter } from './src/router.js'
 
-const app  = express()
 const PORT = process.env.PORT || 8084
-
-app.disable('x-powered-by')
-app.use(express.json({ limit: '1mb' }))
-
-app.use(correlationId)
-
-app.get('/healthz', (_req, res) => res.json({ ok: true, service: 'dashboard', version: '1.0.0' }))
-
-app.use('/api', requireInternalKey('dashboard', 'DASHBOARD_INTERNAL_KEY'), (req, res, next) => {
-  const orgId = String(req.headers['x-org-id'] || '')
-  const uid   = String(req.headers['x-user-uid'] || '')
-  if (!isOrgId(orgId) || !uid) return res.status(401).json({ error: 'Authentication required' })
-  req.user = { orgId, uid, role: String(req.headers['x-user-role'] || 'employee'), name: String(req.headers['x-user-name'] || '') }
-  next()
-})
 
 let _pool = null
 function getPool() {
@@ -61,7 +44,14 @@ function getPool() {
   return _pool
 }
 
-app.use('/api', createDashboardRouter({ getPool }))
-app.use((_req, res) => res.status(404).json({ error: 'Not found' }))
-
-app.listen(PORT, () => console.log(`[dashboard] listening on :${PORT}`))
+createServiceApp({
+  name: 'dashboard', version: '1.0.0', keyEnv: 'DASHBOARD_INTERNAL_KEY',
+  identityKey: 'user',
+  identity: req => {
+    const orgId = String(req.headers['x-org-id'] || '')
+    const uid   = String(req.headers['x-user-uid'] || '')
+    if (!isOrgId(orgId) || !uid) return null
+    return { orgId, uid, role: String(req.headers['x-user-role'] || 'employee'), name: String(req.headers['x-user-name'] || '') }
+  },
+  mount: app => app.use('/api', createDashboardRouter({ getPool })),
+}).listen(PORT, () => console.log(`[dashboard] listening on :${PORT}`))
