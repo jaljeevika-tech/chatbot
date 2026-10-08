@@ -25,13 +25,13 @@ Report Writer and the 4 registration services are out of scope (Report Writer de
 ### 3.1 `lib/serviceApp.js` (new)
 
 ```js
-createServiceApp({ name, version, keyEnv, keyHeader = 'x-internal-key', bodyLimit = '1mb', identity, mount }) → express app
+createServiceApp({ name, version, keyEnv, keyHeader = 'x-internal-key', keyError = 'Unauthorized caller', bodyLimit = '1mb', identity, mount }) → express app
 ```
 
 Wires, in order:
 1. `app.disable('x-powered-by')`, `express.json({ limit: bodyLimit })`, `correlationId`.
 2. `GET /healthz` → `{ ok: true, service: name, version }`.
-3. On `/api`: `requireInternalKey(name, keyEnv, keyHeader)`; then `identity(req)` — returns the object the service already uses and the kit assigns it, or returns `null` → `401`. The identity callback owns its own field names and 401 message so each service keeps its current responses.
+3. On `/api`: `requireInternalKey(name, keyEnv, keyHeader, keyError)`; then `identity(req)` — returns the object the service already uses and the kit assigns it, or returns `null` → `401`. The identity callback owns its own field names and 401 message so each service keeps its current responses.
 4. `mount(app)` — the service mounts its router(s).
 5. Fallback `404 { error: 'Not found' }`.
 
@@ -39,14 +39,14 @@ The caller does `createServiceApp({...}).listen(PORT)`. Returning the app (not l
 
 ### 3.2 `lib/internalCaller.js`
 
-`requireInternalKey(service, keyEnv, header = 'x-internal-key')` — new optional third argument. Existing callers are unchanged.
+`requireInternalKey(service, keyEnv, header = 'x-internal-key', message = 'Unauthorized caller')` — new optional third and fourth arguments. Existing callers are unchanged.
 
 ### 3.3 Per-service changes
 
 | Service | Change |
 |---|---|
 | Finance | `index.js` → `createServiceApp`; `identity` sets `req.fm` from `x-org-id` / `x-user-uid` / `x-user-role` / `x-user-phone`, message `Authentication required`; keeps its own `getPool`, body limit `20mb`, 404. Dockerfile → repo-root context, copies `lib/serviceApp.js`, `lib/internalCaller.js`, `lib/correlationId.js`. |
-| HR | `index.js` → `createServiceApp` with `keyHeader: 'x-internal-token'`; `identity` sets `req.hrIdent` from `x-org-id` / `x-firebase-uid` / `x-user-role` / `x-user-phone`, message `Missing caller identity`; key-failure message becomes `Unauthorized caller` (was `Unauthorized`) — the only text change, on a service prod never calls. Dockerfile → repo-root context. |
+| HR | `index.js` → `createServiceApp` with `keyHeader: 'x-internal-token'`; `identity` sets `req.hrIdent` from `x-org-id` / `x-firebase-uid` / `x-user-role` / `x-user-phone`, message `Missing caller identity`; `keyError: 'Unauthorized'` keeps its current key-failure message. Dockerfile → repo-root context. |
 | Dashboard | `index.js` → `createServiceApp`; identity unchanged (`req.user` with `name`). Dockerfile adds `lib/serviceApp.js`. |
 | Notebook | `index.js` → `createServiceApp`, body limit `5mb`; identity unchanged (`req.user = { orgId }`). Dockerfile adds `lib/serviceApp.js`. |
 
@@ -67,7 +67,7 @@ The parent spec's risk table says "CI deploys every service on push to main". It
 
 ## 5. Testing
 
-- `lib/serviceApp.check.mjs` (node, assert, no framework): builds a throwaway app on port 0 and checks — `/healthz` 200 with name/version; with `K_SERVICE` set, missing or wrong key → 401; custom `keyHeader` honoured; `identity` returning `null` → 401; valid key + identity → reaches the mounted route and the identity object is on `req`; unknown path → JSON 404; correlation ID echoed.
+- `lib/serviceApp.check.mjs` (node, assert, no framework): builds a throwaway app on port 0 and checks — `/healthz` 200 with name/version; with `K_SERVICE` set, missing or wrong key → 401; custom `keyHeader` and `keyError` honoured; `identity` returning `null` → 401; valid key + identity → reaches the mounted route and the identity object is on `req`; unknown path → JSON 404; correlation ID echoed.
 - Each of the 4 services started locally (`node services/<name>/index.js`): boots, `/healthz` 200, `/api/...` without key → 401 when `K_SERVICE` is set.
 - `tsc --noEmit` and `npm run build` (monolith untouched, but per the real-build rule).
 - Not verifiable here: Docker image builds. The Dockerfile changes are exercised the next time each service is deployed; Notebook (CI-deployed) is the one that matters and only gains one copied file.
