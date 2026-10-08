@@ -341,7 +341,7 @@ export default defineConfig(({ mode }) => {
                           o.billing_email, o.billing_notes,
                           p.id AS plan_id, p.name AS plan_name, p.slug AS plan_slug,
                           p.description AS plan_description, p.price_monthly, p.max_users,
-                          p.ai_enabled, p.sort_order, p.is_active AS plan_is_active
+                          p.ai_enabled, p.sort_order, p.is_active AS plan_is_active, to_jsonb(p)->'apps' AS plan_apps
                    FROM organizations o
                    LEFT JOIN plans p ON p.id = o.plan_id
                    WHERE o.id = $1`, [orgId]
@@ -353,7 +353,7 @@ export default defineConfig(({ mode }) => {
                     id: row.plan_id, name: row.plan_name, slug: row.plan_slug,
                     description: row.plan_description,
                     price_monthly: Number(row.price_monthly),
-                    max_users: row.max_users, ai_enabled: row.ai_enabled,
+                    max_users: row.max_users, ai_enabled: row.ai_enabled, apps: row.plan_apps ?? null,
                     sort_order: row.sort_order, is_active: row.plan_is_active,
                   } : null,
                   status:        row.subscription_status  || 'inactive',

@@ -67,8 +67,8 @@ interface NavTab { key: Tab; label: string; icon: ComponentType<{ className?: st
 
 export function OrgApp() {
   const { user, logout } = useAuthContext()
-  const { org } = useOrg()
-  const canSeeTab = makeCanSeeTab(user, org)
+  const { org, subscription } = useOrg()
+  const canSeeTab = makeCanSeeTab(user, org, subscription?.plan?.apps)
   const hasHr = canSeeTab('hr')
   const hasFm = canSeeTab('financemgmt')
   const hr = useHrData(hasHr)

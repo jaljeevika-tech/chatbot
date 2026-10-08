@@ -82,6 +82,7 @@ export interface PlanInfo {
   price_monthly: number;
   max_users:     number;
   ai_enabled:    boolean;
+  apps?:         string[] | null; // sellable apps included; null = all (lib/subscriptionGuard.js APP_PREFIXES)
   sort_order:    number;
   is_active:     boolean;
 }

@@ -1,11 +1,24 @@
 import { useEffect, useState } from 'react'
-import { Plus, Pencil, Sparkles, Users } from 'lucide-react'
+import { Plus, Pencil, Sparkles, Users, Boxes } from 'lucide-react'
 import { useToast } from '../../../context/ToastContext'
 import { saApi, errMsg } from './api'
 import type { PlanInfo, PlatformStats } from './types'
 import { Button, Card, Dialog, Field, Input, Textarea, Switch, PageHeader, Badge, Skeleton } from './ui'
 
-type Draft = Partial<PlanInfo> & { unlimited?: boolean }
+type Draft = Partial<PlanInfo> & { unlimited?: boolean; appsTouched?: boolean }
+// Sellable apps a plan can leave out — keys match lib/subscriptionGuard.js APP_PREFIXES.
+const APPS: { key: string; label: string; description: string }[] = [
+  { key: 'forms',      label: 'Forms & Collect',    description: 'Form builder, ODK Collect, custom forms.' },
+  { key: 'hr',         label: 'HR',                 description: 'Attendance, leave, shifts, performance reviews.' },
+  { key: 'finance',    label: 'Finance Management', description: 'Advances, settlements, ledger, budget management.' },
+  { key: 'engage',     label: 'WhatsApp (Engage)',  description: 'Contacts, flows, broadcasts, conversations.' },
+  { key: 'compliance', label: 'Compliance Calendar', description: 'Statutory due dates and reminders.' },
+]
+const hasApp = (d: Draft, key: string) => !Array.isArray(d.apps) || d.apps.includes(key)
+function toggleApp(d: Draft, key: string, on: boolean): Draft {
+  const next = APPS.map(a => a.key).filter(k => (k === key ? on : hasApp(d, k)))
+  return { ...d, apps: next.length === APPS.length ? null : next, appsTouched: true }  // all on = null, so future apps are included
+}
 const EMPTY: Draft = { name: '', slug: '', description: '', price_monthly: 0, max_users: 10, ai_enabled: false, sort_order: 0, is_active: true }
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 
@@ -34,6 +47,7 @@ export function PlansPage() {
       name: draft.name.trim(), description: draft.description ?? '', price_monthly: Number(draft.price_monthly) || 0,
       max_users: draft.unlimited ? 9999 : Math.max(1, Number(draft.max_users) || 1),
       ai_enabled: !!draft.ai_enabled, sort_order: Number(draft.sort_order) || 0,
+      ...(draft.appsTouched ? { apps: draft.apps ?? null } : {}),
       ...(isEdit ? { is_active: !!draft.is_active } : { slug: draft.slug.trim() }),
     }
     try {
@@ -45,7 +59,7 @@ export function PlansPage() {
 
   return (
     <>
-      <PageHeader title="Plans" subtitle="Subscription tiers. Seat limits and AI access are enforced on the server for every organisation on a plan."
+      <PageHeader title="Plans" subtitle="Subscription tiers. Seat limits, AI and app access are enforced on the server for every organisation on a plan."
         actions={<Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={() => { setError(''); setDraft({ ...EMPTY }) }}>New plan</Button>} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -68,6 +82,7 @@ export function PlansPage() {
               <ul className="mt-4 flex flex-col gap-1.5 text-sm text-sa-text">
                 <li className="flex items-center gap-2"><Users className="w-4 h-4 text-sa-muted" />{unlimited ? 'Unlimited users' : `Up to ${p.max_users} users`}</li>
                 <li className={`flex items-center gap-2 ${p.ai_enabled ? '' : 'text-sa-muted line-through'}`}><Sparkles className="w-4 h-4 text-sa-muted" />AI features</li>
+                {APPS.filter(a => !hasApp(p, a.key)).map(a => <li key={a.key} className="flex items-center gap-2 text-sa-muted line-through"><Boxes className="w-4 h-4" />{a.label}</li>)}
               </ul>
               <div className="flex items-center justify-between mt-5 pt-4 border-t border-sa-border">
                 <span className="text-xs text-sa-muted">{counts[p.slug] ?? 0} organisation{counts[p.slug] === 1 ? '' : 's'}</span>
@@ -97,6 +112,7 @@ export function PlansPage() {
             <div className="divide-y divide-sa-border border-y border-sa-border">
               <Switch label="Unlimited users" checked={!!draft.unlimited} onChange={v => setDraft({ ...draft, unlimited: v })} />
               <Switch label="AI features" description="Notebook, report writer, AI insights and other AI tools." checked={!!draft.ai_enabled} onChange={v => setDraft({ ...draft, ai_enabled: v })} />
+              {APPS.map(a => <Switch key={a.key} label={a.label} description={a.description} checked={hasApp(draft, a.key)} onChange={v => setDraft(toggleApp(draft, a.key, v))} />)}
               {isEdit && <Switch label="Available for new organisations" description="Retired plans keep their existing organisations." checked={!!draft.is_active} onChange={v => setDraft({ ...draft, is_active: v })} />}
             </div>
             {error && <div className="rounded-lg bg-sa-danger-soft text-sa-danger text-sm px-3 py-2">{error}</div>}
