@@ -29,6 +29,8 @@ interface Row {
   beneficiary_name: string | null
   contact_no: string | null
   input_distributed: string
+  quantity: string | null
+  unit: string | null
   distribution_date: string | null
   place: string | null
   created_at: string
@@ -52,6 +54,8 @@ const EMPTY: Data = {
   kpis: { total: 0, individual: 0, entrepreneur: 0, collective: 0, indirect: 0, uniqueBeneficiaries: 0 },
   itemBreakdown: [],
 }
+
+const fmtQty = (r: Row) => r.quantity == null ? '—' : `${Number(r.quantity)}${r.unit ? ' ' + r.unit : ''}`
 
 function fmtDate(d: string | null): string {
   if (!d) return '—'
@@ -153,24 +157,24 @@ export function InputDistributionPage({ projectKey }: { projectKey: string }) {
           <SectionCard noPadding>
             {/* md+: grid table; below md the rows render as cards instead */}
             <div className="hidden md:block" style={{ overflowX: 'auto' }}>
-              <div style={{ minWidth: 900 }}>
+              <div style={{ minWidth: 1000 }}>
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '120px 1fr 130px 1.2fr 110px 1fr',
+                    gridTemplateColumns: '120px 1fr 130px 1.2fr 100px 110px 1fr',
                     gap: 12, padding: '14px 22px', fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase',
                     color: FF.textFaint, borderBottom: `1px solid ${FF.borderSoft}`,
                   }}
                 >
                   <div>Beneficiary UID</div><div>Name</div><div>Contact No.</div>
-                  <div>Input Distributed</div><div>Date</div><div>Place</div>
+                  <div>Input Distributed</div><div>Quantity</div><div>Date</div><div>Place</div>
                 </div>
                 {data.rows.map(r => (
                   <div
                     key={r.id}
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: '120px 1fr 130px 1.2fr 110px 1fr',
+                      gridTemplateColumns: '120px 1fr 130px 1.2fr 100px 110px 1fr',
                       gap: 12, alignItems: 'center', padding: '13px 22px', borderBottom: `1px solid ${FF.borderFaint}`, fontSize: 13,
                     }}
                   >
@@ -178,6 +182,7 @@ export function InputDistributionPage({ projectKey }: { projectKey: string }) {
                     <div style={{ color: FF.tealDark, fontWeight: 500 }}>{r.beneficiary_name || '—'}</div>
                     <div style={{ color: FF.textMuted, fontSize: 12 }}>{r.contact_no || '—'}</div>
                     <div style={{ color: FF.textMuted }}>{r.input_distributed}</div>
+                    <div style={{ color: FF.textMuted, fontSize: 12 }}>{fmtQty(r)}</div>
                     <div style={{ color: FF.textMuted, fontSize: 12 }}>{fmtDate(r.distribution_date)}</div>
                     <div style={{ color: FF.textMuted, fontSize: 12 }}>{r.place || '—'}</div>
                   </div>
@@ -195,7 +200,7 @@ export function InputDistributionPage({ projectKey }: { projectKey: string }) {
                     </div>
                     <div className="text-right shrink-0" style={{ color: FF.textMuted, fontSize: 12 }}>{fmtDate(r.distribution_date)}</div>
                   </div>
-                  <div style={{ color: FF.tealText, fontSize: 13, fontWeight: 500 }}>{r.input_distributed}</div>
+                  <div style={{ color: FF.tealText, fontSize: 13, fontWeight: 500 }}>{r.input_distributed}{r.quantity != null && ` — ${fmtQty(r)}`}</div>
                   <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1" style={{ fontSize: 12, color: FF.textMuted }}>
                     <div>Contact: {r.contact_no || '—'}</div>
                     <div>Place: {r.place || '—'}</div>

@@ -36,6 +36,8 @@ export const INTERVENTION_CATEGORIES: InterventionCategoryConfig[] = [
     apiCategory: 'inputDistribution', title: 'Input Distribution',
     fields: [
       { key: 'input_distributed', label: 'Input Distributed', type: 'text', required: true },
+      { key: 'quantity', label: 'Quantity', type: 'number' },
+      { key: 'unit', label: 'Unit (No., Kg, Pc…)', type: 'text' },
       { key: 'distribution_date', label: 'Date', type: 'date' },
       { key: 'place', label: 'Place', type: 'text' },
     ],

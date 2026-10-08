@@ -103,21 +103,33 @@ export const TRAINING_UPLOAD: MisUploadConfig = {
 
 export const INPUT_DISTRIBUTION_UPLOAD: MisUploadConfig = {
   label: 'Input Distribution',
-  columns: 'UID, Name, Contact No., Input Distributed, Date, Place',
+  columns: 'UID, Name, Contact No., Input Distributed, Quantity, Unit, Date, Place',
   notes: BENEFICIARY_NOTES,
   endpoint: '/api/input-distributions/bulk-upload',
   templateUrl: '/api/input-distributions-template.xlsx',
   templateFile: 'input-distribution-template.xlsx',
   isHeaderCell: isUid,
-  columnMatchers: { ...BENEFICIARY_COLUMNS, item: n => n.includes('input distributed') || n.includes('input') },
+  columnMatchers: {
+    ...BENEFICIARY_COLUMNS,
+    item: n => n.includes('input distributed') || n.includes('input'),
+    quantity: n => n.includes('quantity') || n.startsWith('qty'),
+    unit: n => n.startsWith('unit'),
+  },
   requiredColumns: ['uid', 'item'],
   parseRow: (get, XLSX) => {
     const item = text(get('item'))
     if (!item) return null
-    return { ...beneficiaryFields(get), input_distributed: item, ...dateAndPlace(get, XLSX) }
+    const rawQty = get('quantity')
+    return {
+      ...beneficiaryFields(get),
+      input_distributed: item,
+      quantity: rawQty === '' || rawQty == null ? null : rawQty,
+      unit: textOrNull(get('unit')),
+      ...dateAndPlace(get, XLSX),
+    }
   },
   previewStats: uidStats,
-  previewLine: r => beneficiaryLine(r, r.input_distributed),
+  previewLine: r => beneficiaryLine(r, r.input_distributed) + (r.quantity != null ? ` — ${r.quantity}${r.unit ? ' ' + r.unit : ''}` : ''),
 }
 
 export const SCHEME_ACCESS_UPLOAD: MisUploadConfig = {

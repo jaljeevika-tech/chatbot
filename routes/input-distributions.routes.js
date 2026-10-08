@@ -22,21 +22,22 @@ router.get('/input-distributions-template.xlsx', async (req, res) => {
     const projectName = await resolveProjectName(pool, req.user.orgId, req.query.project_key)
     const buf = await buildTemplateXlsx({
       sheetName: misSheetName(projectName, 'Input Distribution'),
-      header: ['UID', 'Name', 'Contact No.', 'Input Distributed', 'Date', 'Place'],
+      header: ['UID', 'Name', 'Contact No.', 'Input Distributed', 'Quantity', 'Unit', 'Date', 'Place'],
       sampleRows: [
-        ['IB-KHA-1', 'Sample Beneficiary', '9876543210', 'Fish Seed', '2026-01-15', 'Sample Village'],
-        ['', 'Walk-in Recipient', '9876500000', 'Fish Seed', '2026-01-15', 'Sample Village'],
+        ['IB-KHA-1', 'Sample Beneficiary', '9876543210', 'Fish Seed', 5, 'Kg', '2026-01-15', 'Sample Village'],
+        ['', 'Walk-in Recipient', '9876500000', 'Sapling', 20, 'No.', '2026-01-15', 'Sample Village'],
       ],
       readmeLines: [
         'Input Distribution — Upload Template',
         '',
-        'Columns: UID, Name, Contact No., Input Distributed, Date, Place.',
+        'Columns: UID, Name, Contact No., Input Distributed, Quantity, Unit, Date, Place.',
         '',
         'UID is OPTIONAL — leave it blank for someone with no registered Beneficiary UID.',
         'They are saved automatically as an Indirect Beneficiary, matched across every',
         'upload by Contact No.',
         '',
         'Input Distributed is the only required field.',
+        'Quantity is a number; Unit is No., Kg, Pc, Ltr, etc.',
       ],
     })
     sendXlsx(res, buf, 'input-distribution-template.xlsx')
@@ -180,7 +181,7 @@ router.get('/input-distributions', async (req, res) => {
 
     const { rows } = await pool.query(
       `SELECT id, beneficiary_uid, beneficiary_type, beneficiary_name, contact_no,
-              input_distributed, distribution_date, place, created_at
+              input_distributed, quantity, unit, distribution_date, place, created_at
        FROM input_distributions
        WHERE ${whereSql}
        ORDER BY created_at DESC
@@ -210,7 +211,7 @@ router.get('/input-distributions', async (req, res) => {
 })
 
 // POST /api/input-distributions/bulk-upload
-// Body: { rows: [{ uid, name, contact_no, input_distributed, date, place }] }
+// Body: { rows: [{ uid, name, contact_no, input_distributed, quantity, unit, date, place }] }
 router.post('/input-distributions/bulk-upload', async (req, res) => {
   if (!requireEditor(req, res)) return
   try {
@@ -239,6 +240,12 @@ router.post('/input-distributions/bulk-upload', async (req, res) => {
       }
       const distributionDate = parsedDate.date
 
+      const quantity = r.quantity === '' || r.quantity == null ? null : Number(r.quantity)
+      if (quantity != null && !Number.isFinite(quantity)) {
+        errors.push({ row: i + 1, uid, error: `Quantity "${r.quantity}" is not a number` })
+        continue
+      }
+
       let beneficiary
       try {
         beneficiary = uid
@@ -259,7 +266,7 @@ router.post('/input-distributions/bulk-upload', async (req, res) => {
         const outcome = await upsertMisRow(pool, {
           table: 'input_distributions',
           identity: { org_id: orgId, project_key, beneficiary_uid: beneficiary.uid, input_distributed: item, distribution_date: distributionDate },
-          content: { beneficiary_type: beneficiary.type, beneficiary_name: beneficiary.name, contact_no: beneficiary.contact_no, place: r.place || null },
+          content: { beneficiary_type: beneficiary.type, beneficiary_name: beneficiary.name, contact_no: beneficiary.contact_no, quantity, unit: String(r.unit || '').trim() || null, place: r.place || null },
           audit: { uploaded_by: req.user.name || 'unknown' },
         })
         if (outcome === 'new') created += 1

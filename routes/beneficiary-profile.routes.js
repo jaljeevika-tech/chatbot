@@ -363,6 +363,8 @@ const MIS_WRITERS = {
     table: 'input_distributions', requiredLabel: 'Input distributed',
     fields: [
       { col: 'input_distributed', type: 'text', required: true },
+      { col: 'quantity', type: 'number' },
+      { col: 'unit', type: 'text' },
       { col: 'distribution_date', type: 'date' },
       { col: 'place', type: 'text' },
     ],
