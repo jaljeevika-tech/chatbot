@@ -9,6 +9,10 @@ jobs:
   deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
+    # id-token lets the job sign in to GCP via Workload Identity Federation.
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -77,12 +81,14 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          # Keyless: the pool only trusts jaljeevika-tech/chatbot. No secrets needed.
+          workload_identity_provider: projects/725980175357/locations/global/workloadIdentityPools/github/providers/chatbot
+          service_account: github-deployer@chatbot-492915.iam.gserviceaccount.com
 
       - name: Set up gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          project_id: chatbot-492915
 
       - name: Deploy to App Engine
         run: gcloud app deploy app.yaml --quiet --version=main
