@@ -141,6 +141,11 @@ router.post('/auth/sheet-login', loginLimiter, async (req, res) => {
     }
 
     // ── 2. Fall back to Google Sheet (sheet-configured orgs) ──
+    // A platform superadmin must authenticate with their DB password, never with
+    // credentials in an org-controlled sheet.
+    if (String(dbUsers[0]?.role || '').toLowerCase().trim() === 'superadmin') {
+      return res.status(403).json({ error: DENIED })
+    }
     // An org without its own users_sheet_id must never fall back to the shared
     // USERS_SHEET_ID default — that is Jaljeevika's live roster. Deny instead.
     const sheetId = org.metadata?.data_sources?.users_sheet_id
