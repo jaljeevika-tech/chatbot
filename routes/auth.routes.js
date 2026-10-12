@@ -191,6 +191,9 @@ router.post('/auth/sheet-login', loginLimiter, async (req, res) => {
   }
 })
 
+// Same account-status rule as sheet-login: exited or deactivated users get no claims.
+const ACTIVE_USER = `(u.exit_date IS NULL OR u.exit_date > now()) AND coalesce(to_jsonb(u) ->> 'active', 'true') <> 'false'`
+
 // ── POST /api/auth/login — set Firebase custom claims after phone-OTP verification
 router.post('/auth/login', async (req, res) => {
   try {
@@ -199,7 +202,7 @@ router.post('/auth/login', async (req, res) => {
     // Look up user by firebase_uid first, then fall back to phone number
     const phone = (req.user.phone || '').replace(/[\s\-]/g, '').replace(/^\+/, '')
     let { rows } = await pool.query(
-      'SELECT u.id, u.org_id, u.name, u.role, o.metadata FROM users u JOIN organizations o ON o.id = u.org_id WHERE u.firebase_uid = $1',
+      `SELECT u.id, u.org_id, u.name, u.role, o.metadata FROM users u JOIN organizations o ON o.id = u.org_id WHERE u.firebase_uid = $1 AND ${ACTIVE_USER}`,
       [req.user.uid]
     )
 
@@ -209,7 +212,7 @@ router.post('/auth/login', async (req, res) => {
       const orgSlug = String(req.body?.orgSlug || '').trim()
       const { rows: matches } = await pool.query(
         `SELECT u.id, u.org_id FROM users u JOIN organizations o ON o.id = u.org_id
-          WHERE u.phone = $1 AND ($2 = '' OR lower(o.slug) = lower($2))`,
+          WHERE u.phone = $1 AND ($2 = '' OR lower(o.slug) = lower($2)) AND ${ACTIVE_USER}`,
         [phone, orgSlug]
       )
       if (matches.length > 1) {
