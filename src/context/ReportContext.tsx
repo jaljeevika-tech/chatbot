@@ -4,6 +4,7 @@ import { fetchReportsFromSheet } from '../utils/googleSheets';
 import { fetchUsersFromSheet, type UserRow } from '../utils/authSheet';
 import { useOrg } from './OrgContext';
 import { apiFetch } from '../utils/apiFetch';
+import { mergeProjectAlias } from '../utils/cleanReport';
 
 // WhatsApp / Quick Report submissions land in daily_reports; merged with the Sheet rows.
 async function fetchReportsFromDb(): Promise<DailyReport[] | null> {
@@ -14,8 +15,11 @@ async function fetchReportsFromDb(): Promise<DailyReport[] | null> {
     if (!Array.isArray(data.reports)) return [];
     // attachment_url is user-supplied and rendered as an href — only http(s) is a link
     // (sheet rows get the same filter in cleanReport).
-    return (data.reports as DailyReport[]).map(r =>
-      r.attachmentUrl && !/^https?:\/\//i.test(r.attachmentUrl) ? { ...r, attachmentUrl: null } : r);
+    return (data.reports as DailyReport[]).map(r => ({
+      ...r,
+      project: mergeProjectAlias(r.project || ''),
+      attachmentUrl: r.attachmentUrl && !/^https?:\/\//i.test(r.attachmentUrl) ? null : r.attachmentUrl,
+    }));
   } catch (err) {
     console.error('Error fetching reports from database:', err);
     return null;

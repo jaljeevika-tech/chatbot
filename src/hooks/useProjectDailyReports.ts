@@ -5,11 +5,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../utils/apiFetch'
 import { useReportContext } from '../context/ReportContext'
 import type { DailyReport } from '../types/report'
+import { mergeProjectAlias } from '../utils/cleanReport'
 
 // Renamed projects whose project_key (trailing "-<year>" stripped) shares nothing with the
 // short name field workers pick in the report form.
 const PROJECT_KEY_ALIASES: Record<string, string> = {
-  'jal-samriddhi-strengthening-fisheries-based-livelihoods-in-gadchiroli-maharashtra': 'jal-smaridhi-apf',
+  'jal-samriddhi-strengthening-fisheries-based-livelihoods-in-gadchiroli-maharashtra': 'jal-smaridhi-gadchiroli',
 }
 
 export function useProjectDailyReports(projectName: string, projectKey?: string, locationFilter = '', limit = 200) {
@@ -25,7 +26,7 @@ export function useProjectDailyReports(projectName: string, projectKey?: string,
       (locationFilter ? `&location=${encodeURIComponent(locationFilter)}` : '') + `&limit=${limit}`
     apiFetch(url)
       .then(r => r.json())
-      .then(d => { if (!cancelled) setPgReports(d.reports || []) })
+      .then(d => { if (!cancelled) setPgReports((d.reports || []).map((r: DailyReport) => ({ ...r, project: mergeProjectAlias(r.project || '') }))) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [projectName, locationFilter, limit])

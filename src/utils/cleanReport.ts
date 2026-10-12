@@ -15,7 +15,7 @@ export const CANONICAL_PROJECTS: string[] = [
   'FPO Madhepura – NABARD',
   'Jal Nidhi – Herbalife',
   'Water Hyacinth – NABARD',
-  'Jal Smaridhi-APF',
+  'Jal Smaridhi(Gadchiroli)',
   'Shabri Mahamandal',
 ]
 
@@ -53,6 +53,13 @@ export const CANONICAL_AREAS: string[] = [
   'Any Other',
 ]
 
+// Jal Smaridhi-APF and Jal Smaridhi Gadchiroli are one project: every spelling
+// (smaridhi / samridhi / samriddhi, any suffix) rolls up to Jal Smaridhi(Gadchiroli).
+// Applied to Sheet rows here and to DB rows in ReportContext / useProjectDailyReports.
+export function mergeProjectAlias(project: string): string {
+  return /jal\s*s(a?m|ma)r+i+d+h?i/i.test(project) ? 'Jal Smaridhi(Gadchiroli)' : project
+}
+
 // ── Alias maps (alternate spellings / common mistakes → canonical) ──────────
 
 const PROJECT_ALIASES: Record<string, string> = {
@@ -84,7 +91,7 @@ const PROJECT_ALIASES: Record<string, string> = {
   'herbelife':                   'Arogya Anna Herbelife',
   'herbalife':                   'Arogya Anna Herbelife',
   'jal nidhi':                   'Jal Nidhi – Herbalife',
-  'jal smaridhi':                'Jal Smaridhi-APF',
+  'jal smaridhi':                'Jal Smaridhi(Gadchiroli)',
   'fpo madhepura':               'FPO Madhepura – NABARD',
   'fpo':                         'FPO Madhepura – NABARD',
   'nabard':                      'FPO Madhepura – NABARD',
@@ -179,7 +186,7 @@ const PROJECT_KEYWORDS: [RegExp, string][] = [
   [/guhaghar|guhagaon|ratnagiri|padave|rajapur|konkan|tao/i, 'Internal Program'],
   [/arogya|herbalife|herbelife/i,                        'Arogya Anna Herbelife'],
   [/jal nidhi|jaljeevika/i,                              'Jal Nidhi – Herbalife'],
-  [/jal smaridhi|jalsmridhi/i,                           'Jal Smaridhi-APF'],
+  [/jal smaridhi|jalsmridhi/i,                           'Jal Smaridhi(Gadchiroli)'],
   [/fpo.*madhepura|nabard.*madhepura|madhepura.*fpo/i,   'FPO Madhepura – NABARD'],
   [/water hyacinth/i,                                    'Water Hyacinth – NABARD'],
   [/shabri|mahamandal/i,                                 'Shabri Mahamandal'],
@@ -337,7 +344,7 @@ export function cleanReport(report: DailyReport): DailyReport {
   const loc  = String(report.location || '')
 
   // ── Project ────────────────────────────────────────────
-  let project = String(report.project || '').trim()
+  let project = mergeProjectAlias(String(report.project || '').trim())
   if (looksGarbage(project)) {
     project = inferFromDescription(desc, loc, PROJECT_KEYWORDS) ?? ''
   } else {
