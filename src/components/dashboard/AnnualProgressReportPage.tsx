@@ -41,8 +41,10 @@ function fyLabel(y: number) {
 
 // Plain-text links pasted without a scheme (e.g. "www.example.com") resolve
 // relative to the current page and 404 instead of opening — assume https.
+// Any other scheme (javascript:, data:) is never rendered as a link.
 function normalizeLink(link: string) {
-  return /^[a-z][a-z0-9+.-]*:/i.test(link) ? link : `https://${link}`
+  if (/^https?:\/\//i.test(link)) return link
+  return /^[a-z][a-z0-9+.-]*:/i.test(link) ? undefined : `https://${link}`
 }
 
 type Row = {
