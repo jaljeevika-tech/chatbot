@@ -25,6 +25,13 @@ function requireAuth(req, res, next) {
   next()
 }
 
+// The review's subject may read it (_canView) and acknowledge it, but never edit or sign it off.
+async function _isReviewee(pool, viewer, review) {
+  const { rows } = await pool.query(
+    `SELECT 1 FROM users WHERE id = $1 AND firebase_uid = $2`, [review.employee_id, viewer.uid])
+  return rows.length > 0
+}
+
 // ── Visibility middleware ───────────────────────────────────────────────────
 async function _canView(pool, viewer, review) {
   if (!viewer || !review) return false
@@ -322,6 +329,9 @@ router.patch('/performance/reviews/:id', requireAuth, async (req, res) => {
     if (!['admin', 'superadmin', 'manager'].includes(req.user.role)) {
       return res.status(403).json({ error: 'Manager role required' })
     }
+    if (await _isReviewee(pool, req.user, review)) {
+      return res.status(403).json({ error: "You can't edit or finalise your own review" })
+    }
 
     const { kpis, activities, learning, strengths, improvements,
             risk, risk_notes, recommendation, action_plan, reviewer_notes } = req.body || {}
@@ -403,6 +413,9 @@ router.post('/performance/reviews/:id/finalise', requireAuth, async (req, res) =
     }
     if (!['admin', 'superadmin', 'manager'].includes(req.user.role)) {
       return res.status(403).json({ error: 'Manager role required' })
+    }
+    if (await _isReviewee(pool, req.user, review)) {
+      return res.status(403).json({ error: "You can't edit or finalise your own review" })
     }
 
     const { rows: rvRows } = await pool.query(
