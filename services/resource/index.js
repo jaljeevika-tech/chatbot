@@ -130,6 +130,16 @@ app.get('/api/lookup', async (req, res) => {
   }
   try {
     const result = await lookupBeneficiary(org, String(uid).trim())
+    // Anyone with the link can read beneficiary details, so every lookup is
+    // recorded first; if the record can't be written, nothing is served.
+    await orgQuery(org,
+      `INSERT INTO audit_log (org_id, actor_uid, actor_name, action, target_type, target_id, diff)
+       VALUES ($1, 'public-link', 'Resource registration link', 'beneficiary.lookup', 'beneficiary', $2, $3)`,
+      [org, String(uid).trim().toUpperCase().slice(0, 100), JSON.stringify({
+        found: !result.error,
+        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || null,
+        user_agent: String(req.headers['user-agent'] || '').slice(0, 300),
+      })])
     if (result.error) return res.status(404).json({ error: result.error })
     res.json(result)
   } catch (e) {
