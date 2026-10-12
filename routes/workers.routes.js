@@ -209,8 +209,12 @@ router.put('/update-user', async (req, res) => {
   }
 
   // Mirror to PostgreSQL
+  let before = null
   try {
     const pool = getPool()
+    before = (await pool.query(
+      'SELECT role, firebase_uid FROM users WHERE org_id=$1 AND phone=$2',
+      [req.user.orgId, normPhone(originalPhone)])).rows[0] || null
     await pool.query(
       `UPDATE users SET name=$1, role=$2, designation=$3, project_ids=$4, phone=$7
        WHERE org_id=$5 AND phone=$6`,
@@ -220,6 +224,13 @@ router.put('/update-user', async (req, res) => {
     )
   } catch (e) { console.warn('[update-user] DB mirror failed:', e.message) }
   await setDbUserActive(req.user.orgId, normPhone(phone), activeVal === 'TRUE')
+  // The role lives in the session's token claims, so a role change ends live
+  // sessions (as the superadmin console does); the next login gets the new role.
+  if (before?.firebase_uid && String(before.role || '').trim().toLowerCase() !== role.trim().toLowerCase()) {
+    ensureFirebase()
+    try { await admin.auth().revokeRefreshTokens(before.firebase_uid) }
+    catch (e) { if (e.code !== 'auth/user-not-found') console.warn('[update-user] revoke failed:', e.message) }
+  }
 
   writeAudit(req.user.orgId, req.user.uid, req.user.name, 'user.update', 'user', normPhone(originalPhone), { name, role, active: activeVal, designation, project_ids })
 
