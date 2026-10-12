@@ -141,6 +141,11 @@ router.post('/auth/sheet-login', loginLimiter, async (req, res) => {
     }
 
     // ── 2. Fall back to Google Sheet (sheet-configured orgs) ──
+    // A platform superadmin must authenticate with their DB password, never with
+    // credentials in an org-controlled sheet.
+    if (String(dbUsers[0]?.role || '').toLowerCase().trim() === 'superadmin') {
+      return res.status(403).json({ error: DENIED })
+    }
     // An org without its own users_sheet_id must never fall back to the shared
     // USERS_SHEET_ID default — that is Jaljeevika's live roster. Deny instead.
     const sheetId = org.metadata?.data_sources?.users_sheet_id
@@ -186,6 +191,9 @@ router.post('/auth/sheet-login', loginLimiter, async (req, res) => {
   }
 })
 
+// Same account-status rule as sheet-login: exited or deactivated users get no claims.
+const ACTIVE_USER = `(u.exit_date IS NULL OR u.exit_date > now()) AND coalesce(to_jsonb(u) ->> 'active', 'true') <> 'false'`
+
 // ── POST /api/auth/login — set Firebase custom claims after phone-OTP verification
 router.post('/auth/login', async (req, res) => {
   try {
@@ -194,7 +202,7 @@ router.post('/auth/login', async (req, res) => {
     // Look up user by firebase_uid first, then fall back to phone number
     const phone = (req.user.phone || '').replace(/[\s\-]/g, '').replace(/^\+/, '')
     let { rows } = await pool.query(
-      'SELECT u.id, u.org_id, u.name, u.role, o.metadata FROM users u JOIN organizations o ON o.id = u.org_id WHERE u.firebase_uid = $1',
+      `SELECT u.id, u.org_id, u.name, u.role, o.metadata FROM users u JOIN organizations o ON o.id = u.org_id WHERE u.firebase_uid = $1 AND ${ACTIVE_USER}`,
       [req.user.uid]
     )
 
@@ -204,7 +212,7 @@ router.post('/auth/login', async (req, res) => {
       const orgSlug = String(req.body?.orgSlug || '').trim()
       const { rows: matches } = await pool.query(
         `SELECT u.id, u.org_id FROM users u JOIN organizations o ON o.id = u.org_id
-          WHERE u.phone = $1 AND ($2 = '' OR lower(o.slug) = lower($2))`,
+          WHERE u.phone = $1 AND ($2 = '' OR lower(o.slug) = lower($2)) AND ${ACTIVE_USER}`,
         [phone, orgSlug]
       )
       if (matches.length > 1) {

@@ -11,7 +11,11 @@ async function fetchReportsFromDb(): Promise<DailyReport[] | null> {
     const res = await apiFetch('/api/reports/daily');
     if (!res.ok) return null;
     const data = await res.json();
-    return Array.isArray(data.reports) ? data.reports : [];
+    if (!Array.isArray(data.reports)) return [];
+    // attachment_url is user-supplied and rendered as an href — only http(s) is a link
+    // (sheet rows get the same filter in cleanReport).
+    return (data.reports as DailyReport[]).map(r =>
+      r.attachmentUrl && !/^https?:\/\//i.test(r.attachmentUrl) ? { ...r, attachmentUrl: null } : r);
   } catch (err) {
     console.error('Error fetching reports from database:', err);
     return null;

@@ -51,7 +51,7 @@ async function rwAppendRow(token, tabName, values) {
   if (!RW_SHEET_ID) return
   const range = encodeURIComponent(`${tabName}!A:Z`)
   const r = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${RW_SHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${RW_SHEET_ID}/values/${range}:append?valueInputOption=RAW`,
     { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [values] }) }
   )
   if (!r.ok) console.error(`[rw] append failed ${r.status}:`, await r.text().catch(() => ''))
@@ -61,7 +61,7 @@ async function rwUpdateRow(token, tabName, rowIdx, values) {
   if (!RW_SHEET_ID) return
   const range = encodeURIComponent(`${tabName}!A${rowIdx}:Z${rowIdx}`)
   const r = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${RW_SHEET_ID}/values/${range}?valueInputOption=USER_ENTERED`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${RW_SHEET_ID}/values/${range}?valueInputOption=RAW`,
     { method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [values] }) }
   )
   if (!r.ok) console.error(`[rw] update failed ${r.status}:`, await r.text().catch(() => ''))
