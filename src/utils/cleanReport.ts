@@ -16,6 +16,7 @@ export const CANONICAL_PROJECTS: string[] = [
   'Jal Nidhi – Herbalife',
   'Water Hyacinth – NABARD',
   'Jal Smaridhi(Gadchiroli)',
+  'Jal Samradhi (Purnia)',
   'Shabri Mahamandal',
 ]
 
@@ -53,11 +54,13 @@ export const CANONICAL_AREAS: string[] = [
   'Any Other',
 ]
 
-// Jal Smaridhi-APF and Jal Smaridhi Gadchiroli are one project: every spelling
-// (smaridhi / samridhi / samriddhi, any suffix) rolls up to Jal Smaridhi(Gadchiroli).
+// Jal Smaridhi-APF / Jal Smaridhi Gadchiroli / Jal Samradhi Purnia: every spelling
+// (smaridhi / samridhi / samradhi / samriddhi, any suffix) rolls up to one of two
+// projects — Bihar reports to Jal Samradhi (Purnia), the rest to Jal Smaridhi(Gadchiroli).
 // Applied to Sheet rows here and to DB rows in ReportContext / useProjectDailyReports.
-export function mergeProjectAlias(project: string): string {
-  return /jal\s*s(a?m|ma)r+i+d+h?i/i.test(project) ? 'Jal Smaridhi(Gadchiroli)' : project
+export function mergeProjectAlias(project: string, state = '', location = ''): string {
+  if (!/jal\s*s[a-z]{2,6}dhi/i.test(project)) return project
+  return BIHAR_RE.test(`${project} ${state} ${location}`) ? 'Jal Samradhi (Purnia)' : 'Jal Smaridhi(Gadchiroli)'
 }
 
 // ── Alias maps (alternate spellings / common mistakes → canonical) ──────────
@@ -193,8 +196,10 @@ const PROJECT_KEYWORDS: [RegExp, string][] = [
   [/dasara|dussehra/i,                                   'Dasara'],
 ]
 
+const BIHAR_RE = /bihar|patna|muzaffarpur|gaya|supaul|purnia|purnea|darbhanga|sitamarhi|madhubani|saharsa|bhagalpur|kishanganj|araria|katihar/i
+
 const STATE_KEYWORDS: [RegExp, string][] = [
-  [/bihar|patna|muzaffarpur|gaya|supaul|purnia|darbhanga|sitamarhi|madhubani|saharsa|bhagalpur|kishanganj|araria|katihar/i, 'Bihar'],
+  [BIHAR_RE, 'Bihar'],
   [/maharashtra|pune|mumbai|nagpur|nashik|aurangabad|thane|ratnagiri|konkan|kolhapur|sangli|solapur|amravati/i, 'Maharashtra'],
   [/madhya pradesh|bhopal|indore|jabalpur|gwalior|ujjain|sagar|rewa|satna|ratlam|dewas|chhindwara/i, 'Madhya Pradesh'],
   [/uttar pradesh|lucknow|kanpur|agra|varanasi|allahabad|prayagraj|gorakhpur|meerut|bareilly|aligarh|moradabad|saharanpur|firozabad|jhansi/i, 'Uttar Pradesh'],
@@ -344,7 +349,7 @@ export function cleanReport(report: DailyReport): DailyReport {
   const loc  = String(report.location || '')
 
   // ── Project ────────────────────────────────────────────
-  let project = mergeProjectAlias(String(report.project || '').trim())
+  let project = mergeProjectAlias(String(report.project || '').trim(), String(report.state || ''), loc)
   if (looksGarbage(project)) {
     project = inferFromDescription(desc, loc, PROJECT_KEYWORDS) ?? ''
   } else {
@@ -377,6 +382,8 @@ export function cleanReport(report: DailyReport): DailyReport {
       ?? inferFromDescription(desc, loc, AREA_KEYWORDS)
       ?? area
   }
+
+  project = mergeProjectAlias(project, state, loc)
 
   // MIS & Analysis work rolls up to TATWA unless a specific programme is tagged.
   if (area === 'MIS & Analysis' && (project === 'Internal Program' || project === '' || !project)) {

@@ -26,7 +26,7 @@ export function useProjectDailyReports(projectName: string, projectKey?: string,
       (locationFilter ? `&location=${encodeURIComponent(locationFilter)}` : '') + `&limit=${limit}`
     apiFetch(url)
       .then(r => r.json())
-      .then(d => { if (!cancelled) setPgReports((d.reports || []).map((r: DailyReport) => ({ ...r, project: mergeProjectAlias(r.project || '') }))) })
+      .then(d => { if (!cancelled) setPgReports((d.reports || []).map((r: DailyReport) => ({ ...r, project: mergeProjectAlias(r.project || '', r.state, r.location) }))) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [projectName, locationFilter, limit])
