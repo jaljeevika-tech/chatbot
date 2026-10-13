@@ -49,7 +49,7 @@ export const PROJECT_PALETTE: Record<string, ProjectStyle> = {
   'Arogya Anna Herbelife': { dot: '#10b981', badge: '#f0fdf4', bar: '#10b981', bg: '#D1FAE5' },
   'FPO Madhepura – NABARD':{ dot: '#f59e0b', badge: '#fffbeb', bar: '#f59e0b', bg: '#FEF3C7' },
   'Water Hyacinth – NABARD':{ dot: '#84cc16', badge: '#f7fee7', bar: '#84cc16', bg: '#ECFCCB' },
-  'Jal Smaridhi-APF':      { dot: '#a855f7', badge: '#faf5ff', bar: '#a855f7', bg: '#F3E8FF' },
+  'Jal Smaridhi(Gadchiroli)': { dot: '#a855f7', badge: '#faf5ff', bar: '#a855f7', bg: '#F3E8FF' },
   'Shabri Mahamandal':     { dot: '#dc2626', badge: '#fef2f2', bar: '#dc2626', bg: '#FEE2E2' },
 }
 
