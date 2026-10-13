@@ -17,7 +17,7 @@ async function fetchReportsFromDb(): Promise<DailyReport[] | null> {
     // (sheet rows get the same filter in cleanReport).
     return (data.reports as DailyReport[]).map(r => ({
       ...r,
-      project: mergeProjectAlias(r.project || ''),
+      project: mergeProjectAlias(r.project || '', r.state, r.location),
       attachmentUrl: r.attachmentUrl && !/^https?:\/\//i.test(r.attachmentUrl) ? null : r.attachmentUrl,
     }));
   } catch (err) {
