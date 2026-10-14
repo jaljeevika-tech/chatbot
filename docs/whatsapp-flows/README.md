@@ -1,8 +1,27 @@
 # WhatsApp form for field reports
 
-`field-report.flow.json` is a WhatsApp Flow (WhatsApp's built-in form screen). It
-asks for the same six answers the chat questions used to ask, under the same names,
-so the report-save step (`lib/waReportSubmit.js`) gets the same data as before.
+`field-report.flow.json` is a WhatsApp Flow (WhatsApp's built-in form screen) that
+mirrors the Glific reporting flow "FieldFlow Daily Report" (`glific/fieldflow-report-flow.json`),
+in Hindi + English. Project and Activity type are drop-downs with the dashboard's
+official lists (`CANONICAL_PROJECTS` / `CANONICAL_AREAS` in `src/utils/cleanReport.ts`):
+12 projects and 12 activities. The Glific flow's own lists are older and shorter.
+
+**State, name, phone and organisation are not asked**: they come from the worker's
+registration. The save step fills State from the WhatsApp contact field `state`
+(`"state": "{{contact.state}}"`), so registration must save it under that name.
+
+Answer names: `project`, `location`, `area_of_intervention`, `beneficiaries`,
+`description`. Both save steps accept them: `lib/waReportSubmit.js` (Meta flow →
+dashboard) reads them as-is, and the Glific save step (`routes/whatsapp.routes.js`)
+accepts `area_of_intervention` in place of its `area`. Activity type lands in the
+report's "Area of Intervention" column. Drop-down answers are the option text
+(e.g. "Community Mobilization"), the same text the Glific list saved. To change the
+options, edit `data-source` (and the Glific flow) and publish a new version in WhatsApp
+Manager. `lib/waReportSubmit.check.mjs` fails if the form's names or option lists drift
+from the save step or the Glific flow.
+
+Phone and name aren't form fields: the save step's webhook body supplies them as
+`"phone": "{{contact.wa_id}}"` and `"name": "{{contact.name}}"`.
 
 ## Set up (once, in Meta WhatsApp Manager)
 
@@ -18,16 +37,24 @@ Replace the chat questions in the Reporting flow with:
 1. **WhatsApp Form** step: paste the Flow ID; first screen `REPORT`.
 2. **Wait for Input** step: validation "Photos / videos / PDFs (several, then DONE)",
    save as e.g. `files`. Up to 10 files.
-3. **Webhook Call** step to `/api/wa/reports/submit`, body as before
-   (`{"project": "{{project}}", "state": "{{state}}", ...}`). Files are attached automatically.
+3. **Webhook Call** step to `/api/wa/reports/submit` with this body (files are attached automatically):
+   ```json
+   { "phone": "{{contact.wa_id}}", "name": "{{contact.name}}",
+     "project": "{{project}}", "state": "{{contact.state}}", "location": "{{location}}",
+     "beneficiaries": "{{beneficiaries}}", "area_of_intervention": "{{area_of_intervention}}",
+     "description": "{{description}}" }
+   ```
+   Don't copy the URL from the "Field Report Collection" template: its
+   `/api/wa/webhook-submit` doesn't exist on the server.
 4. **End** step.
 
 ## Limits worth knowing
 
 - One screen holds up to 50 fields. A text box takes up to 80 characters by default,
   a long-text box up to 600. Field labels can be at most 20 characters.
-- A form without an endpoint (like this one) can't load per-organisation lists such as
-  project names. That's why Project is a typed field here, not a drop-down.
+- A form without an endpoint (like this one) can't load lists from the app, so the
+  Project/State/Activity options are written into the form. A new project means editing
+  the form and publishing a new version. Option titles can be at most 30 characters.
 - The form's own photo/document pickers allow up to 10 files (100 MB total) per submission.
   We collect files in chat instead, as agreed.
 - WhatsApp Forms are a Meta Cloud API feature; Glific connections don't send them.

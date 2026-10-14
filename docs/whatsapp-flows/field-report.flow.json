@@ -1,29 +1,162 @@
 {
-  "version": "5.0",
+  "version": "7.3",
   "screens": [
     {
       "id": "REPORT",
-      "title": "Field report",
+      "title": "दैनिक रिपोर्ट / Daily Report",
       "terminal": true,
       "success": true,
       "data": {},
       "layout": {
         "type": "SingleColumnLayout",
         "children": [
-          { "type": "TextInput", "name": "project",  "label": "Project",  "input-type": "text", "required": true },
-          { "type": "TextInput", "name": "state",    "label": "State",    "input-type": "text", "required": true },
-          { "type": "TextInput", "name": "location", "label": "Village / block", "input-type": "text", "required": true },
-          { "type": "TextInput", "name": "area_of_intervention", "label": "Area of work", "input-type": "text", "required": false },
-          { "type": "TextInput", "name": "beneficiaries", "label": "People reached", "input-type": "number", "required": false },
-          { "type": "TextArea",  "name": "description", "label": "What happened?", "max-length": 600, "required": true },
+          {
+            "type": "TextBody",
+            "text": "आज की फील्ड रिपोर्ट भरें।\nPlease fill today's field report."
+          },
+          {
+            "type": "Dropdown",
+            "name": "project",
+            "label": "प्रोजेक्ट / Project",
+            "required": true,
+            "data-source": [
+              {
+                "id": "Dasara",
+                "title": "Dasara"
+              },
+              {
+                "id": "Kosi Sahajivan",
+                "title": "Kosi Sahajivan"
+              },
+              {
+                "id": "UNDP ECRIC Project",
+                "title": "UNDP ECRIC Project"
+              },
+              {
+                "id": "TATWA",
+                "title": "TATWA"
+              },
+              {
+                "id": "Internal Program",
+                "title": "Internal Program"
+              },
+              {
+                "id": "Arogya Anna Herbelife",
+                "title": "Arogya Anna Herbelife"
+              },
+              {
+                "id": "FPO Madhepura – NABARD",
+                "title": "FPO Madhepura – NABARD"
+              },
+              {
+                "id": "Jal Nidhi – Herbalife",
+                "title": "Jal Nidhi – Herbalife"
+              },
+              {
+                "id": "Water Hyacinth – NABARD",
+                "title": "Water Hyacinth – NABARD"
+              },
+              {
+                "id": "Jal Smaridhi(Gadchiroli)",
+                "title": "Jal Smaridhi(Gadchiroli)"
+              },
+              {
+                "id": "Jal Samradhi (Purnia)",
+                "title": "Jal Samradhi (Purnia)"
+              },
+              {
+                "id": "Shabri Mahamandal",
+                "title": "Shabri Mahamandal"
+              }
+            ]
+          },
+          {
+            "type": "TextInput",
+            "name": "location",
+            "label": "स्थान / Location",
+            "input-type": "text",
+            "helper-text": "गाँव/ब्लॉक/जिला — Village / block / district",
+            "required": true
+          },
+          {
+            "type": "Dropdown",
+            "name": "area_of_intervention",
+            "label": "गतिविधि / Activity",
+            "required": true,
+            "data-source": [
+              {
+                "id": "Community Mobilization",
+                "title": "Community Mobilization"
+              },
+              {
+                "id": "Beneficiary Training",
+                "title": "Beneficiary Training"
+              },
+              {
+                "id": "Beneficiary Exposure Visit",
+                "title": "Beneficiary Exposure Visit"
+              },
+              {
+                "id": "Beneficiary Input Distribution",
+                "title": "Beneficiary Input Distribution"
+              },
+              {
+                "id": "Camp & Convergence",
+                "title": "Camp & Convergence"
+              },
+              {
+                "id": "Collective Development",
+                "title": "Collective Development"
+              },
+              {
+                "id": "Documentation & Report",
+                "title": "Documentation & Report"
+              },
+              {
+                "id": "Donor Relations",
+                "title": "Donor Relations"
+              },
+              {
+                "id": "Enterprise Development Support",
+                "title": "Enterprise Development Support"
+              },
+              {
+                "id": "Input & Financial Linkage",
+                "title": "Input & Financial Linkage"
+              },
+              {
+                "id": "MIS & Analysis",
+                "title": "MIS & Analysis"
+              },
+              {
+                "id": "Any Other",
+                "title": "Any Other"
+              }
+            ]
+          },
+          {
+            "type": "TextInput",
+            "name": "beneficiaries",
+            "label": "लाभार्थी / People",
+            "input-type": "number",
+            "helper-text": "कितने लाभार्थी थे? How many beneficiaries were reached?",
+            "required": true
+          },
+          {
+            "type": "TextArea",
+            "name": "description",
+            "label": "विवरण / Description",
+            "helper-text": "आज की गतिविधि 1-2 वाक्यों में — Today's activity in 1-2 sentences",
+            "max-length": 600,
+            "required": true
+          },
           {
             "type": "Footer",
-            "label": "Submit",
+            "label": "जमा करें / Submit",
             "on-click-action": {
               "name": "complete",
               "payload": {
                 "project": "${form.project}",
-                "state": "${form.state}",
                 "location": "${form.location}",
                 "area_of_intervention": "${form.area_of_intervention}",
                 "beneficiaries": "${form.beneficiaries}",
