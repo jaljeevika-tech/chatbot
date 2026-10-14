@@ -1,16 +1,19 @@
 # WhatsApp form for field reports
 
-`field-report.flow.json` is a WhatsApp Flow (WhatsApp's built-in form screen) built
-from the "Field Report Collection" flow template: project, state, village, beneficiaries,
-an **Activity type** drop-down (the template's 5 options) and a description.
+`field-report.flow.json` is a WhatsApp Flow (WhatsApp's built-in form screen) that
+mirrors the Glific reporting flow "FieldFlow Daily Report" (`glific/fieldflow-report-flow.json`):
+the same 6 questions in the same order, with Project, State and Activity type as
+drop-downs carrying exactly the same options.
 
-Answer names match exactly what the report save step (`lib/waReportSubmit.js`) reads:
-`project`, `state`, `location`, `beneficiaries`, `area_of_intervention`, `description`.
-Activity type is saved in the report's `area_of_intervention` ("Area") column.
-Drop-down answers are the option's title (e.g. "Training / Workshop"), the same text
-the chat list step saved. To change the options, edit `data-source` and publish a new
-version in WhatsApp Manager. `lib/waReportSubmit.check.mjs` fails if the form's
-answer names drift from the save step.
+Answer names: `project`, `state`, `location`, `area_of_intervention`, `beneficiaries`,
+`description`. Both save steps accept them: `lib/waReportSubmit.js` (Meta flow →
+dashboard) reads them as-is, and the Glific save step (`routes/whatsapp.routes.js`)
+accepts `area_of_intervention` in place of its `area`. Activity type lands in the
+report's "Area of Intervention" column. Drop-down answers are the option text
+(e.g. "Community Mobilization"), the same text the Glific list saved. To change the
+options, edit `data-source` (and the Glific flow) and publish a new version in WhatsApp
+Manager. `lib/waReportSubmit.check.mjs` fails if the form's names or option lists drift
+from the save step or the Glific flow.
 
 Phone and name aren't form fields: the save step's webhook body supplies them as
 `"phone": "{{contact.wa_id}}"` and `"name": "{{contact.name}}"`.
@@ -44,8 +47,9 @@ Replace the chat questions in the Reporting flow with:
 
 - One screen holds up to 50 fields. A text box takes up to 80 characters by default,
   a long-text box up to 600. Field labels can be at most 20 characters.
-- A form without an endpoint (like this one) can't load per-organisation lists such as
-  project names. That's why Project is a typed field here, not a drop-down.
+- A form without an endpoint (like this one) can't load lists from the app, so the
+  Project/State/Activity options are written into the form. A new project means editing
+  the form and publishing a new version. Option titles can be at most 30 characters.
 - The form's own photo/document pickers allow up to 10 files (100 MB total) per submission.
   We collect files in chat instead, as agreed.
 - WhatsApp Forms are a Meta Cloud API feature; Glific connections don't send them.
