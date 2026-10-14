@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '../../../utils/apiFetch'
 import { authedDownload } from '../../../utils/authedDownload'
 import type { BeneficiaryProfileResponse } from '../../../types/beneficiaryProfile'
+import type { Answers, FormSchema } from '../../../../lib/odkForm'
 
 // Shared by the roster overlay and BeneficiaryPublicProfilePage (the QR landing page).
 export function useBeneficiaryProfile(uid: string) {
@@ -58,6 +59,27 @@ export async function updateBeneficiaryProfile(uid: string, updates: Record<stri
   }
   if (!r.ok) throw new Error(d.error || 'Could not save changes')
   return d
+}
+
+export interface ProfileEditForm { form: { form_key: string; title: string; version: number; schema: FormSchema }; answers: Answers }
+
+/** The org's published registration form, prefilled. null = none published (or XB-): use the flat editor. */
+export async function fetchProfileEditForm(uid: string): Promise<ProfileEditForm | null> {
+  const r = await apiFetch(`/api/beneficiary-profile/${encodeURIComponent(uid)}/form`)
+  if (r.status === 404) return null
+  const d = await r.json().catch(() => ({}))
+  if (!r.ok) throw new Error(d.error || `Could not load the form (HTTP ${r.status})`)
+  return d
+}
+
+export async function saveProfileEditForm(uid: string, data: Answers): Promise<void> {
+  const r = await apiFetch(`/api/beneficiary-profile/${encodeURIComponent(uid)}/form`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data }),
+  })
+  const d = await r.json().catch(() => ({}))
+  if (!r.ok) throw new Error(d.errors ? `${d.error} ${Object.entries(d.errors).map(([k, v]) => `${k}: ${v}`).join('; ')}` : d.error || `Could not save changes (HTTP ${r.status})`)
 }
 
 /**

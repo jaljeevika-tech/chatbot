@@ -6,6 +6,8 @@
 //
 //   GET  /api/beneficiary-profile/:uid                — full record + MIS + linked projects
 //   PUT  /api/beneficiary-profile/:uid                 — edit the master record's own fields (admin/superadmin only)
+//   GET  /api/beneficiary-profile/:uid/form            — published registration form + prefilled answers (admin)
+//   PUT  /api/beneficiary-profile/:uid/form            — save edits made through that form (admin)
 //   GET  /api/beneficiary-profile/:uid/export.pdf      — same record as a downloadable PDF
 //   PUT  /api/beneficiary-profile/:uid/projects        — replace the set of linked projects
 //   POST /api/beneficiary-profile/:uid/mis/:category   — add ONE intervention record directly
@@ -17,7 +19,10 @@ import { getPool } from '../db/pool.js'
 import { requireEditor, requireAdmin } from '../lib/routeGuards.js'
 import { buildBeneficiaryProfilePdf } from '../lib/beneficiaryProfilePdf.js'
 import { writeAudit } from '../lib/auditMiddleware.js'
-import { decryptRowInPlace, encryptMappedFields } from '../lib/piiCrypto.js'
+import { decryptRowInPlace, encryptMappedFields, PII_FIELD_MAP } from '../lib/piiCrypto.js'
+import { evaluateForm } from '../lib/odkForm.js'
+import { ENTITY_FORMS, defaultSchema } from '../lib/forms.js'
+import { PROFILE_ENTITY_BY_PREFIX, WriteError, entityColumns, profileAnswers, splitAnswers } from '../lib/entityWriters.js'
 
 const EXPORT_PURPOSES = ['dsr_fulfillment', 'field_verification', 'donor_report']
 
@@ -207,6 +212,96 @@ router.put('/beneficiary-profile/:uid', async (req, res) => {
     res.json(payload)
   } catch (e) {
     console.error('[beneficiary-profile PUT]', e.message)
+    res.status(500).json({ error: e.message })
+  }
+})
+
+// GET/PUT /api/beneficiary-profile/:uid/form
+// Edit an IB-/EB-/CB- record through the org's published registration form, so
+// the profile editor asks the same questions (labels, choices, skip logic,
+// custom fields) and applies the same rules as registering. Without a published
+// form the built-in one is used. 404 = XB-; the client then uses the flat editor above.
+// Photo/audio questions are archived here: archived answers pass through
+// evaluateForm untouched and the PUT keeps their stored values.
+async function publishedEditForm(pool, orgId, spec) {
+  const entity = PROFILE_ENTITY_BY_PREFIX[spec.normalizedUid.slice(0, 3)]
+  if (!entity) return null
+  // Not published in the builder (or forms migration 087 not run) → the built-in form.
+  let form = { form_key: entity, title: ENTITY_FORMS[entity], version: 0, schema: defaultSchema(entity) }
+  try {
+    const { rows } = await pool.query(
+      `SELECT f.form_key, f.title, v.version, v.schema
+         FROM forms f JOIN form_versions v ON v.id = f.current_version_id
+        WHERE f.org_id = $1 AND f.form_key = $2 AND f.archived_at IS NULL`, [orgId, entity])
+    if (rows[0]) form = rows[0]
+  } catch (e) {
+    if (e.code !== '42P01') throw e
+  }
+  const survey = form.schema.survey.map(r => (r.type === 'image' || r.type === 'audio' ? { ...r, archived: true } : r))
+  return { entity, form: { ...form, schema: { ...form.schema, survey } } }
+}
+
+router.get('/beneficiary-profile/:uid/form', async (req, res) => {
+  if (!requireAdmin(req, res)) return
+  try {
+    const pool = getPool()
+    const spec = beneficiaryLookupSpec(req.params.uid)
+    const edit = spec && await publishedEditForm(pool, req.user.orgId, spec)
+    if (!edit) return res.status(404).json({ error: 'No published registration form for this beneficiary type' })
+    const { rows } = await pool.query(`SELECT * FROM ${spec.table} WHERE org_id = $1 AND uid = $2`, [req.user.orgId, spec.normalizedUid])
+    if (!rows[0]) return res.status(404).json({ error: `No ${spec.type} found for UID "${spec.normalizedUid}"` })
+    decryptRowInPlace(spec.table, rows[0])
+    res.json({ form: edit.form, answers: profileAnswers(edit.entity, rows[0]) })
+  } catch (e) {
+    console.error('[beneficiary-profile GET form]', e.message)
+    res.status(500).json({ error: e.message })
+  }
+})
+
+router.put('/beneficiary-profile/:uid/form', async (req, res) => {
+  if (!requireAdmin(req, res)) return
+  const data = req.body?.data
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return res.status(400).json({ error: 'data must be an object' })
+  try {
+    const pool  = getPool()
+    const orgId = req.user.orgId
+    const spec  = beneficiaryLookupSpec(req.params.uid)
+    const edit  = spec && await publishedEditForm(pool, orgId, spec)
+    if (!edit) return res.status(404).json({ error: 'No published registration form for this beneficiary type' })
+    const { rows } = await pool.query(`SELECT * FROM ${spec.table} WHERE org_id = $1 AND uid = $2`, [orgId, spec.normalizedUid])
+    const existing = rows[0]
+    if (!existing) return res.status(404).json({ error: `No ${spec.type} found for UID "${spec.normalizedUid}"` })
+
+    const { schema } = edit.form
+    const { data: clean, errors } = evaluateForm(schema, data)
+    if (Object.keys(errors).length) return res.status(422).json({ error: 'Some answers are missing or invalid.', errors })
+    const { system, custom } = splitAnswers(edit.entity, clean)
+    const columns = entityColumns(edit.entity, system)
+
+    // Live custom questions take the new answers (a cleared one is removed);
+    // archived/photo answers and keys from older form versions are kept.
+    const live = new Set(schema.survey.filter(r => !r.archived && !r.system).map(r => r.name))
+    const customData = Object.fromEntries(Object.entries(existing.custom_data || {}).filter(([k]) => !live.has(k)))
+    for (const [k, v] of Object.entries(custom)) if (live.has(k)) customData[k] = v
+    columns.custom_data = customData
+
+    // encryptMappedFields treats a falsy value as empty, so pass 0 as '0'.
+    for (const k of Object.keys(PII_FIELD_MAP[spec.table] || {})) if (typeof columns[k] === 'number') columns[k] = String(columns[k])
+    const setEntries = Object.entries(encryptMappedFields(spec.table, columns))
+      .filter(([key]) => Object.prototype.hasOwnProperty.call(existing, key))
+    const setClause = setEntries.map(([key], i) => `"${key}" = $${i + 3}`).join(', ')
+    const values = setEntries.map(([, v]) => (v !== null && typeof v === 'object' ? JSON.stringify(v) : v))
+    try {
+      await pool.query(`UPDATE ${spec.table} SET ${setClause} WHERE org_id = $1 AND uid = $2`, [orgId, spec.normalizedUid, ...values])
+    } catch (e) {
+      // 23505 = the (org, phone hash, name) unique index from migration 070.
+      if (e.code === '23505') return res.status(409).json({ error: 'Another record is already registered with this name and contact number.' })
+      throw e
+    }
+    res.json(await loadFullProfile(pool, orgId, spec))
+  } catch (e) {
+    if (e instanceof WriteError) return res.status(e.status).json({ error: e.message })
+    console.error('[beneficiary-profile PUT form]', e.message)
     res.status(500).json({ error: e.message })
   }
 })

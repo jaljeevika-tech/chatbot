@@ -10,7 +10,9 @@ import type {
 import { inr, READONLY_DETAIL_FIELDS } from './helpers'
 import { DetailGrid, EditableDetailGrid } from './DetailGrids'
 import { MisTable, ResourceTable, ProjectChips } from './ProfileSections'
-import { updateBeneficiaryProfile } from './profileApi'
+import { updateBeneficiaryProfile, fetchProfileEditForm, saveProfileEditForm, type ProfileEditForm } from './profileApi'
+import { DynamicForm } from '../../forms/DynamicForm'
+import { evaluateForm, type Answers } from '../../../../lib/odkForm'
 
 // Also rendered read-only by BeneficiaryPublicProfilePage (the QR landing page),
 // which omits the edit props. `editable` (any editor) only gates adding
@@ -37,21 +39,58 @@ export function BeneficiaryProfileDetail({ data, uid, editable, onRecordAdded, c
     setDraft({ ...(data.profile as unknown as Record<string, unknown>) })
   }, [data.profile])
 
-  const startEdit = () => {
+  // When the org has published this type's registration form, Edit shows that
+  // form (same questions, choices and rules as registering); otherwise the flat grid.
+  const [editForm, setEditForm] = useState<ProfileEditForm | null>(null)
+  const [formAnswers, setFormAnswers] = useState<Answers>({})
+  const [showFormErrors, setShowFormErrors] = useState(false)
+
+  const startEdit = async () => {
+    if (!uid) return
     setDraft({ ...(data.profile as unknown as Record<string, unknown>) })
     setProfileSaveError(null)
-    setEditingProfile(true)
+    setShowFormErrors(false)
+    setSavingProfile(true)
+    try {
+      const f = await fetchProfileEditForm(uid)
+      setEditForm(f)
+      if (f) setFormAnswers(f.answers)
+      setEditingProfile(true)
+    } catch (e: any) {
+      setProfileSaveError(e.message || 'Could not open the editor')
+    } finally {
+      setSavingProfile(false)
+    }
   }
   const cancelEdit = () => {
     setDraft({ ...(data.profile as unknown as Record<string, unknown>) })
     setProfileSaveError(null)
+    setEditForm(null)
     setEditingProfile(false)
   }
   const saveProfile = async () => {
     if (!uid) return
+    let formData: Answers | null = null
+    if (editForm) {
+      const ev = evaluateForm(editForm.form.schema, formAnswers)
+      const count = Object.keys(ev.errors).length
+      if (count) {
+        setShowFormErrors(true)
+        setProfileSaveError(`${count} answer${count === 1 ? ' needs' : 's need'} attention.`)
+        return
+      }
+      formData = ev.data
+    }
     setSavingProfile(true)
     setProfileSaveError(null)
     try {
+      if (formData) {
+        await saveProfileEditForm(uid, formData)
+        setEditForm(null)
+        setEditingProfile(false)
+        onProfileSaved?.()
+        return
+      }
       // draft is a full copy of the profile; drop read-only fields before sending.
       const updates = { ...draft }
       for (const key of READONLY_DETAIL_FIELDS) delete updates[key]
@@ -74,11 +113,12 @@ export function BeneficiaryProfileDetail({ data, uid, editable, onRecordAdded, c
             <span style={{ fontSize: 11, fontWeight: 600, color: FF.textFaint }}>{data.misRecordCount} Intervention record{data.misRecordCount === 1 ? '' : 's'}</span>
             {canEditProfile && uid && !editingProfile && (
               <button
-                onClick={startEdit}
-                className="flex items-center gap-1.5 rounded-lg text-xs font-semibold shrink-0"
+                onClick={() => void startEdit()}
+                disabled={savingProfile}
+                className="flex items-center gap-1.5 rounded-lg text-xs font-semibold shrink-0 disabled:opacity-40"
                 style={{ padding: '6px 10px', background: FF.purple, color: '#fff' }}
               >
-                <Pencil className="w-3.5 h-3.5" /> Edit
+                {savingProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Pencil className="w-3.5 h-3.5" />} Edit
               </button>
             )}
             {editingProfile && (
@@ -107,7 +147,9 @@ export function BeneficiaryProfileDetail({ data, uid, editable, onRecordAdded, c
         {profileSaveError && (
           <div className="rounded-xl p-2.5 text-xs" style={{ marginBottom: 12, background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C' }}>{profileSaveError}</div>
         )}
-        {editingProfile
+        {editingProfile && editForm
+          ? <DynamicForm schema={editForm.form.schema} value={formAnswers} onChange={setFormAnswers} showErrors={showFormErrors} />
+          : editingProfile
           ? <EditableDetailGrid record={data.profile as unknown as Record<string, unknown>} draft={draft} onChange={(key, value) => setDraft(d => ({ ...d, [key]: value }))} />
           : <DetailGrid record={data.profile as unknown as Record<string, unknown>} />}
       </SectionCard>
