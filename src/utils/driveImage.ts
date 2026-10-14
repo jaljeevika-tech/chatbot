@@ -11,8 +11,14 @@ export function extractDriveFileId(url: string): string | null {
   return null
 }
 
-/** Drive share URL → <img>-friendly thumbnail URL (`sz` = max dimension). */
+/** WhatsApp report file stored by the server (routes/wa-reports.routes.js) — already an <img>-able link. */
+export function isWaMediaUrl(url: string): boolean {
+  return /^https?:\/\/[^/]+\/api\/wa\/media\/[0-9a-f-]{36}$/i.test(url || '')
+}
+
+/** Drive share URL → <img>-friendly thumbnail URL (`sz` = max dimension). WhatsApp report photos pass through. */
 export function getDriveThumbnailUrl(url: string, sz = 'w800'): string | null {
+  if (isWaMediaUrl(url)) return url
   const id = extractDriveFileId(url)
   if (!id) return null
   return `https://drive.google.com/thumbnail?id=${id}&sz=${sz}`

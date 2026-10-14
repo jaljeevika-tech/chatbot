@@ -255,6 +255,7 @@ router.get('/reports/daily', async (req, res) => {
       description:         r.description || '',
       beneficiaries:       r.beneficiaries,
       attachmentUrl:       r.attachment_url,
+      attachments:         Array.isArray(r.custom_data?.attachments) ? r.custom_data.attachments : [],
       source:              r.custom_data?.source === 'whatsapp-flow' ? 'whatsapp' : 'web',
       qualityFlag:         r.quality_flag,
       qualityConfidence:   r.quality_confidence,

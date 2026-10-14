@@ -19,6 +19,7 @@ async function fetchReportsFromDb(): Promise<DailyReport[] | null> {
       ...r,
       project: mergeProjectAlias(r.project || '', r.state, r.location),
       attachmentUrl: r.attachmentUrl && !/^https?:\/\//i.test(r.attachmentUrl) ? null : r.attachmentUrl,
+      attachments: (r.attachments || []).filter(a => /^https?:\/\//i.test(a?.url || '')),
     }));
   } catch (err) {
     console.error('Error fetching reports from database:', err);

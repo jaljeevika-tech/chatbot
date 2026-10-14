@@ -25,6 +25,7 @@ import { waClientFromConfig, runFlowFrom, processReply } from '../lib/flowEngine
 import { detectIntent, extractSlotValue, generateFallbackResponse } from '../lib/nlp.js'
 import { redact } from '../lib/contentModeration.js'
 import { handleApprovalReply } from '../lib/waApprovals.js'
+import { MAX_MEDIA_PER_REPORT } from '../lib/waReportSubmit.js'
 
 const router = Router()
 
@@ -332,6 +333,30 @@ async function handleWebhookEvent(event, pool, rawBody, sigHeader, { trusted = f
     const flowCtx  = { nodes, show_progress: !!session.flow_show_progress, name: session.flow_name }
     const nodeMap  = Object.fromEntries(nodes.map(n => [n.id, n]))
     const curNode  = nodeMap[session.current_node]
+
+    // Multi-file step: a gallery pick arrives as several near-simultaneous events,
+    // which the read-then-guarded-write below would drop. Append each file in one
+    // atomic UPDATE instead and stay on this step until a text reply (DONE).
+    if (curNode?.type === 'wait_input' && curNode.validation === 'media' && curNode.save_as &&
+        event.media && ['image', 'video', 'document'].includes(event.subType)) {
+      const item = { media_id: event.media.id, mime_type: event.media.mime_type || '', caption: event.media.caption || '' }
+      const path = [curNode.save_as]
+      const { rows } = await pool.query(
+        `UPDATE wa_sessions
+            SET collected = jsonb_set(collected, $2::text[],
+                  CASE WHEN jsonb_typeof(collected #> $2::text[]) = 'array' THEN collected #> $2::text[] ELSE '[]'::jsonb END || $3::jsonb),
+                updated_at = NOW()
+          WHERE id = $1
+            AND COALESCE(jsonb_array_length(CASE WHEN jsonb_typeof(collected #> $2::text[]) = 'array' THEN collected #> $2::text[] END), 0) < $4
+          RETURNING jsonb_array_length(collected #> $2::text[]) AS n`,
+        [session.id, path, JSON.stringify([item]), MAX_MEDIA_PER_REPORT]
+      )
+      const reply = rows.length
+        ? `📎 Got it (${rows[0].n}). Send more, or reply *DONE* when finished.`
+        : `📎 That's the maximum of ${MAX_MEDIA_PER_REPORT} files. Reply *DONE* to continue.`
+      await waClient.sendText(event.from, reply).catch(e => console.error('[wa] media ack failed:', e.message))
+      return
+    }
 
     let updatedCollected = processReply(curNode, event, session.collected)
     // Capture last raw text so a human_handoff node can include it in staff notify

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { X, MapPin, Briefcase, Users, Calendar, Tag, ExternalLink, ZoomIn, ImageOff, Sparkles, AlertTriangle, Languages, Loader2 } from 'lucide-react';
+import { X, MapPin, Briefcase, Users, Calendar, Tag, ExternalLink, ZoomIn, ImageOff, Sparkles, AlertTriangle, Languages, Loader2, FileText } from 'lucide-react';
 import type { DailyReport } from '../../types/report';
-import { getDriveThumbnailUrl, extractDriveFileId } from '../../utils/driveImage';
+import { getDriveThumbnailUrl, extractDriveFileId, isWaMediaUrl } from '../../utils/driveImage';
 import { apiFetch } from '../../utils/apiFetch';
 
 interface Props {
@@ -43,6 +43,8 @@ export function ReportDetailModal({ report: r, onClose }: Props) {
   const fullUrl    = driveFileId
     ? `https://lh3.googleusercontent.com/d/${driveFileId}`
     : thumbUrl;
+  const isWa  = isWaMediaUrl(r.attachmentUrl || '');
+  const files = r.attachments || [];
 
   // Fire-and-forget; never blocks the modal opening
   useEffect(() => {
@@ -150,7 +152,7 @@ export function ReportDetailModal({ report: r, onClose }: Props) {
                   className="flex items-center gap-1 text-xs text-white bg-black/50 hover:bg-black/70 px-2 py-1 rounded-full transition backdrop-blur-sm"
                 >
                   <ExternalLink className="w-3 h-3" />
-                  Drive
+                  {isWa ? 'Open' : 'Drive'}
                 </a>
               </div>
             </div>
@@ -200,8 +202,26 @@ export function ReportDetailModal({ report: r, onClose }: Props) {
                 className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 rounded-xl px-4 py-3 hover:bg-blue-100 transition"
               >
                 <ExternalLink className="w-4 h-4 shrink-0" />
-                Open in Google Drive
+                {isWa ? 'Open photo' : 'Open in Google Drive'}
               </a>
+            )}
+
+            {files.length > 1 && (
+              <div>
+                <dt className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">All files ({files.length})</dt>
+                <dd className="grid grid-cols-3 gap-2">
+                  {files.map(f => (
+                    <a key={f.url} href={f.url} target="_blank" rel="noopener noreferrer" title={f.caption || undefined}
+                       className="block aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-100">
+                      {f.mime_type.startsWith('image/')
+                        ? <img src={f.url} alt={f.caption || 'Report photo'} loading="lazy" className="w-full h-full object-cover" />
+                        : f.mime_type.startsWith('video/')
+                          ? <video src={f.url} muted preload="metadata" className="w-full h-full object-cover" />
+                          : <span className="w-full h-full flex flex-col items-center justify-center gap-1 text-xs text-gray-500"><FileText className="w-6 h-6" />PDF</span>}
+                    </a>
+                  ))}
+                </dd>
+              </div>
             )}
           </dl>
 
@@ -354,7 +374,7 @@ export function ReportDetailModal({ report: r, onClose }: Props) {
             className="absolute bottom-4 right-4 flex items-center gap-1.5 text-xs text-white bg-white/10 hover:bg-white/20 px-3 py-2 rounded-full transition backdrop-blur-sm"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            Open in Drive
+            {isWa ? 'Open original' : 'Open in Drive'}
           </a>
         </div>
       )}
