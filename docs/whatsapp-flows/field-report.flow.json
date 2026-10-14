@@ -37,10 +37,8 @@
                 "project": "${form.project}",
                 "state": "${form.state}",
                 "location": "${form.location}",
-                "village": "${form.location}",
                 "beneficiaries": "${form.beneficiaries}",
                 "area_of_intervention": "${form.area_of_intervention}",
-                "activity_type": "${form.area_of_intervention}",
                 "description": "${form.description}"
               }
             }
