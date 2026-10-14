@@ -31,6 +31,7 @@ function defaultNode(type: NodeType): FlowNode {
     case 'send_list':    return { ...base, header: 'Please select', text: 'Choose an option:', button_text: 'Select', section_title: 'Options', options: [{ id: '1', title: 'Option 1', description: '' }] }
     case 'send_buttons': return { ...base, text: 'Choose an option:', buttons: [{ id: '1', title: 'Yes' }, { id: '2', title: 'No' }] }
     case 'wait_input':   return { ...base, text: 'Please type your response:', save_as: 'response', validation: 'text' }
+    case 'send_form':    return { ...base, text: 'Tap the button below to fill in your report.', form_id: '', form_cta: 'Fill report', form_screen: 'REPORT', form_mode: 'published' }
     case 'condition':    return { ...base, variable: '', operator: 'equals', value: '' }
     case 'webhook':      return { ...base, url: '', method: 'POST', body: {}, headers: {} }
     case 'set_field':    return { ...base, field: '', value: '' }
@@ -55,6 +56,7 @@ function nodePreview(n: FlowNode): string {
     case 'send_list':    return `${n.options?.length ?? 0} options → ${n.save_as || '?'}`
     case 'send_buttons': return `${n.buttons?.length ?? 0} buttons → ${n.save_as || '?'}`
     case 'wait_input':   return `→ ${n.save_as || '?'} (${n.validation || 'text'})`
+    case 'send_form':    return `📝 Form ${n.form_id || '(no id)'}${n.form_mode === 'draft' ? ' (draft)' : ''}`
     case 'condition':    return `{{${n.variable}}} ${n.operator} "${n.value}"`
     case 'webhook':      return `${n.method || 'POST'} ${n.url?.slice(0, 32) || '(no url)'}`
     case 'set_field':    return `${n.field} = ${n.value}`
@@ -685,6 +687,7 @@ function NodeEditor({
               { value: 'number', label: 'Number only'  },
               { value: 'phone',  label: 'Phone number' },
               { value: 'image',  label: '📷 Photo only' },
+              { value: 'media',  label: '📎 Photos / videos / PDFs (several, then DONE)' },
             ]}
             onChange={v => onChange({ validation: v as any })}
           />
@@ -1004,6 +1007,29 @@ function NodeEditor({
         </>
       )
     }
+
+    case 'send_form':
+      return (
+        <>
+          <TextArea   label="Message Text" value={node.text || ''} onChange={v => onChange({ text: v })} placeholder="Tap the button below to fill in your report." />
+          <InputField label="WhatsApp Flow ID" value={node.form_id || ''} onChange={v => onChange({ form_id: v.replace(/\D/g, '') })} placeholder="From WhatsApp Manager → Flows" />
+          <div className="grid grid-cols-2 gap-2">
+            <InputField label="Button Text" value={node.form_cta || ''} onChange={v => onChange({ form_cta: v.slice(0, 30) })} placeholder="Fill report" />
+            <InputField label="First Screen ID" value={node.form_screen || ''} onChange={v => onChange({ form_screen: v })} placeholder="REPORT" />
+          </div>
+          <SelectField
+            label="Version"
+            value={node.form_mode || 'published'}
+            options={[
+              { value: 'published', label: 'Published' },
+              { value: 'draft',     label: 'Draft (testing only)' },
+            ]}
+            onChange={v => onChange({ form_mode: v as any })}
+          />
+          <p className="text-[10px] text-gray-400">Each form field's name becomes a variable, e.g. <code>{'{{project}}'}</code>. Template: docs/whatsapp-flows/field-report.flow.json.</p>
+          <NextSelect label="Next Node" value={node.next} options={nodeOptions} onChange={v => onChange({ next: v })} />
+        </>
+      )
 
     case 'recap_confirm':
       return (

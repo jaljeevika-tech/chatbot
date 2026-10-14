@@ -1,0 +1,38 @@
+{
+  "version": "5.0",
+  "screens": [
+    {
+      "id": "REPORT",
+      "title": "Field report",
+      "terminal": true,
+      "success": true,
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextInput", "name": "project",  "label": "Project",  "input-type": "text", "required": true },
+          { "type": "TextInput", "name": "state",    "label": "State",    "input-type": "text", "required": true },
+          { "type": "TextInput", "name": "location", "label": "Village / block", "input-type": "text", "required": true },
+          { "type": "TextInput", "name": "area_of_intervention", "label": "Area of work", "input-type": "text", "required": false },
+          { "type": "TextInput", "name": "beneficiaries", "label": "People reached", "input-type": "number", "required": false },
+          { "type": "TextArea",  "name": "description", "label": "What happened?", "max-length": 600, "required": true },
+          {
+            "type": "Footer",
+            "label": "Submit",
+            "on-click-action": {
+              "name": "complete",
+              "payload": {
+                "project": "${form.project}",
+                "state": "${form.state}",
+                "location": "${form.location}",
+                "area_of_intervention": "${form.area_of_intervention}",
+                "beneficiaries": "${form.beneficiaries}",
+                "description": "${form.description}"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

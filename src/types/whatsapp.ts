@@ -3,6 +3,7 @@ export type NodeType =
   | 'send_list'
   | 'send_buttons'
   | 'wait_input'
+  | 'send_form'
   | 'condition'
   | 'webhook'
   | 'set_field'
@@ -45,8 +46,13 @@ export interface FlowNode {
   buttons?:    ButtonOption[]
   // wait_input
   save_as?:    string
-  validation?: 'text' | 'number' | 'phone' | 'image'
+  validation?: 'text' | 'number' | 'phone' | 'image' | 'media'
   example?:    string   // shown to user as "_e.g. <example>_" after the prompt
+  // send_form — WhatsApp Flow (native form) built in WhatsApp Manager
+  form_id?:     string
+  form_cta?:    string
+  form_screen?: string
+  form_mode?:   'published' | 'draft'
   // condition
   variable?:   string
   operator?:   'equals' | 'contains' | 'starts_with' | 'not_empty' | 'is_number'
@@ -167,6 +173,7 @@ export const NODE_META: Record<NodeType, { label: string; icon: string; color: s
   send_list:    { label: 'List Selection', icon: '📋', color: '#8b5cf6' },
   send_buttons: { label: 'Button Choice',  icon: '🔘', color: '#6366f1' },
   wait_input:   { label: 'Wait for Input', icon: '✏️', color: '#f59e0b' },
+  send_form:    { label: 'WhatsApp Form',  icon: '📝', color: '#0d9488' },
   condition:    { label: 'Condition',      icon: '🔀', color: '#ec4899' },
   webhook:      { label: 'Webhook Call',   icon: '🌐', color: '#10b981' },
   set_field:    { label: 'Set Variable',   icon: '📌', color: '#14b8a6' },

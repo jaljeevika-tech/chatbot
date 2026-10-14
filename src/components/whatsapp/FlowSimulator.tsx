@@ -62,11 +62,11 @@ function evalCond(node: FlowNode, vars: Record<string, string>): boolean {
   }
 }
 
-function validateInput(text: string, kind?: 'text' | 'number' | 'phone' | 'image'): string | null {
+function validateInput(text: string, kind?: 'text' | 'number' | 'phone' | 'image' | 'media'): string | null {
   if (!text.trim()) return 'Please enter a value'
   if (kind === 'number' && isNaN(Number(text))) return 'Please enter a valid number'
   if (kind === 'phone' && !/^\+?[\d\s\-()]{7,}$/.test(text)) return 'Please enter a valid phone number'
-  if (kind === 'image') return '📷 Please send a photo (image upload not supported in the simulator — try it on real WhatsApp)'
+  if (kind === 'image' || kind === 'media') return '📷 Please send a photo (image upload not supported in the simulator — try it on real WhatsApp)'
   return null
 }
 
@@ -151,6 +151,9 @@ export function FlowSimulator({ flow, onClose }: Props) {
         const prompt = mkBot(interp(node.text || '', vars))
         return { msgs: [...msgs, prompt], vars, nodeId, waitFor: 'text', done: false }
       }
+
+      case 'send_form':
+        return run(node.next, [...msgs, mkBot(interp(node.text || '', vars)), mkSys(`📝 WhatsApp Form ${node.form_id || '?'} (opens on a real phone only — skipped)`)], vars)
 
       case 'condition': {
         const ok  = evalCond(node, vars)

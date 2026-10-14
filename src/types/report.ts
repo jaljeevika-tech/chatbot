@@ -10,6 +10,8 @@ export interface DailyReport {
   description: string;
   beneficiaries: number | string | null;
   attachmentUrl: string | null;
+  // Every file sent with a WhatsApp report (attachmentUrl is the first photo)
+  attachments?: { url: string; mime_type: string; caption?: string }[];
   source?: 'whatsapp' | 'web' | 'sheet';  // origin of submission
   // Data-correctness layer flags (server-populated; nullable for legacy rows)
   qualityFlag?: 'low_confidence' | 'needs_review' | 'photo_mismatch' | null;

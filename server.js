@@ -223,6 +223,7 @@ const PUBLIC_API_PATHS = [
 
 app.use('/api', (req, res, next) => {
   if (PUBLIC_API_PATHS.some(p => req.path === p)) return next()
+  if (req.method === 'GET' && req.path.startsWith('/wa/media/')) return next() // WA report files, unguessable id
   return requireAuth(req, res, next)
 })
 
