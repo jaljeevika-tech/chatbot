@@ -1,8 +1,14 @@
 # WhatsApp form for field reports
 
-`field-report.flow.json` is a WhatsApp Flow (WhatsApp's built-in form screen). It
-asks for the same six answers the chat questions used to ask, under the same names,
-so the report-save step (`lib/waReportSubmit.js`) gets the same data as before.
+`field-report.flow.json` is a WhatsApp Flow (WhatsApp's built-in form screen) built
+from the "Field Report Collection" flow template: project, state, village, beneficiaries,
+an **Activity type** drop-down (the template's 5 options) and a description.
+
+Answers come back under both naming styles, so either kind of save step works:
+`location` + `village`, and `area_of_intervention` + `activity_type` (same value).
+Drop-down answers are the option's title (e.g. "Training / Workshop"), the same text
+the chat list step saved. To change the options, edit `data-source` and publish a new
+version in WhatsApp Manager.
 
 ## Set up (once, in Meta WhatsApp Manager)
 

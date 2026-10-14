@@ -3,7 +3,7 @@
   "screens": [
     {
       "id": "REPORT",
-      "title": "Field report",
+      "title": "Field Activity Report",
       "terminal": true,
       "success": true,
       "data": {},
@@ -12,10 +12,22 @@
         "children": [
           { "type": "TextInput", "name": "project",  "label": "Project",  "input-type": "text", "required": true },
           { "type": "TextInput", "name": "state",    "label": "State",    "input-type": "text", "required": true },
-          { "type": "TextInput", "name": "location", "label": "Village / block", "input-type": "text", "required": true },
-          { "type": "TextInput", "name": "area_of_intervention", "label": "Area of work", "input-type": "text", "required": false },
-          { "type": "TextInput", "name": "beneficiaries", "label": "People reached", "input-type": "number", "required": false },
-          { "type": "TextArea",  "name": "description", "label": "What happened?", "max-length": 600, "required": true },
+          { "type": "TextInput", "name": "location", "label": "Village / location", "input-type": "text", "required": true },
+          { "type": "TextInput", "name": "beneficiaries", "label": "Beneficiaries met", "input-type": "number", "required": true },
+          {
+            "type": "Dropdown",
+            "name": "area_of_intervention",
+            "label": "Activity type",
+            "required": true,
+            "data-source": [
+              { "id": "Training / Workshop",   "title": "Training / Workshop",   "description": "Capacity building session" },
+              { "id": "Household Survey",      "title": "Household Survey",      "description": "Data collection" },
+              { "id": "Material Distribution", "title": "Material Distribution", "description": "Kit / input distribution" },
+              { "id": "Community Meeting",     "title": "Community Meeting",     "description": "SHG / village meeting" },
+              { "id": "Other Activity",        "title": "Other Activity",        "description": "Any other activity" }
+            ]
+          },
+          { "type": "TextArea", "name": "description", "label": "What happened?", "helper-text": "Briefly describe it in 2-3 sentences", "max-length": 600, "required": true },
           {
             "type": "Footer",
             "label": "Submit",
@@ -25,8 +37,10 @@
                 "project": "${form.project}",
                 "state": "${form.state}",
                 "location": "${form.location}",
-                "area_of_intervention": "${form.area_of_intervention}",
+                "village": "${form.location}",
                 "beneficiaries": "${form.beneficiaries}",
+                "area_of_intervention": "${form.area_of_intervention}",
+                "activity_type": "${form.area_of_intervention}",
                 "description": "${form.description}"
               }
             }
