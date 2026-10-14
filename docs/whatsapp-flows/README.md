@@ -2,8 +2,9 @@
 
 `field-report.flow.json` is a WhatsApp Flow (WhatsApp's built-in form screen) that
 mirrors the Glific reporting flow "FieldFlow Daily Report" (`glific/fieldflow-report-flow.json`),
-in Hindi + English, with Project and Activity type as drop-downs carrying exactly the
-same options.
+in Hindi + English. Project and Activity type are drop-downs with the dashboard's
+official lists (`CANONICAL_PROJECTS` / `CANONICAL_AREAS` in `src/utils/cleanReport.ts`):
+12 projects and 12 activities. The Glific flow's own lists are older and shorter.
 
 **State, name, phone and organisation are not asked**: they come from the worker's
 registration. The save step fills State from the WhatsApp contact field `state`
