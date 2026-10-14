@@ -1,11 +1,15 @@
 # WhatsApp form for field reports
 
 `field-report.flow.json` is a WhatsApp Flow (WhatsApp's built-in form screen) that
-mirrors the Glific reporting flow "FieldFlow Daily Report" (`glific/fieldflow-report-flow.json`):
-the same 6 questions in the same order, with Project, State and Activity type as
-drop-downs carrying exactly the same options.
+mirrors the Glific reporting flow "FieldFlow Daily Report" (`glific/fieldflow-report-flow.json`),
+in Hindi + English, with Project and Activity type as drop-downs carrying exactly the
+same options.
 
-Answer names: `project`, `state`, `location`, `area_of_intervention`, `beneficiaries`,
+**State, name, phone and organisation are not asked**: they come from the worker's
+registration. The save step fills State from the WhatsApp contact field `state`
+(`"state": "{{contact.state}}"`), so registration must save it under that name.
+
+Answer names: `project`, `location`, `area_of_intervention`, `beneficiaries`,
 `description`. Both save steps accept them: `lib/waReportSubmit.js` (Meta flow →
 dashboard) reads them as-is, and the Glific save step (`routes/whatsapp.routes.js`)
 accepts `area_of_intervention` in place of its `area`. Activity type lands in the
@@ -35,7 +39,7 @@ Replace the chat questions in the Reporting flow with:
 3. **Webhook Call** step to `/api/wa/reports/submit` with this body (files are attached automatically):
    ```json
    { "phone": "{{contact.wa_id}}", "name": "{{contact.name}}",
-     "project": "{{project}}", "state": "{{state}}", "location": "{{location}}",
+     "project": "{{project}}", "state": "{{contact.state}}", "location": "{{location}}",
      "beneficiaries": "{{beneficiaries}}", "area_of_intervention": "{{area_of_intervention}}",
      "description": "{{description}}" }
    ```

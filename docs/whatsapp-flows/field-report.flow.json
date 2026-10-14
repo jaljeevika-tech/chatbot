@@ -3,17 +3,18 @@
   "screens": [
     {
       "id": "REPORT",
-      "title": "Daily Field Report",
+      "title": "दैनिक रिपोर्ट / Daily Report",
       "terminal": true,
       "success": true,
       "data": {},
       "layout": {
         "type": "SingleColumnLayout",
         "children": [
+          { "type": "TextBody", "text": "आज की फील्ड रिपोर्ट भरें।\nPlease fill today's field report." },
           {
             "type": "Dropdown",
             "name": "project",
-            "label": "Project",
+            "label": "प्रोजेक्ट / Project",
             "required": true,
             "data-source": [
               { "id": "Dasara",                "title": "Dasara" },
@@ -25,28 +26,11 @@
               { "id": "Other / अन्य",          "title": "Other / अन्य" }
             ]
           },
-          {
-            "type": "Dropdown",
-            "name": "state",
-            "label": "State",
-            "required": true,
-            "data-source": [
-              { "id": "Bihar",          "title": "Bihar" },
-              { "id": "Jharkhand",      "title": "Jharkhand" },
-              { "id": "Uttar Pradesh",  "title": "Uttar Pradesh" },
-              { "id": "Madhya Pradesh", "title": "Madhya Pradesh" },
-              { "id": "Maharashtra",    "title": "Maharashtra" },
-              { "id": "Odisha",         "title": "Odisha" },
-              { "id": "West Bengal",    "title": "West Bengal" },
-              { "id": "Rajasthan",      "title": "Rajasthan" },
-              { "id": "Other / अन्य",   "title": "Other / अन्य" }
-            ]
-          },
-          { "type": "TextInput", "name": "location", "label": "Location", "input-type": "text", "helper-text": "Village / block / district — गाँव/ब्लॉक/जिला", "required": true },
+          { "type": "TextInput", "name": "location", "label": "स्थान / Location", "input-type": "text", "helper-text": "गाँव/ब्लॉक/जिला — Village / block / district", "required": true },
           {
             "type": "Dropdown",
             "name": "area_of_intervention",
-            "label": "Activity type",
+            "label": "गतिविधि / Activity",
             "required": true,
             "data-source": [
               { "id": "Community Mobilization",          "title": "Community Mobilization" },
@@ -61,16 +45,15 @@
               { "id": "Any Other",                       "title": "Any Other" }
             ]
           },
-          { "type": "TextInput", "name": "beneficiaries", "label": "Beneficiaries", "input-type": "number", "helper-text": "How many were reached? कितने लाभार्थी थे?", "required": true },
-          { "type": "TextArea", "name": "description", "label": "Activity description", "helper-text": "Describe today's activity in 1-2 sentences", "max-length": 600, "required": true },
+          { "type": "TextInput", "name": "beneficiaries", "label": "लाभार्थी / People", "input-type": "number", "helper-text": "कितने लाभार्थी थे? How many beneficiaries were reached?", "required": true },
+          { "type": "TextArea", "name": "description", "label": "विवरण / Description", "helper-text": "आज की गतिविधि 1-2 वाक्यों में — Today's activity in 1-2 sentences", "max-length": 600, "required": true },
           {
             "type": "Footer",
-            "label": "Submit",
+            "label": "जमा करें / Submit",
             "on-click-action": {
               "name": "complete",
               "payload": {
                 "project": "${form.project}",
-                "state": "${form.state}",
                 "location": "${form.location}",
                 "area_of_intervention": "${form.area_of_intervention}",
                 "beneficiaries": "${form.beneficiaries}",
