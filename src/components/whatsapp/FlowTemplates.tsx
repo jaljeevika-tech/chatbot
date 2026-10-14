@@ -59,6 +59,64 @@ const TEMPLATES: TemplateCard[] = [
     },
   },
 
+  // ── Daily Field Report (WhatsApp Form) ──────────────────────────────────────
+  // One native form (docs/whatsapp-flows/field-report.flow.json, published in
+  // WhatsApp Manager) instead of chat questions, then photos, then the in-app
+  // report save. State/name/phone come from registration, not the form.
+  {
+    id: 'daily_report_form',
+    name: 'Daily Field Report (WhatsApp Form)',
+    description: 'Field staff fill one Hindi + English form, then send photos. Saves to Reports.',
+    icon: '🗒️',
+    tags: ['field', 'reporting', 'form'],
+    flow: {
+      name: 'Daily Field Report',
+      description: 'WhatsApp Form report → photos → saved to Reports',
+      trigger_keywords: ['report', 'rept', 'रिपोर्ट'],
+      is_default: false,
+      is_active: false,
+      nodes: [
+        {
+          id: 'n1', type: 'send_form', node_label: 'Report form',
+          text: '🌾 FieldFlow में आपका स्वागत है!\nHello {{contact.name}} 👋\n\nआज की फील्ड रिपोर्ट जमा करने के लिए नीचे का फॉर्म भरें।\nPlease fill today\'s field report.',
+          form_id: '1857857831867732', form_cta: 'Fill report', form_screen: 'REPORT', form_mode: 'published',
+          next: 'n2',
+        },
+        {
+          id: 'n2', type: 'wait_input', node_label: 'Photos',
+          text: '📸 काम की फोटो भेजें (10 तक)।\nSend photos of the work (up to 10).',
+          save_as: 'files', validation: 'media',
+          next: 'n3',
+        },
+        {
+          id: 'n3', type: 'webhook', node_label: 'Save report',
+          method: 'POST',
+          url: '/api/wa/reports/submit',
+          body: {
+            phone: '{{contact.wa_id}}',
+            name: '{{contact.name}}',
+            project: '{{project}}',
+            state: '{{contact.state}}',
+            location: '{{location}}',
+            area_of_intervention: '{{area_of_intervention}}',
+            beneficiaries: '{{beneficiaries}}',
+            description: '{{description}}',
+          },
+          next: 'n4',
+          next_on_error: 'n5',
+        },
+        {
+          id: 'n4', type: 'end', node_label: 'Saved',
+          text: '🎉 *Report Saved!*\n\nआपकी रिपोर्ट सफलतापूर्वक जमा हो गई।\nYour report has been saved successfully.\n\n📋 Project: {{project}}\n🎯 Activity: {{area_of_intervention}}\n👥 Beneficiaries: {{beneficiaries}}\n\nशुक्रिया! Keep up the great work! 🌾\n\n_Send *REPORT* to submit another report._',
+        },
+        {
+          id: 'n5', type: 'end', node_label: 'Save failed',
+          text: '❌ *Something went wrong.*\n\nकुछ गलत हो गया। कृपया दोबारा कोशिश करें।\nPlease try again or contact your supervisor.\n\n_Send *REPORT* to try again._',
+        },
+      ],
+    },
+  },
+
   // ── Field Report Collection ───────────────────────────────────────────────
   {
     id: 'field_report',
