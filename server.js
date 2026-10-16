@@ -62,6 +62,7 @@ import creditGrantAccessRoutes from './routes/credit-grant-access.routes.js'
 import businessDevelopmentSupportRoutes from './routes/business-development-support.routes.js'
 import complianceSupportRoutes from './routes/compliance-support.routes.js'
 import campaignRoutes from './routes/campaign.routes.js'
+import misRecordDeleteRoutes from './routes/mis-record-delete.routes.js'
 import exposureVisitsRoutes from './routes/exposure-visits.routes.js'
 import communityMeetingRoutes from './routes/community-meeting.routes.js'
 import indicatorsRoutes   from './routes/indicators.routes.js'
@@ -270,6 +271,7 @@ app.use('/api', complianceSupportRoutes) // GET /compliance-support, POST /compl
 app.use('/api', campaignRoutes) // GET /campaign, POST /campaign/bulk-upload
 app.use('/api', exposureVisitsRoutes) // GET /exposure-visits, POST /exposure-visits/bulk-upload
 app.use('/api', communityMeetingRoutes) // GET /community-meeting, POST /community-meeting/bulk-upload
+app.use('/api', misRecordDeleteRoutes) // DELETE /mis-records/:kind/:id (admin) — any MIS sub-tab row
 app.use('/api', indicatorsRoutes)    // GET/POST/PUT /projects/:projectKey/indicators
 app.use('/api', dataSourcesRoutes)   // GET/POST/PUT /projects/:projectKey/data-sources, /mis-templates
 app.use('/api', misEntriesRoutes)    // GET/PUT /projects/:projectKey/mis-entries, workflow transitions, evidence
