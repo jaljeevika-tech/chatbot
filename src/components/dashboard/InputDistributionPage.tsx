@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import { Loader2, Upload } from 'lucide-react'
 import { useMisList } from '../../hooks/useMisList'
+import { MisDeleteButton, useIsAdmin } from './MisDeleteButton'
 import { FF } from '../../theme/colors'
 import { KpiTile } from '../ui/KpiTile'
 import { KpiGrid } from '../ui/KpiGrid'
@@ -72,6 +73,7 @@ export function InputDistributionPage({ projectKey }: { projectKey: string }) {
 
   const { data, loading, error, search, setSearch, page, setPage, reload } =
     useMisList<Data>('/api/input-distributions', { project_key: projectKey, beneficiary_type: dbType }, EMPTY)
+  const isAdmin = useIsAdmin()
 
   const handleUploaded = (saved: number, errors: UploadRowError[], duplicates: number, warnings: UploadRowWarning[]) => {
     setShowUpload(false)
@@ -161,20 +163,21 @@ export function InputDistributionPage({ projectKey }: { projectKey: string }) {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '120px 1fr 130px 1.2fr 100px 110px 1fr',
+                    gridTemplateColumns: `120px 1fr 130px 1.2fr 100px 110px 1fr${isAdmin ? ' 36px' : ''}`,
                     gap: 12, padding: '14px 22px', fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase',
                     color: FF.textFaint, borderBottom: `1px solid ${FF.borderSoft}`,
                   }}
                 >
                   <div>Beneficiary UID</div><div>Name</div><div>Contact No.</div>
                   <div>Input Distributed</div><div>Quantity</div><div>Date</div><div>Place</div>
+                  {isAdmin && <div />}
                 </div>
                 {data.rows.map(r => (
                   <div
                     key={r.id}
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: '120px 1fr 130px 1.2fr 100px 110px 1fr',
+                      gridTemplateColumns: `120px 1fr 130px 1.2fr 100px 110px 1fr${isAdmin ? ' 36px' : ''}`,
                       gap: 12, alignItems: 'center', padding: '13px 22px', borderBottom: `1px solid ${FF.borderFaint}`, fontSize: 13,
                     }}
                   >
@@ -185,6 +188,7 @@ export function InputDistributionPage({ projectKey }: { projectKey: string }) {
                     <div style={{ color: FF.textMuted, fontSize: 12 }}>{fmtQty(r)}</div>
                     <div style={{ color: FF.textMuted, fontSize: 12 }}>{fmtDate(r.distribution_date)}</div>
                     <div style={{ color: FF.textMuted, fontSize: 12 }}>{r.place || '—'}</div>
+                    {isAdmin && <MisDeleteButton kind="input-distributions" id={r.id} onDeleted={reload} />}
                   </div>
                 ))}
               </div>
@@ -205,6 +209,7 @@ export function InputDistributionPage({ projectKey }: { projectKey: string }) {
                     <div>Contact: {r.contact_no || '—'}</div>
                     <div>Place: {r.place || '—'}</div>
                   </div>
+                  {isAdmin && <div className="mt-2 flex justify-end"><MisDeleteButton kind="input-distributions" id={r.id} onDeleted={reload} /></div>}
                 </div>
               ))}
             </div>
