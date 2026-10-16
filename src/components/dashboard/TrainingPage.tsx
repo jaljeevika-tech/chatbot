@@ -5,7 +5,7 @@
 import { useState } from 'react'
 import { Loader2, Upload } from 'lucide-react'
 import { useMisList } from '../../hooks/useMisList'
-import { MisDeleteButton, useIsAdmin } from './MisDeleteButton'
+import { MisBulkDeleteBar, MisRowActions, MisSelectAll, useMisRowActions } from './MisDeleteButton'
 import { FF } from '../../theme/colors'
 import { KpiTile } from '../ui/KpiTile'
 import { KpiGrid } from '../ui/KpiGrid'
@@ -69,7 +69,8 @@ export function TrainingPage({ projectKey }: { projectKey: string }) {
 
   const { data, loading, error, search, setSearch, page, setPage, reload } =
     useMisList<Data>('/api/trainings', { project_key: projectKey, beneficiary_type: dbType }, EMPTY)
-  const isAdmin = useIsAdmin()
+  const rowActions = useMisRowActions('trainings', data.rows, reload)
+  const { isAdmin } = rowActions
 
   const handleUploaded = (saved: number, errors: UploadRowError[], duplicates: number, warnings: UploadRowWarning[]) => {
     setShowUpload(false)
@@ -152,6 +153,8 @@ export function TrainingPage({ projectKey }: { projectKey: string }) {
             </SectionCard>
           )}
 
+          {isAdmin && <MisBulkDeleteBar a={rowActions} />}
+
           <SectionCard noPadding>
             {/* md+: grid table; below md the rows render as cards instead */}
             <div className="hidden md:block" style={{ overflowX: 'auto' }}>
@@ -159,21 +162,21 @@ export function TrainingPage({ projectKey }: { projectKey: string }) {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: `120px 1fr 130px 1.2fr 110px 1fr${isAdmin ? ' 36px' : ''}`,
+                    gridTemplateColumns: `120px 1fr 130px 1.2fr 110px 1fr${isAdmin ? ' 64px' : ''}`,
                     gap: 12, padding: '14px 22px', fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase',
                     color: FF.textFaint, borderBottom: `1px solid ${FF.borderSoft}`,
                   }}
                 >
                   <div>Beneficiary UID</div><div>Name</div><div>Contact No.</div>
                   <div>Training Topic</div><div>Date</div><div>Place</div>
-                  {isAdmin && <div />}
+                  {isAdmin && <MisSelectAll a={rowActions} />}
                 </div>
                 {data.rows.map(r => (
                   <div
                     key={r.id}
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: `120px 1fr 130px 1.2fr 110px 1fr${isAdmin ? ' 36px' : ''}`,
+                      gridTemplateColumns: `120px 1fr 130px 1.2fr 110px 1fr${isAdmin ? ' 64px' : ''}`,
                       gap: 12, alignItems: 'center', padding: '13px 22px', borderBottom: `1px solid ${FF.borderFaint}`, fontSize: 13,
                     }}
                   >
@@ -183,7 +186,7 @@ export function TrainingPage({ projectKey }: { projectKey: string }) {
                     <div style={{ color: FF.textMuted }}>{r.training_topic}</div>
                     <div style={{ color: FF.textMuted, fontSize: 12 }}>{fmtDate(r.training_date)}</div>
                     <div style={{ color: FF.textMuted, fontSize: 12 }}>{r.place || '—'}</div>
-                    {isAdmin && <MisDeleteButton kind="trainings" id={r.id} onDeleted={reload} />}
+                    {isAdmin && <MisRowActions a={rowActions} id={r.id} />}
                   </div>
                 ))}
               </div>
@@ -204,7 +207,7 @@ export function TrainingPage({ projectKey }: { projectKey: string }) {
                     <div>Contact: {r.contact_no || '—'}</div>
                     <div>Place: {r.place || '—'}</div>
                   </div>
-                  {isAdmin && <div className="mt-2 flex justify-end"><MisDeleteButton kind="trainings" id={r.id} onDeleted={reload} /></div>}
+                  {isAdmin && <div className="mt-2 flex justify-end"><MisRowActions a={rowActions} id={r.id} /></div>}
                 </div>
               ))}
             </div>
