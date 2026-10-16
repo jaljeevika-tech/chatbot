@@ -271,7 +271,7 @@ app.use('/api', complianceSupportRoutes) // GET /compliance-support, POST /compl
 app.use('/api', campaignRoutes) // GET /campaign, POST /campaign/bulk-upload
 app.use('/api', exposureVisitsRoutes) // GET /exposure-visits, POST /exposure-visits/bulk-upload
 app.use('/api', communityMeetingRoutes) // GET /community-meeting, POST /community-meeting/bulk-upload
-app.use('/api', misRecordDeleteRoutes) // DELETE /mis-records/:kind/:id (admin) — any MIS sub-tab row
+app.use('/api', misRecordDeleteRoutes) // POST /mis-records/:kind/delete (admin) — one or many MIS sub-tab rows
 app.use('/api', indicatorsRoutes)    // GET/POST/PUT /projects/:projectKey/indicators
 app.use('/api', dataSourcesRoutes)   // GET/POST/PUT /projects/:projectKey/data-sources, /mis-templates
 app.use('/api', misEntriesRoutes)    // GET/PUT /projects/:projectKey/mis-entries, workflow transitions, evidence
