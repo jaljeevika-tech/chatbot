@@ -6,9 +6,8 @@ import { Loader2, Upload } from 'lucide-react'
 import { useMisList } from '../../hooks/useMisList'
 import { MisBulkDeleteBar, MisRowActions, MisSelectAll, useMisRowActions } from './MisDeleteButton'
 import { FF } from '../../theme/colors'
-import { KpiTile } from '../ui/KpiTile'
-import { KpiGrid } from '../ui/KpiGrid'
 import { SectionCard } from '../ui/SectionCard'
+import { MisTabDashboard } from './MisTabDashboard'
 import { UploadResultBanner, type UploadRowError } from '../ui/UploadResultBanner'
 import { UploadCommunityMeetingModal } from './UploadCommunityMeetingModal'
 
@@ -104,34 +103,18 @@ export function CommunityMeetingPage({ projectKey }: { projectKey: string }) {
         </div>
       ) : (
         <>
-          <KpiGrid cols={5}>
-            <KpiTile label="Total Meetings" value={data.kpis.total} />
-            <KpiTile label="Total Attendees" value={data.kpis.totalAttendees} />
-            <KpiTile label="Male" value={data.kpis.totalMale} />
-            <KpiTile label="Female" value={data.kpis.totalFemale} />
-            <KpiTile label="Children" value={data.kpis.totalChildren} />
-          </KpiGrid>
-
-          {data.purposeBreakdown.length > 0 && (
-            <SectionCard title="Top Purposes by Attendance">
-              <div className="flex flex-col gap-2.5">
-                {(() => {
-                  const maxVal = Math.max(...data.purposeBreakdown.map(t => t.attendees), 1)
-                  return data.purposeBreakdown.map(t => (
-                    <div key={t.label}>
-                      <div className="flex justify-between text-xs mb-1" style={{ color: FF.textMuted }}>
-                        <span>{t.label}</span>
-                        <span style={{ fontWeight: 600, color: FF.tealDark }}>{t.attendees} attendees · {t.total} meeting{t.total === 1 ? '' : 's'}</span>
-                      </div>
-                      <div style={{ height: 8, background: FF.borderSoft, borderRadius: 999 }}>
-                        <div style={{ height: 8, width: `${Math.max((t.attendees / maxVal) * 100, 3)}%`, background: FF.purple, borderRadius: 999, transition: 'width .3s' }} />
-                      </div>
-                    </div>
-                  ))
-                })()}
-              </div>
-            </SectionCard>
-          )}
+          <MisTabDashboard
+            kpis={[
+              { label: 'Total Meetings', value: data.kpis.total },
+              { label: 'Total Attendees', value: data.kpis.totalAttendees },
+              { label: 'Male', value: data.kpis.totalMale },
+              { label: 'Female', value: data.kpis.totalFemale },
+              { label: 'Children', value: data.kpis.totalChildren },
+            ]}
+            breakdownTitle="Top Purposes by Attendance"
+            valueLabel="Attendees"
+            breakdown={data.purposeBreakdown.map(t => ({ label: t.label, value: t.attendees, sub: `${t.total} meeting${t.total === 1 ? '' : 's'}` }))}
+          />
 
           {isAdmin && <MisBulkDeleteBar a={rowActions} />}
 
