@@ -7,9 +7,8 @@ import { Loader2, Upload } from 'lucide-react'
 import { useMisList } from '../../hooks/useMisList'
 import { MisBulkDeleteBar, MisRowActions, MisSelectAll, useMisRowActions } from './MisDeleteButton'
 import { FF } from '../../theme/colors'
-import { KpiTile } from '../ui/KpiTile'
-import { KpiGrid } from '../ui/KpiGrid'
 import { SectionCard } from '../ui/SectionCard'
+import { MisTabDashboard } from './MisTabDashboard'
 import { TabPill } from '../ui/TabPill'
 import { UploadResultBanner, type UploadRowError, type UploadRowWarning } from '../ui/UploadResultBanner'
 import { UploadComplianceSupportModal } from './UploadComplianceSupportModal'
@@ -124,34 +123,18 @@ export function ComplianceSupportPage({ projectKey }: { projectKey: string }) {
         </div>
       ) : (
         <>
-          <KpiGrid cols={5}>
-            <KpiTile label="Total (this tab)" value={data.kpis.total} />
-            <KpiTile label="Unique Beneficiaries" value={data.kpis.uniqueBeneficiaries} />
-            <KpiTile label="Individual" value={data.kpis.individual} />
-            <KpiTile label="Micro-Entrepreneurs" value={data.kpis.entrepreneur} />
-            <KpiTile label="Collective" value={data.kpis.collective} />
-          </KpiGrid>
-
-          {data.supportBreakdown.length > 0 && (
-            <SectionCard title="Top Compliance Support Types">
-              <div className="flex flex-col gap-2.5">
-                {(() => {
-                  const maxVal = Math.max(...data.supportBreakdown.map(t => t.total), 1)
-                  return data.supportBreakdown.map(t => (
-                    <div key={t.label}>
-                      <div className="flex justify-between text-xs mb-1" style={{ color: FF.textMuted }}>
-                        <span>{t.label}</span>
-                        <span style={{ fontWeight: 600, color: FF.tealDark }}>{t.total}</span>
-                      </div>
-                      <div style={{ height: 8, background: FF.borderSoft, borderRadius: 999 }}>
-                        <div style={{ height: 8, width: `${Math.max((t.total / maxVal) * 100, 3)}%`, background: FF.purple, borderRadius: 999, transition: 'width .3s' }} />
-                      </div>
-                    </div>
-                  ))
-                })()}
-              </div>
-            </SectionCard>
-          )}
+          <MisTabDashboard
+            kpis={[
+              { label: 'Total (this tab)', value: data.kpis.total },
+              { label: 'Unique Beneficiaries', value: data.kpis.uniqueBeneficiaries },
+              { label: 'Individual', value: data.kpis.individual },
+              { label: 'Micro-Entrepreneurs', value: data.kpis.entrepreneur },
+              { label: 'Collective', value: data.kpis.collective },
+            ]}
+            breakdownTitle="Top Compliance Support Types"
+            valueLabel="Records"
+            breakdown={data.supportBreakdown.map(t => ({ label: t.label, value: t.total }))}
+          />
 
           {isAdmin && <MisBulkDeleteBar a={rowActions} />}
 

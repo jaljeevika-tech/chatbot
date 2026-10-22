@@ -7,9 +7,8 @@ import { Loader2, Upload } from 'lucide-react'
 import { useMisList } from '../../hooks/useMisList'
 import { MisBulkDeleteBar, MisRowActions, MisSelectAll, useMisRowActions } from './MisDeleteButton'
 import { FF } from '../../theme/colors'
-import { KpiTile } from '../ui/KpiTile'
-import { KpiGrid } from '../ui/KpiGrid'
 import { SectionCard } from '../ui/SectionCard'
+import { MisTabDashboard } from './MisTabDashboard'
 import { TabPill } from '../ui/TabPill'
 import { UploadResultBanner, type UploadRowError, type UploadRowWarning } from '../ui/UploadResultBanner'
 import { UploadIncomeModal } from './UploadIncomeModal'
@@ -124,34 +123,19 @@ export function IncomePage({ projectKey }: { projectKey: string }) {
         </div>
       ) : (
         <>
-          <KpiGrid cols={5}>
-            <KpiTile label="Total (this tab)" value={data.kpis.total} />
-            <KpiTile label="Unique Beneficiaries" value={data.kpis.uniqueBeneficiaries} />
-            <KpiTile label="Income Realised" value={fmtInr(data.kpis.totalIncome)} />
-            <KpiTile label="Individual" value={data.kpis.individual} />
-            <KpiTile label="Micro-Entrepreneurs" value={data.kpis.entrepreneur} />
-          </KpiGrid>
-
-          {data.sourceBreakdown.length > 0 && (
-            <SectionCard title="Income by Source">
-              <div className="flex flex-col gap-2.5">
-                {(() => {
-                  const maxVal = Math.max(...data.sourceBreakdown.map(s => s.amount), 1)
-                  return data.sourceBreakdown.map(s => (
-                    <div key={s.label}>
-                      <div className="flex justify-between text-xs mb-1" style={{ color: FF.textMuted }}>
-                        <span>{s.label} <span style={{ color: FF.textFaint }}>({s.total})</span></span>
-                        <span style={{ fontWeight: 600, color: FF.tealDark }}>{fmtInr(s.amount)}</span>
-                      </div>
-                      <div style={{ height: 8, background: FF.borderSoft, borderRadius: 999 }}>
-                        <div style={{ height: 8, width: `${Math.max((s.amount / maxVal) * 100, 3)}%`, background: FF.purple, borderRadius: 999, transition: 'width .3s' }} />
-                      </div>
-                    </div>
-                  ))
-                })()}
-              </div>
-            </SectionCard>
-          )}
+          <MisTabDashboard
+            kpis={[
+              { label: 'Total (this tab)', value: data.kpis.total },
+              { label: 'Unique Beneficiaries', value: data.kpis.uniqueBeneficiaries },
+              { label: 'Income Realised', value: fmtInr(data.kpis.totalIncome) },
+              { label: 'Individual', value: data.kpis.individual },
+              { label: 'Micro-Entrepreneurs', value: data.kpis.entrepreneur },
+            ]}
+            breakdownTitle="Income by Source"
+            valueLabel="Income"
+            formatValue={fmtInr}
+            breakdown={data.sourceBreakdown.map(s => ({ label: s.label, value: s.amount, sub: `${s.total} record${s.total === 1 ? '' : 's'}` }))}
+          />
 
           {isAdmin && <MisBulkDeleteBar a={rowActions} />}
 
