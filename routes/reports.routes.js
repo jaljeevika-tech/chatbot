@@ -1050,7 +1050,15 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   'docs.google.com',
 ])
 
-function isAllowedImageUrl(raw) {
+// Our own WhatsApp report photos (db/migrations/091_wa_report_media.sql). Not on
+// a Google host, so without this every WA photo was dropped from Word exports,
+// slide decks, video overviews and social-post vision. The uuid alone is the
+// capability (same as the public /api/wa/media route), so the host isn't checked —
+// nothing is ever fetched from it, the bytes come from our own table.
+const WA_MEDIA_RE = /^https?:\/\/[^/]+\/api\/wa\/media\/([0-9a-f-]{36})$/i
+
+export function isAllowedImageUrl(raw) {
+  if (WA_MEDIA_RE.test(String(raw))) return true
   try {
     const u = new URL(raw)
     if (u.protocol !== 'https:') return false
@@ -1064,6 +1072,13 @@ function isAllowedImageUrl(raw) {
 // re-checking every hop against the allowlist (Drive thumbnails 302 to
 // googleusercontent; an unchecked auto-follow could land on an internal host).
 async function fetchAllowedImage(url, opts = {}) {
+  // Our own file — read the bytes from the table instead of fetching ourselves.
+  const waId = String(url).match(WA_MEDIA_RE)?.[1]
+  if (waId) {
+    const { rows } = await getPool().query('SELECT mime_type, data FROM wa_report_media WHERE id = $1', [waId])
+    if (!rows.length || !rows[0].mime_type.startsWith('image/')) return null
+    return new Response(rows[0].data, { headers: { 'Content-Type': rows[0].mime_type } })
+  }
   let current = url
   for (let hop = 0; hop <= 3; hop++) {
     if (!isAllowedImageUrl(current)) return null
