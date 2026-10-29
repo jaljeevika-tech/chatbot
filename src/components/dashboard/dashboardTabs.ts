@@ -22,11 +22,13 @@ export function tabFromHash(): AnyTabKey | null {
 // Tabs whose body reads the Sheets/DB report list (ReportContext). Only these
 // wait on the report sync; every other tab fetches its own data and renders
 // immediately. 'settings' is here because User Management calls
-// refreshReports() and relies on the remount that the loader causes.
+// refreshReports() and relies on the remount that the loader causes. 'media'
+// pages its photos from /api/media but its FilterBar options still come from
+// the report list.
 export const REPORT_TABS: ReadonlySet<AnyTabKey> = new Set<AnyTabKey>([
   'overview', 'reports', 'media', 'impact', 'toc', 'notebook', 'analytics', 'settings', 'content-hub',
   'generate-report', 'story-finder', 'project-report-picker', 'case-study-picker', 'org-report-picker',
-  'self-report-picker', 'team-report-picker', 'impact-report-picker', 'content-picker', 'projectmedia',
+  'self-report-picker', 'team-report-picker', 'impact-report-picker', 'content-picker',
 ]);
 
 export const TAB_MODULES = {
