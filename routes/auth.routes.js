@@ -76,19 +76,26 @@ router.post('/auth/sheet-login', loginLimiter, async (req, res) => {
   // One message for every failure, so users/orgs can't be enumerated
   const DENIED = 'Invalid credentials.'
   try {
-    const { phone, password, orgSlug } = req.body || {}
-    // orgSlug is required — no default tenant
-    if (!phone || !password || !orgSlug) {
+    const { phone, password, orgSlug, platform } = req.body || {}
+    // orgSlug is required — no default tenant. The one exception: the platform sign-in
+    // (superadmin.fieldimpact.in) finds a superadmin by phone across orgs.
+    if (!phone || !password || (!orgSlug && !platform)) {
       return res.status(400).json({ error: 'phone, password and orgSlug are required' })
     }
 
     const target = normPhone(phone)
 
     const pool = getPool()
-    const { rows: orgRows } = await pool.query(
+    const { rows: orgRows } = orgSlug
       // Case-insensitive: login links get typed and shared by hand (?org=pratham vs Pratham).
-      'SELECT id, slug, metadata FROM organizations WHERE lower(slug) = lower($1) ORDER BY (slug = $1) DESC LIMIT 1', [orgSlug]
-    )
+      ? await pool.query(
+          'SELECT id, slug, metadata FROM organizations WHERE lower(slug) = lower($1) ORDER BY (slug = $1) DESC LIMIT 1', [orgSlug]
+        )
+      // Only a row with the superadmin role can match here, so this never opens an org user's account.
+      : await pool.query(
+          `SELECT o.id, o.slug, o.metadata FROM users u JOIN organizations o ON o.id = u.org_id
+            WHERE u.phone = $1 AND lower(u.role) = 'superadmin' LIMIT 1`, [target]
+        )
     if (!orgRows.length) return res.status(403).json({ error: DENIED })
     const org = orgRows[0]
     const orgId = org.id
