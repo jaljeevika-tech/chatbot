@@ -1058,7 +1058,7 @@ export function DashboardPage() {
               <ReportCardGrid reports={filteredReports} filters={filters} />
             )}
             {activeTab === 'media' && (
-              <MediaLibraryTab reports={filteredReports} />
+              <MediaLibraryTab filters={filters} />
             )}
             {activeTab === 'impact' && canImpact && (
               <ImpactDashboard
@@ -1134,10 +1134,8 @@ export function DashboardPage() {
             {activeTab === 'projectmedia' && selectedProjectKey && (
               <ErrorBoundary key={`${activeTab}:${selectedProjectKey ?? ''}`}>
                 <MediaLibraryTab
-                  reports={baseReports.filter(r =>
-                    r.project.trim().toLowerCase() === (selectedProject?.name ?? '').trim().toLowerCase()
-                  )}
                   projectKey={selectedProjectKey}
+                  projectName={selectedProject?.name ?? ''}
                 />
               </ErrorBoundary>
             )}

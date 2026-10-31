@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ImageOff, MapPin, Tag, Calendar, User, Briefcase, ExternalLink, Search, Download, MessageCircle, FileSpreadsheet,
-  Upload, Loader2, FileText, Music, Video as VideoIcon, File as FileIcon, Trash2, Sparkles,
+  Upload, Loader2, FileText, Music, Video as VideoIcon, File as FileIcon, Trash2, Sparkles, AlertCircle,
 } from 'lucide-react';
-import type { DailyReport } from '../../types/report';
+import type { ActiveFilters, DailyReport } from '../../types/report';
 import { getDriveThumbnailUrl, getDriveDownloadUrl } from '../../utils/driveImage';
 import { useLanguage } from '../../context/LanguageContext';
 import { apiFetch } from '../../utils/apiFetch';
@@ -12,9 +12,18 @@ import { useOrg } from '../../context/OrgContext';
 import { DEFAULT_REPORT_CATEGORIES } from './ReportCategoriesSettings';
 
 interface Props {
-  reports: DailyReport[];
+  /** Media tab: the dashboard filter bar's selection. */
+  filters?: ActiveFilters;
   projectKey?: string;
+  /** Project Media tab: only this project's field-report photos (dashboard filters don't apply). */
+  projectName?: string;
 }
+
+// One field-report photo as GET /api/media returns it.
+type MediaItem = Pick<DailyReport,
+  'id' | 'timestamp' | 'name' | 'state' | 'location' | 'project' | 'areaOfIntervention' | 'description' | 'attachmentUrl' | 'source'>
+
+const PAGE_SIZE = 48
 
 type UploadedMediaType = 'image' | 'video' | 'audio' | 'pdf' | 'other'
 
@@ -129,11 +138,18 @@ function UploadedMediaCard({ projectKey, item, onDeleted }: { projectKey: string
   )
 }
 
-export function MediaLibraryTab({ reports, projectKey }: Props) {
+export function MediaLibraryTab({ filters, projectKey, projectName }: Props) {
   const { t } = useLanguage()
   const { org } = useOrg()
   const categories = org?.reportCategories?.length ? org.reportCategories : DEFAULT_REPORT_CATEGORIES
+  const [items, setItems] = useState<MediaItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [offset, setOffset] = useState(0)
+  // Starts true so the empty state doesn't flash before the first page arrives.
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [uploadedMedia, setUploadedMedia] = useState<UploadedMedia[]>([])
   const [loadingUploaded, setLoadingUploaded] = useState(!!projectKey)
   const [categoryFilter, setCategoryFilter] = useState('')
@@ -232,24 +248,69 @@ export function MediaLibraryTab({ reports, projectKey }: Props) {
     }
   }
 
-  const mediaItems = useMemo(() => {
-    return reports
-      .filter(r => r.attachmentUrl)
-      .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-  }, [reports]);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300)
+    return () => clearTimeout(timer)
+  }, [search])
 
-  const filteredMedia = useMemo(() => {
-    if (!search.trim()) return mediaItems;
-    const s = search.toLowerCase();
-    return mediaItems.filter(r => 
-      r.project.toLowerCase().includes(s) ||
-      r.location.toLowerCase().includes(s) ||
-      r.name.toLowerCase().includes(s) ||
-      r.areaOfIntervention.toLowerCase().includes(s) ||
-      r.description.toLowerCase().includes(s) ||
-      (r.source ?? 'sheet').toLowerCase().includes(s)
-    );
-  }, [mediaItems, search]);
+  // Everything but paging, as a string so a re-rendered parent passing an equal
+  // filters object doesn't refetch.
+  const filterQuery = useMemo(() => {
+    const params = new URLSearchParams()
+    if (debouncedSearch) params.set('search', debouncedSearch)
+    if (projectName !== undefined) {
+      params.append('project', projectName)
+    } else if (filters) {
+      filters.project.forEach(v => params.append('project', v))
+      filters.state.forEach(v => params.append('state', v))
+      filters.area.forEach(v => params.append('area', v))
+      filters.workerName.forEach(v => params.append('workerName', v))
+      if (filters.dateFrom) params.set('dateFrom', filters.dateFrom)
+      if (filters.dateTo)   params.set('dateTo', filters.dateTo)
+    }
+    return params.toString()
+  }, [debouncedSearch, projectName, filters])
+
+  // The Project Media tab mounts before the project list has loaded; an empty name
+  // would read as "no project filter" and show the whole org's photos.
+  const ready = projectName === undefined || projectName.trim() !== ''
+
+  // Only the latest request may update state, so a slow page for an old search
+  // can't land on top of the new one.
+  const requestIdRef = useRef(0)
+  const fetchPage = useCallback(async (newOffset: number, replace: boolean) => {
+    const requestId = ++requestIdRef.current
+    setLoading(true)
+    setLoadError(null)
+    if (replace) { setItems([]); setTotal(0) }
+    try {
+      const params = new URLSearchParams(filterQuery)
+      params.set('limit', String(PAGE_SIZE))
+      params.set('offset', String(newOffset))
+      const res = await apiFetch(`/api/media?${params.toString()}`)
+      if (!res.ok) throw new Error(`Couldn't load photos (${res.status})`)
+      const data: { items: MediaItem[]; total: number } = await res.json()
+      if (requestId !== requestIdRef.current) return
+      // The server re-reads the sheet every 30s; drop any row a shifted page repeats.
+      setItems(prev => {
+        if (replace) return data.items
+        const seen = new Set(prev.map(r => r.id))
+        return [...prev, ...data.items.filter(r => !seen.has(r.id))]
+      })
+      setTotal(data.total)
+      setOffset(newOffset + PAGE_SIZE)
+    } catch (err: any) {
+      if (requestId === requestIdRef.current) setLoadError(err.message || "Couldn't load photos")
+    } finally {
+      if (requestId === requestIdRef.current) setLoading(false)
+    }
+  }, [filterQuery])
+
+  useEffect(() => {
+    if (ready) fetchPage(0, true)
+  }, [fetchPage, ready])
+
+  const noMediaAtAll = !loading && !loadError && total === 0 && !debouncedSearch
 
   return (
     <div className="space-y-6">
@@ -311,7 +372,7 @@ export function MediaLibraryTab({ reports, projectKey }: Props) {
         </div>
       )}
 
-      {mediaItems.length === 0 ? (
+      {noMediaAtAll ? (
         <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
           <ImageOff className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500 font-medium">{t.mlNoMedia}</p>
@@ -331,16 +392,25 @@ export function MediaLibraryTab({ reports, projectKey }: Props) {
           />
         </div>
 
-        {filteredMedia.length === 0 && (
+        {loadError && (
+          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-600">
+            <span className="flex items-center gap-2"><AlertCircle className="w-4 h-4 shrink-0" />{loadError}</span>
+            <button onClick={() => fetchPage(items.length ? offset : 0, items.length === 0)} className="text-xs font-bold underline">
+              Retry
+            </button>
+          </div>
+        )}
+
+        {!loading && !loadError && total === 0 && debouncedSearch && (
           <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-gray-200">
             <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 font-medium">No photos match "{search}"</p>
+            <p className="text-gray-500 font-medium">No photos match "{debouncedSearch}"</p>
             <p className="text-sm text-gray-400 mt-1">Try a different keyword or clear the search.</p>
           </div>
         )}
 
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-        {filteredMedia.map((r) => {
+        {items.map((r) => {
           const thumb = getDriveThumbnailUrl(r.attachmentUrl!, 'w800');
           const downloadUrl = getDriveDownloadUrl(r.attachmentUrl!) || r.attachmentUrl!;
           const isWhatsapp = r.source === 'whatsapp';
@@ -424,7 +494,33 @@ export function MediaLibraryTab({ reports, projectKey }: Props) {
             </div>
           );
         })}
+        {loading && items.length === 0 && Array.from({ length: 6 }, (_, i) => (
+          <div key={i} className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col animate-pulse">
+            <div className="aspect-[4/3] bg-gray-100" />
+            <div className="p-3 sm:p-4 space-y-2.5 sm:space-y-3">
+              <div className="h-3 w-2/3 bg-gray-100 rounded-full" />
+              <div className="h-3 w-1/2 bg-gray-100 rounded-full" />
+              <div className="h-3 w-1/3 bg-gray-100 rounded-full" />
+            </div>
+          </div>
+        ))}
         </div>
+
+        {items.length > 0 && (items.length < total ? (
+          <div className="flex flex-col items-center gap-2 pt-2">
+            <button
+              onClick={() => fetchPage(offset, false)}
+              disabled={loading}
+              className="flex items-center gap-2 text-xs font-bold px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 shadow-sm transition-all hover:shadow-md disabled:opacity-60"
+            >
+              {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {loading ? 'Loading…' : 'Load more'}
+            </button>
+            <p className="text-[11px] text-gray-400">Showing {items.length} of {total} photos</p>
+          </div>
+        ) : (
+          <p className="text-center text-[11px] text-gray-400 pt-2">All photos loaded ({total})</p>
+        ))}
       </div>
       )}
 

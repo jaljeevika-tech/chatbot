@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '../utils/apiFetch'
 import { useReportContext } from '../context/ReportContext'
 import type { DailyReport } from '../types/report'
-import { mergeProjectAlias } from '../utils/cleanReport'
+import { mergeProjectAlias } from '../../lib/cleanReport'
 
 // Renamed projects whose project_key (trailing "-<year>" stripped) shares nothing with the
 // short name field workers pick in the report form.

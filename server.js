@@ -252,7 +252,7 @@ app.use('/api', budgetUtilisationRoutes)   // GET/POST/PUT/DELETE /action-plans/
 app.use('/api', aiExtractRoutes)   // POST /ai-extract/action-plan|budget-utilisation|annual-progress
 app.use('/api', documentsRoutes)    // GET/POST/DELETE /projects/:projectKey/documents
 app.use('/api', notebooksRoutes)    // GET/POST/PATCH/DELETE /notebooks — saved "Ask AI" notebook persistence
-app.use('/api', mediaRoutes)         // GET/POST/DELETE /projects/:projectKey/media (uploaded video/audio/pictures/PDFs)
+app.use('/api', mediaRoutes)         // GET /media (field-report photos, paginated), GET/POST/DELETE /projects/:projectKey/media (uploaded video/audio/pictures/PDFs)
 app.use('/api', beneficiariesRoutes) // GET/POST/PUT/DELETE /projects/:projectKey/beneficiaries
 app.use('/api', beneficiaryMisRoutes) // GET/POST/DELETE /projects/:projectKey/beneficiary-mis
 app.use('/api', individualBeneficiariesRoutes) // GET /individual-beneficiaries, GET/POST /individual-beneficiaries/registration-link(/rotate)

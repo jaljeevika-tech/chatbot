@@ -4,7 +4,7 @@ import { fetchReportsFromSheet } from '../utils/googleSheets';
 import { fetchUsersFromSheet, type UserRow } from '../utils/authSheet';
 import { useOrg } from './OrgContext';
 import { apiFetch } from '../utils/apiFetch';
-import { mergeProjectAlias } from '../utils/cleanReport';
+import { mergeProjectAlias } from '../../lib/cleanReport';
 
 // WhatsApp / Quick Report submissions land in daily_reports; merged with the Sheet rows.
 async function fetchReportsFromDb(): Promise<DailyReport[] | null> {

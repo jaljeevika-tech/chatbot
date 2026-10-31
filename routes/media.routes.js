@@ -8,13 +8,19 @@
 //   POST   /api/projects/:projectKey/media/suggest-category        — AI category suggestion for a not-yet-uploaded file
 //   GET    /api/projects/:projectKey/media/:id/content             — raw file bytes (view/download)
 //   DELETE /api/projects/:projectKey/media/:id                     — delete
+//
+// Plus the field-report photos (Sheet + daily_reports attachments) the Media tab pages through:
+//   GET    /api/media?limit=&offset=&search=&project=&state=&area=&workerName=&dateFrom=&dateTo=
 
 import { Router } from 'express'
+import Papa from 'papaparse'
 import { getPool } from '../db/pool.js'
-import { requireEditor } from '../lib/routeGuards.js'
+import { requireAuth, requireEditor } from '../lib/routeGuards.js'
 import { suggestMediaCategory } from '../lib/nlp.js'
 import { getOrgMeta } from '../lib/orgMetaCache.js'
 import { isDangerousMime, isInlineSafeMime, safeServingContentType } from '../lib/fileSafety.js'
+import { normPhone } from '../lib/sheets.js'
+import { cleanReports, mergeProjectAlias, sheetRowToReport } from '../lib/cleanReport.js'
 
 const router = Router()
 const MEDIA_TYPES = ['image', 'video', 'audio', 'pdf', 'other']
@@ -165,6 +171,158 @@ router.delete('/projects/:projectKey/media/:id([0-9a-fA-F-]{36})', async (req, r
     res.json({ ok: true })
   } catch (e) {
     console.error('[media DELETE]', e.message)
+    res.status(500).json({ error: e.message })
+  }
+})
+
+// ── Field-report photos ───────────────────────────────────────────────────────
+// The same rows the dashboard builds client-side (ReportContext.tsx + DashboardPage
+// baseReports/filteredReports), photos only, so the Media tab can page through them.
+
+const REPORT_MEDIA_TTL = 30_000
+// orgId -> { ts, promise } — the promise is shared so concurrent requests load once.
+const _reportMediaCache = new Map()
+
+const norm = v => String(v ?? '').trim().toLowerCase()
+
+async function fetchCsvRows(url) {
+  const res = await fetch(url, { signal: AbortSignal.timeout(15_000) })
+  if (!res.ok) throw new Error(`sheet fetch failed (${res.status})`)
+  return Papa.parse(await res.text(), { header: true, skipEmptyLines: true }).data
+}
+
+async function loadSheetReports(sheetId) {
+  if (!sheetId) return []
+  const rows = await fetchCsvRows(`https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv`)
+  return cleanReports(rows.map(sheetRowToReport))
+}
+
+// GET /reports/daily's rows with ReportContext's fixes applied, photo rows only.
+async function loadDbReports(orgId) {
+  const { rows } = await getPool().query(
+    `SELECT dr.id, dr.report_date, dr.state, dr.location, dr.project, dr.area_of_intervention,
+            dr.description, dr.attachment_url, dr.custom_data,
+            u.name AS submitter_name, u.phone AS submitter_phone
+     FROM daily_reports dr
+     LEFT JOIN users u ON u.id = dr.submitted_by
+     WHERE dr.org_id = $1 AND dr.attachment_url ~* '^https?://'
+     ORDER BY dr.report_date DESC, dr.created_at DESC
+     LIMIT 1000`,
+    [orgId]
+  )
+  return rows.map(r => ({
+    id:                 'db-' + r.id,
+    // What the JSON round trip through /reports/daily used to produce
+    timestamp:          r.report_date instanceof Date ? r.report_date.toISOString() : String(r.report_date || ''),
+    name:               r.submitter_name || r.custom_data?.wa_name || '',
+    phone:              r.submitter_phone || r.custom_data?.wa_phone || '',
+    state:              r.state || '',
+    location:           r.location || '',
+    project:            mergeProjectAlias(r.project || '', r.state || '', r.location || ''),
+    areaOfIntervention: r.area_of_intervention || '',
+    description:        r.description || '',
+    attachmentUrl:      r.attachment_url,
+    source:             r.custom_data?.source === 'whatsapp-flow' ? 'whatsapp' : 'web',
+  }))
+}
+
+// Manager → team mapping lives in the users sheet (columns Name / Phone / Manager).
+async function loadSheetUsers(sheetId) {
+  if (!sheetId) return []
+  return fetchCsvRows(`https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/gviz/tq?tqx=out:csv&sheet=Sheet1`)
+}
+
+async function loadOrgReportMedia(orgId) {
+  const ds = (await getOrgMeta(orgId)).data_sources || {}
+  const results = await Promise.allSettled([
+    loadSheetReports(ds.reports_sheet_id),
+    loadDbReports(orgId),
+    loadSheetUsers(ds.users_sheet_id),
+  ])
+  for (const r of results) {
+    if (r.status === 'rejected') console.warn('[media/reports] source failed:', r.reason?.message)
+  }
+  const [sheet, db, users] = results.map(r => r.status === 'fulfilled' ? r.value : [])
+  const media = [...db, ...sheet]
+    .filter(r => r.attachmentUrl)
+    .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)))
+  return { media, users, complete: results.every(r => r.status === 'fulfilled') }
+}
+
+function getOrgReportMedia(orgId) {
+  const hit = _reportMediaCache.get(orgId)
+  if (hit && Date.now() - hit.ts < REPORT_MEDIA_TTL) return hit.promise
+  const entry = { ts: Date.now(), promise: loadOrgReportMedia(orgId) }
+  _reportMediaCache.set(orgId, entry)
+  // A load that missed a source is served once, not cached, so the next request retries.
+  const evict = () => { if (_reportMediaCache.get(orgId) === entry) _reportMediaCache.delete(orgId) }
+  entry.promise.then(r => { if (!r.complete) evict() }, evict)
+  return entry.promise
+}
+
+// Same rule as DashboardPage's baseReports. Empty names/phones never match, since
+// this is the server-side boundary (the client's version was only a view filter).
+async function scopeToCaller(media, users, user) {
+  if (user.role === 'admin' || user.role === 'superadmin') return media
+  const { rows } = await getPool().query(
+    `SELECT name, phone FROM users WHERE firebase_uid = $1 AND org_id = $2 LIMIT 1`,
+    [user.uid, user.orgId]
+  )
+  const myName  = norm(user.name || rows[0]?.name)
+  const myPhone = normPhone(rows[0]?.phone || user.phone)
+  let phones
+  if (user.role === 'manager') {
+    phones = new Set(users
+      .filter(u => {
+        const manager = norm(u.Manager)
+        return (myName && (manager === myName || norm(u.Name) === myName))
+            || (myPhone && normPhone(manager) === myPhone)
+      })
+      .map(u => normPhone(u.Phone)))
+  } else {
+    phones = new Set([myPhone])
+  }
+  phones.delete('')
+  return media.filter(r => phones.has(normPhone(r.phone)))
+}
+
+router.get('/media', async (req, res) => {
+  if (!requireAuth(req, res)) return
+  try {
+    // URLSearchParams rather than req.query: qs turns 20+ repeated keys into an object.
+    const q = new URL(req.originalUrl, 'http://localhost').searchParams
+    const list = key => q.getAll(key).map(norm).filter(Boolean)
+    const projects = list('project'), states = list('state'), areas = list('area'), workers = list('workerName')
+    const dateFrom = q.get('dateFrom') || ''
+    const dateTo   = q.get('dateTo')   || ''
+    const search   = norm(q.get('search'))
+    const limit    = Math.min(parseInt(q.get('limit'),  10) || 48, 200)
+    const offset   = Math.max(parseInt(q.get('offset'), 10) || 0,  0)
+
+    const { media, users } = await getOrgReportMedia(req.user.orgId)
+    const inList = (values, v) => !values.length || values.includes(norm(v))
+    const items = (await scopeToCaller(media, users, req.user)).filter(r => {
+      if (!inList(projects, r.project) || !inList(states, r.state)
+       || !inList(areas, r.areaOfIntervention) || !inList(workers, r.name)) return false
+      if (dateFrom || dateTo) {
+        const date = String(r.timestamp).slice(0, 10)
+        if (!date || (dateFrom && date < dateFrom) || (dateTo && date > dateTo)) return false
+      }
+      return !search || [r.project, r.location, r.name, r.areaOfIntervention, r.description, r.source]
+        .some(field => norm(field).includes(search))
+    })
+
+    // Phone stays server-side: it's only needed for the role scoping above.
+    res.json({
+      items: items.slice(offset, offset + limit).map(r => ({
+        id: r.id, timestamp: r.timestamp, name: r.name, state: r.state, location: r.location,
+        project: r.project, areaOfIntervention: r.areaOfIntervention, description: r.description,
+        attachmentUrl: r.attachmentUrl, source: r.source,
+      })),
+      total: items.length,
+    })
+  } catch (e) {
+    console.error('[media/reports GET]', e.message)
     res.status(500).json({ error: e.message })
   }
 })
