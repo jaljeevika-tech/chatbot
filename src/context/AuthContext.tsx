@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { initializeApp, getApps } from 'firebase/app';
+import { getLoginSlug } from '../utils/orgSlug';
 import {
   getAuth,
   signInWithCustomToken,
@@ -147,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadOrg, restoreOrg, clearOrg]);
 
   const login = useCallback(async (phone: string, password: string) => {
-    const orgSlug = new URLSearchParams(window.location.search).get('org');
+    const orgSlug = getLoginSlug();
     // No tenant guessing: a password checked against the wrong org's users just fails confusingly.
     if (!orgSlug) throw new Error('No organization specified — use your organization\'s login link (it includes ?org=... in the URL).')
     const res = await fetch('/api/auth/sheet-login', {

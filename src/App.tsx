@@ -13,6 +13,7 @@ import { LoginPage } from './components/login/LoginPage';
 import { DEFAULT_TAB, preloadTab, tabFromHash } from './components/dashboard/dashboardTabs';
 import { lazyNamed } from './utils/lazyNamed';
 import { isOrgAppPath } from './components/org-app/orgAppRoute';
+import { getLoginSlug, isOrgSubdomain, isSuperadminHost } from './utils/orgSlug';
 
 // Landing + Login stay in the boot bundle; everything behind login is its own chunk.
 const loadDashboard = () => import('./components/dashboard/DashboardPage');
@@ -38,8 +39,9 @@ function AppRouter() {
   const { org, orgSlug, isModule } = useOrg();
   // ?org=<slug> from a shared login link. Only the sign-in form reads it, so an
   // existing session for another org must not silently win (see OrgSwitchPrompt).
-  const [linkSlug, setLinkSlug] = useState(() => new URLSearchParams(window.location.search).get('org'));
-  const [showLogin, setShowLogin] = useState(false);
+  const [linkSlug, setLinkSlug] = useState(getLoginSlug);
+  // An organisation's own subdomain opens straight on sign-in; the landing page is for the main domain.
+  const [showLogin, setShowLogin] = useState(isOrgSubdomain);
   const [hash, setHash] = useState(window.location.hash);
 
   useEffect(() => {
@@ -52,7 +54,7 @@ function AppRouter() {
   // FieldFlow Org: the HR + Finance phone app (components/org-app).
   const orgApp = isOrgAppPath(window.location.pathname);
   // The super admin console deep-links its pages: #superadmin/orgs/<id>/users etc.
-  const superadminHash = hash === '#superadmin' || hash.startsWith('#superadmin/');
+  const superadminHash = isSuperadminHost() || hash === '#superadmin' || hash.startsWith('#superadmin/');
 
   // Once Firebase reports a persisted session, prefetch the dashboard chunk and its
   // starting tab in parallel with the claims check and org metadata fetch.

@@ -3,6 +3,7 @@ import { AlertCircle, Loader2, Phone, Lock } from 'lucide-react';
 import { useAuthContext } from '../../context/AuthContext';
 import { useOrg } from '../../context/OrgContext';
 import { HeroScene } from '../landing/Illustrations';
+import { getLoginSlug } from '../../utils/orgSlug';
 
 export function LoginPage() {
   const { login } = useAuthContext();
@@ -14,7 +15,7 @@ export function LoginPage() {
   // Forgot-password panel: emails a reset link if the account has an email on file.
   const [forgot,   setForgot]   = useState(false);
   const [notice,   setNotice]   = useState('');
-  const orgSlug = new URLSearchParams(window.location.search).get('org');
+  const orgSlug = getLoginSlug();
 
   const orgName = org?.branding?.org_name ?? 'FieldFlow';
   const sidebar = org?.branding?.theme?.sidebar ?? '#341272';
