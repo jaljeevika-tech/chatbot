@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { initializeApp, getApps } from 'firebase/app';
-import { getLoginSlug } from '../utils/orgSlug';
+import { getLoginSlug, isSuperadminHost } from '../utils/orgSlug';
 import {
   getAuth,
   signInWithCustomToken,
@@ -149,12 +149,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (phone: string, password: string) => {
     const orgSlug = getLoginSlug();
+    // The superadmin subdomain has no organisation; the server finds the superadmin by phone.
+    const platform = !orgSlug && isSuperadminHost();
     // No tenant guessing: a password checked against the wrong org's users just fails confusingly.
-    if (!orgSlug) throw new Error('No organization specified — use your organization\'s login link (it includes ?org=... in the URL).')
+    if (!orgSlug && !platform) throw new Error('No organization specified — use your organization\'s login link (it includes ?org=... in the URL).')
     const res = await fetch('/api/auth/sheet-login', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ phone, password, orgSlug }),
+      body:    JSON.stringify(platform ? { phone, password, platform: true } : { phone, password, orgSlug }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
