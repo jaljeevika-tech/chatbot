@@ -13,7 +13,7 @@ import { LoginPage } from './components/login/LoginPage';
 import { DEFAULT_TAB, preloadTab, tabFromHash } from './components/dashboard/dashboardTabs';
 import { lazyNamed } from './utils/lazyNamed';
 import { isOrgAppPath } from './components/org-app/orgAppRoute';
-import { getLoginSlug, isOrgSubdomain, isSuperadminHost } from './utils/orgSlug';
+import { getLoginSlug, isOrgSubdomain, isSuperadminHost, superadminRedirectTarget } from './utils/orgSlug';
 
 // Landing + Login stay in the boot bundle; everything behind login is its own chunk.
 const loadDashboard = () => import('./components/dashboard/DashboardPage');
@@ -40,8 +40,8 @@ function AppRouter() {
   // ?org=<slug> from a shared login link. Only the sign-in form reads it, so an
   // existing session for another org must not silently win (see OrgSwitchPrompt).
   const [linkSlug, setLinkSlug] = useState(getLoginSlug);
-  // An organisation's own subdomain opens straight on sign-in; the landing page is for the main domain.
-  const [showLogin, setShowLogin] = useState(isOrgSubdomain);
+  // An organisation's own subdomain (and the superadmin subdomain) opens straight on sign-in; the landing page is for the main domain.
+  const [showLogin, setShowLogin] = useState(() => isOrgSubdomain() || isSuperadminHost());
   const [hash, setHash] = useState(window.location.hash);
 
   useEffect(() => {
@@ -69,6 +69,13 @@ function AppRouter() {
   useEffect(() => {
     if (firebaseUser && orgApp) loadOrgApp().catch(() => {});
   }, [firebaseUser, orgApp]);
+
+  // The super admin sign-in lives on its own subdomain; the main domain just forwards there.
+  const superadminTarget = superadminRedirectTarget();
+  if (superadminTarget) {
+    window.location.replace(superadminTarget);
+    return <BootSplash />;
+  }
 
   // Public, checked before every auth-gated branch: a privacy notice must be readable without an account.
   if (window.location.pathname === '/privacy') {

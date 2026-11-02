@@ -22,6 +22,14 @@ export function isOrgSubdomain(): boolean {
   return !!label && !NOT_ORG_SUBDOMAINS.has(label)
 }
 
+/** On the main domain, #superadmin moves to superadmin.fieldimpact.in. Null when no move is needed. */
+export function superadminRedirectTarget(): string | null {
+  const host = window.location.hostname.toLowerCase();
+  if (host !== BASE_DOMAIN && host !== `www.${BASE_DOMAIN}`) return null;
+  if (!window.location.hash.startsWith('#superadmin')) return null;
+  return `https://superadmin.${BASE_DOMAIN}/${window.location.hash}`;
+}
+
 export function getLoginSlug(): string | null {
   const fromQuery = new URLSearchParams(window.location.search).get('org')
   if (fromQuery) return fromQuery
