@@ -87,7 +87,9 @@ interface AuthContextValue {
   authReady:    boolean;
   /** Started without a network on the saved session; only the HR tab works until it returns. */
   offlineSession: boolean;
-  login:        (phone: string, password: string) => Promise<void>;
+  /** Resolves { otpRequired } — a superadmin must then call verifySuperadminOtp with the emailed code. */
+  login:        (phone: string, password: string) => Promise<{ otpRequired?: boolean; emailHint?: string }>;
+  verifySuperadminOtp: (phone: string, code: string) => Promise<void>;
   logout:       () => Promise<void>;
 }
 
@@ -160,8 +162,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
+    if (data.otpRequired) return { otpRequired: true, emailHint: data.emailHint };
     const cred = await signInWithCustomToken(firebaseAuth, data.customToken);
     // Force refresh so custom claims (orgId, role, name) are in the ID token
+    await cred.user.getIdToken(true);
+    return {};
+  }, []);
+
+  const verifySuperadminOtp = useCallback(async (phone: string, code: string) => {
+    const res = await fetch('/api/auth/superadmin-verify', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ phone, code }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Verification failed');
+    const cred = await signInWithCustomToken(firebaseAuth, data.customToken);
     await cred.user.getIdToken(true);
   }, []);
 
@@ -177,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [clearOrg]);
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, authReady, offlineSession, login, logout }}>
+    <AuthContext.Provider value={{ user, firebaseUser, authReady, offlineSession, login, verifySuperadminOtp, logout }}>
       {children}
     </AuthContext.Provider>
   );

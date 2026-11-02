@@ -6,10 +6,13 @@ import { HeroScene } from '../landing/Illustrations';
 import { getLoginSlug } from '../../utils/orgSlug';
 
 export function LoginPage() {
-  const { login } = useAuthContext();
+  const { login, verifySuperadminOtp } = useAuthContext();
   const { org }   = useOrg();
   const [phone,    setPhone]    = useState('');
   const [password, setPassword] = useState('');
+  // Superadmin step two: the password was right, so an emailed code is needed.
+  const [otp,      setOtp]      = useState<{ phone: string; emailHint: string } | null>(null);
+  const [code,     setCode]     = useState('');
   const [error,    setError]    = useState('');
   const [busy,     setBusy]     = useState(false);
   // Forgot-password panel: emails a reset link if the account has an email on file.
@@ -28,9 +31,25 @@ export function LoginPage() {
     const normalised = digits.length === 10 ? `91${digits}` : digits;
     setBusy(true);
     try {
-      await login(normalised, password);
+      const r = await login(normalised, password);
+      if (r.otpRequired) setOtp({ phone: normalised, emailHint: r.emailHint ?? '' });
     } catch (e: any) {
       setError(e.message ?? 'Login failed. Check your credentials.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    if (!otp) return;
+    if (!/^\d{6}$/.test(code)) { setError('Enter the 6-digit code from your email.'); return; }
+    setBusy(true);
+    try {
+      await verifySuperadminOtp(otp.phone, code);
+    } catch (e: any) {
+      setError(e.message ?? 'Verification failed.');
     } finally {
       setBusy(false);
     }
@@ -84,6 +103,31 @@ export function LoginPage() {
           <p className="text-sm text-gray-400 mt-2 font-bold uppercase tracking-[0.2em]">Management Access</p>
         </div>
 
+        {otp ? (
+        <form onSubmit={handleVerify} className="space-y-5">
+          <p className="text-xs text-gray-500 leading-relaxed">We emailed a 6-digit code to {otp.emailHint || 'your email address'}. It expires in 10 minutes.</p>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email code</label>
+            <input
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="123456"
+              value={code}
+              onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl py-4 px-4 text-gray-800 font-bold tracking-[0.4em] text-center placeholder:text-gray-200 focus:border-[#A78BFA] focus:bg-white transition-all outline-none"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={busy || code.length !== 6}
+            className="w-full text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-3 disabled:opacity-40"
+            style={{ background: sidebar }}
+          >
+            {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify and sign in'}
+          </button>
+          <button type="button" onClick={() => { setOtp(null); setCode(''); setPassword(''); setError(''); }} className="w-full text-xs font-bold text-gray-500 hover:text-gray-800">Back to sign in</button>
+        </form>
+        ) : (
         <form onSubmit={forgot ? handleForgot : handleLogin} className="space-y-5">
           <div className="space-y-2">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
@@ -138,6 +182,7 @@ export function LoginPage() {
             <button type="button" onClick={() => { setForgot(false); setError(''); setNotice(''); }} className="w-full text-xs font-bold text-gray-500 hover:text-gray-800">Back to sign in</button>
           )}
         </form>
+        )}
 
         {notice && (
           <div className="mt-6 text-green-700 text-[11px] bg-green-50 rounded-2xl p-4 border border-green-100 font-bold leading-tight">{notice}</div>

@@ -12,6 +12,8 @@ import { getPool } from '../db/pool.js'
 import { getGoogleAccessToken, normPhone, USERS_SHEET_NAME } from '../lib/sheets.js'
 import { stripSecretMeta } from '../lib/secretMeta.js'
 import { peekAuthToken, consumeAuthToken, sendAuthLink } from '../lib/authTokens.js'
+import { writePlatformAudit } from '../lib/platformAudit.js'
+import { sendSuperadminOtp, checkSuperadminOtp, maskEmail } from '../lib/superadminOtp.js'
 
 const router = Router()
 
@@ -106,7 +108,7 @@ router.post('/auth/sheet-login', loginLimiter, async (req, res) => {
     let dbUsers = []
     try {
       const dbRes = await pool.query(
-        `SELECT id, name, role, password, exit_date, to_jsonb(u) ->> 'active' AS active
+        `SELECT id, name, role, password, email, exit_date, to_jsonb(u) ->> 'active' AS active
            FROM users u WHERE org_id = $1 AND phone = $2`,
         [orgId, target]
       )
@@ -122,7 +124,11 @@ router.post('/auth/sheet-login', loginLimiter, async (req, res) => {
       const passOk = isLegacyPlaintext
         ? timingSafeStringEqual(dbUser.password.trim(), password.trim())
         : await bcrypt.compare(password, dbUser.password)
-      if (!passOk) return res.status(403).json({ error: DENIED })
+      const isSuperadmin = String(dbUser.role || '').toLowerCase().trim() === 'superadmin'
+      if (!passOk) {
+        if (isSuperadmin) writePlatformAudit(req, { action: 'superadmin.login_failed', targetOrgId: orgId, diff: { phone: target, step: 'password' } })
+        return res.status(403).json({ error: DENIED })
+      }
       if ((dbUser.exit_date && new Date(dbUser.exit_date) <= new Date()) || dbUser.active === 'false') {
         return res.status(403).json({ error: 'Your account has been deactivated. Please contact your administrator.' })
       }
@@ -133,6 +139,16 @@ router.post('/auth/sheet-login', loginLimiter, async (req, res) => {
         bcrypt.hash(password, 10)
           .then(newHash => pool.query(`UPDATE users SET password = $1 WHERE id = $2`, [newHash, dbUser.id]))
           .catch(e => console.warn('[sheet-login] plaintext->bcrypt migration failed:', e.message))
+      }
+      // Superadmin: the password is step one. Sign-in finishes only with the emailed code (/auth/superadmin-verify).
+      if (isSuperadmin) {
+        const sent = await sendSuperadminOtp({ user: dbUser, orgId })
+        if (!sent.emailed) {
+          writePlatformAudit(req, { action: 'superadmin.login_failed', targetOrgId: orgId, diff: { phone: target, step: 'code_send', error: sent.error } })
+          return res.status(503).json({ error: sent.error || 'Could not send the sign-in code. Try again.' })
+        }
+        writePlatformAudit(req, { action: 'superadmin.login_code_sent', targetOrgId: orgId, diff: { phone: target } })
+        return res.json({ otpRequired: true, emailHint: maskEmail(dbUser.email) })
       }
       // DB role is authoritative here (only superadmin can write 'superadmin' to it).
       const normRole = clampRole(dbUser.role, String(dbUser.role || '').toLowerCase().trim())
@@ -359,6 +375,40 @@ router.get('/auth/token-info', loginLimiter, async (req, res) => {
     res.json({ valid: true, purpose: t.purpose, name: t.name, org_name: t.org_name, org_slug: t.org_slug })
   } catch (e) {
     console.error('[auth/token-info]', e)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// POST /api/auth/superadmin-verify { phone, code } — step two of superadmin sign-in.
+router.post('/auth/superadmin-verify', loginLimiter, async (req, res) => {
+  const CODE_DENIED = 'Invalid or expired code.'
+  try {
+    const target = normPhone(req.body?.phone)
+    const code = String(req.body?.code || '').trim()
+    if (!target || !/^\d{6}$/.test(code)) return res.status(400).json({ error: 'Enter the 6-digit code from your email.' })
+
+    const pool = getPool()
+    const { rows } = await pool.query(
+      `SELECT u.id, u.name, u.org_id, o.slug FROM users u JOIN organizations o ON o.id = u.org_id
+        WHERE u.phone = $1 AND lower(u.role) = 'superadmin' LIMIT 1`,
+      [target]
+    )
+    const u = rows[0]
+    if (!u || !(await checkSuperadminOtp(u.id, code))) {
+      writePlatformAudit(req, { action: 'superadmin.login_failed', targetOrgId: u?.org_id || null, diff: { phone: target, step: 'code' } })
+      return res.status(403).json({ error: CODE_DENIED })
+    }
+
+    ensureFirebase()
+    const uid = `sheet_${u.slug}_${target}`
+    const customToken = await admin.auth().createCustomToken(uid, {
+      orgId: u.org_id, role: 'superadmin', name: u.name, phone: target,
+    })
+    await pool.query(`UPDATE users SET firebase_uid = $1 WHERE id = $2`, [uid, u.id])
+    writePlatformAudit(req, { action: 'superadmin.login', targetOrgId: u.org_id, diff: { phone: target } })
+    res.json({ customToken })
+  } catch (e) {
+    console.error('[superadmin-verify]', e)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
