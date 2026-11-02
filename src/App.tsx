@@ -40,8 +40,8 @@ function AppRouter() {
   // ?org=<slug> from a shared login link. Only the sign-in form reads it, so an
   // existing session for another org must not silently win (see OrgSwitchPrompt).
   const [linkSlug, setLinkSlug] = useState(getLoginSlug);
-  // An organisation's own subdomain opens straight on sign-in; the landing page is for the main domain.
-  const [showLogin, setShowLogin] = useState(isOrgSubdomain);
+  // An organisation's own subdomain (and the superadmin subdomain) opens straight on sign-in; the landing page is for the main domain.
+  const [showLogin, setShowLogin] = useState(() => isOrgSubdomain() || isSuperadminHost());
   const [hash, setHash] = useState(window.location.hash);
 
   useEffect(() => {
