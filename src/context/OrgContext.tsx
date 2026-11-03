@@ -51,9 +51,11 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     setOrgSlug(data.slug ?? null);
     setOrg(data.metadata);
     setSubscription(data.subscription ?? null);
-    applyTheme(data.metadata.branding.theme);
+    // The platform org (superadmin) has no branding; a TypeError here would read as "offline" in AuthContext.
+    const branding = data.metadata.branding;
+    if (branding?.theme) applyTheme(branding.theme);
 
-    document.title = data.metadata.branding.dashboard_title || data.metadata.branding.org_name;
+    document.title = branding?.dashboard_title || branding?.org_name || 'FieldFlow';
   }, []);
 
   const loadOrg = useCallback(async (token: string) => {
