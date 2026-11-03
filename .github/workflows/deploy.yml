@@ -69,6 +69,7 @@ jobs:
             CB_FORM_BASE_URL: "https://fieldflow-collective-725980175357.asia-south1.run.app"
             RS_FORM_BASE_URL: "https://fieldflow-resource-725980175357.asia-south1.run.app"
             APP_BASE_URL: "https://chatbot-492915.el.r.appspot.com"
+            PLATFORM_EMAIL_FROM: "tech@jaljeevika.org"
           automatic_scaling:
             min_instances: 1
             max_instances: 3
