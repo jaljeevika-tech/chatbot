@@ -48,6 +48,8 @@ export function LoginPage() {
     setBusy(true);
     try {
       await verifySuperadminOtp(otp.phone, code);
+      // Reload so the app boots from the new session, instead of waiting on this form's state.
+      window.location.reload();
     } catch (e: any) {
       setError(e.message ?? 'Verification failed.');
     } finally {
