@@ -213,6 +213,7 @@ const PUBLIC_API_PATHS = [
   '/send-otp',
   '/verify-otp',
   '/auth/sheet-login',
+  '/auth/superadmin-verify', // step two of superadmin sign-in (rate-limited, code-gated)
   '/auth/token-info',      // invite / reset links (rate-limited, token-gated)
   '/auth/set-password',
   '/auth/forgot-password', // always answers generically
