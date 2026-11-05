@@ -1,0 +1,103 @@
+name: CI
+
+# Checks every PR into main, and main itself after each merge. deploy.yml ships
+# main on push independently of this; make these jobs required status checks on
+# main (branch protection) so nothing reaches main without passing them.
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a PR supersedes its previous run; runs on main always finish.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Tests & checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Node 22 matches App Engine (runtime: nodejs22) and the service images.
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Same floor as deploy.yml, so a PR finds out before main does.
+      - name: Audit dependencies for critical vulnerabilities
+        run: npm audit --audit-level=critical
+
+      # Server, lib, routes, services and scripts are plain JS that no compiler
+      # looks at, and most route files aren't imported by any test.
+      - name: Syntax-check server-side JavaScript
+        run: git ls-files -z '*.js' '*.mjs' ':!:src/**' ':!:public/**' ':!:services/*/public/**' | xargs -0 -n1 node --check
+
+      - name: Unit tests (node --test)
+        run: node --test $(git ls-files '*.test.js')
+
+      # Self-check scripts (node lib/forms.check.mjs etc.) — each exits non-zero on failure.
+      - name: Self-checks (*.check.mjs)
+        run: |
+          for f in $(git ls-files '*.check.mjs'); do
+            echo "::group::$f"
+            node "$f"
+            echo "::endgroup::"
+          done
+
+  build:
+    name: Type-check & build frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # tsc -b && vite build. No VITE_* config here, so this bundle is only a
+      # compile check — deploy.yml builds the real one.
+      - name: Build
+        run: npm run build
+
+  docker:
+    name: Build service images
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Every services/*/Dockerfile, built from the repo root the way deploy.yml
+      # and cloudbuild.services.yaml do, but never pushed. Catches a COPY of a
+      # lib/ file that was moved or renamed before it breaks a Cloud Run deploy.
+      - name: Build images
+        run: |
+          for df in services/*/Dockerfile; do
+            svc=$(basename "$(dirname "$df")")
+            echo "::group::$svc"
+            docker build -f "$df" -t "fieldflow-$svc:ci" .
+            echo "::endgroup::"
+          done
